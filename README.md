@@ -7,3 +7,9 @@ A clean, fast, and role-based event management system designed to make event pla
 * **Backend:** Python / Django (managed via `uv`)
 * **Frontend:** React (scaffolded with Vite) + tailwind css
 * **Database:** Postgresql
+
+
+Team Members:
+
+- Aatish Ajay
+
