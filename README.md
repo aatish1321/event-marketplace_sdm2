@@ -110,6 +110,7 @@ npm run dev
 * **Hrishikesh Thorat**
 * **Nouman Khan**
 * **Hina**
+* **Ajoy**
 
 ---
 
