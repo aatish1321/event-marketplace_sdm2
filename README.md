@@ -1,7 +1,4 @@
-┌─┐┬  ┬┌─┐┌┐┌┌┬┐  ┌┬┐┌─┐┬─┐┬┌─┌─┐┌┬┐┌─┐┬  ┌─┐┌─┐┌─┐
-├┤ └┐┌┘├┤ │││ │───│││├─┤├┬┘├┴┐├┤  │ ├─┘│  ├─┤│  ├┤ 
-└─┘ └┘ └─┘┘└┘ ┴   ┴ ┴┴ ┴┴└─┴ ┴└─┘ ┴ ┴  ┴─┘┴ ┴└─┘└─┘
-                                                                                   
+# EVENT MARKETPLACE                                                                                   
                                                                                    
 A modern, role-based event management platform designed to streamline event planning, user registration, and scheduling. The application provides tailored workflows and permission levels for **Admins**, **Speakers**, and **Attendees**.
 
