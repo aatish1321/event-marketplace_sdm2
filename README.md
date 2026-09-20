@@ -109,6 +109,7 @@ npm run dev
 * **Aatish Ajay**
 * **Hrishikesh Thorat**
 * **Nouman Khan**
+* **Hina**
 
 ---
 
