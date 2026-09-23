@@ -98,6 +98,10 @@ MAILERS = {
 }
 
 # --- MONGOENGINE CONFIGURATION ---
+import environ
 import mongoengine
 
-mongoengine.connect(db='event_marketplace_db', host='localhost', port=27017)
+env = environ.Env()
+environ.Env.read_env(BASE_DIR / '.env')
+
+mongoengine.connect(host=env('MONGO_URI', default='mongodb://localhost:27017/event_marketplace_db'))
