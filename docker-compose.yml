@@ -1,8 +1,7 @@
-version: '3.8'
 
 services:
   db:
-    image: mongo:latest
+    image: mongo:7.0.14
 
   backend:
     build:
@@ -11,6 +10,7 @@ services:
       - "8000:8000"
     volumes:
       - ./backend:/app
+      - /app/.venv
     depends_on:
       - db
     env_file:
