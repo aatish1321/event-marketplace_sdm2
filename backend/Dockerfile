@@ -2,6 +2,7 @@ FROM python:3-slim
 
 WORKDIR /app
 
+ENV UV_LINK_MODE=copy
 # Install uv
 RUN pip install uv
 
