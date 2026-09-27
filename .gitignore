@@ -1,2 +1,13 @@
 .env
 .agents/
+.ai/
+.codex/
+.cursor/
+.cursorrules
+.claude/
+.github/copilot/
+.github/copilot-instructions.md
+AGENTS.md
+CLAUDE.md
+ORIGINAL_REQUEST.md
+*.ai.log
