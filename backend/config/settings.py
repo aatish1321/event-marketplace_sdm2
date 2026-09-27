@@ -42,6 +42,7 @@ INSTALLED_APPS = [
 
 # Auth and Session middlewares are commented out to prevent crashes
 MIDDLEWARE = [
+    'config.middleware.MongoExceptionLoggingMiddleware',
     'django.middleware.security.SecurityMiddleware',
     # 'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
