@@ -17,6 +17,9 @@ Including another URLconf
 
 from django.urls import path
 
+from . import auth_views
+
 urlpatterns = [
-   
+    path("api/auth/register/", auth_views.register, name="auth-register"),
+    path("api/auth/login/", auth_views.login, name="auth-login"),
 ]
