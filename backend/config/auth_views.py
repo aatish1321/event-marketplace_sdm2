@@ -64,7 +64,7 @@ def register(request):
         )
         user.validate()
     except ValueError as exc:
-        return JsonResponse({"error": str(exc)}, status=400)
+        return JsonResponse({"error": "Invalid request payload."}, status=400)
     except ValidationError as exc:
         return JsonResponse({"error": "Invalid registration data.", "fields": exc.to_dict()}, status=400)
 
@@ -93,9 +93,9 @@ def login(request):
         email = _required_string(data, "email").strip()
         password = _required_string(data, "password")
     except ValueError as exc:
-        return JsonResponse({"error": str(exc)}, status=400)
+        return JsonResponse({"error": "Invalid request payload."}, status=400)
 
-    user = User.objects(email=email).first()
+    user = User.objects(email=str(email)).first()
     if user is None:
         # Match the password-hashing work of an unsuccessful existing-user login.
         make_password(password)
