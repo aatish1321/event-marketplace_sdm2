@@ -18,4 +18,14 @@ export default defineConfig([
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
   },
+  {
+    files: ['*.config.js'],
+    languageOptions: { globals: globals.node },
+  },
+  {
+    files: ['src/components/ui/button.jsx'],
+    rules: {
+      'react-refresh/only-export-components': ['error', { allowConstantExport: true, allowExportNames: ['buttonVariants'] }],
+    },
+  },
 ])

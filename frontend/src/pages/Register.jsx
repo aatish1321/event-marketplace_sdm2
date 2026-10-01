@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ROLES, useAuth } from '../context/AuthContext'
 import { ApiError, loginUser, registerUser } from '../api/auth'
+import { getRoleHome } from '../lib/authRoutes'
 
 const ROLE_OPTIONS = [
   { value: ROLES.ATTENDEE, label: 'Register as Attendee' },
@@ -192,6 +193,9 @@ export default function Register() {
               <p className="mt-4 text-sm text-slate-600">
                 Logged in as <span className="font-medium text-indigo-600">{userRole}</span>.
               </p>
+              <Link to={getRoleHome(userRole) ?? '/login'} className="mt-6 block font-medium text-indigo-600 hover:underline">
+                Continue to your home
+              </Link>
               <button
                 type="button"
                 onClick={logout}
@@ -273,6 +277,9 @@ export default function Register() {
             {submitting ? 'Creating account…' : isOrganizer ? 'Register as Organizer' : 'Register as Attendee'}
           </button>
         </form>
+        <p className="mt-6 text-center text-sm text-slate-600">
+          Already registered? <Link to="/login" className="font-medium text-indigo-600 hover:underline">Log in</Link>
+        </p>
       </div>
     </main>
   )
