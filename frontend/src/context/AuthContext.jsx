@@ -1,12 +1,12 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { decodeToken } from '../lib/jwt'
+import { ROLES } from '../lib/authRoutes'
 
 // localStorage key for the JWT returned by POST /api/auth/login/
 const TOKEN_KEY = 'access_token'
 
 // Role values exactly as the backend stores them (backend/config/models.py)
-// eslint-disable-next-line react-refresh/only-export-components
-export const ROLES = { ATTENDEE: 'attendee', ORGANIZER: 'organizer', ADMIN: 'admin' }
+export { ROLES }
 
 const AuthContext = createContext(null)
 

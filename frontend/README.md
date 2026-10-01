@@ -1,16 +1,46 @@
-# React + Vite
+# Event marketplace frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React, React Router, Vite, and Tailwind CSS.
 
-Currently, two official plugins are available:
+## Development
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```sh
+npm ci
+npm run dev
+```
 
-## React Compiler
+Vite proxies `/api` to `http://localhost:8000` when running locally and to
+`http://backend:8000` inside Docker. Set `API_PROXY_TARGET` to override the target.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Authentication and routing
 
-## Expanding the ESLint configuration
+`/register` creates an account; `/login` sends `{ email, password }` to
+`POST /api/auth/login/`. The returned `token` is passed to `AuthContext`, which
+persists it under `access_token` and clears the session when it expires.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+After login, users go to their role's home:
+
+| Role | Route |
+| --- | --- |
+| Attendee | `/discover` |
+| Organizer | `/dashboard` |
+| Admin | `/admin-logs` |
+
+These destinations currently contain minimal landing views for future features.
+`ProtectedRoute` sends anonymous users to `/login`; `allowedRoles` restricts a
+route to the specified roles and sends other authenticated users to their own
+home. It supports both nested routes through `Outlet` and wrapped children.
+
+JWT decoding and route guards control the browser UI only. The backend must
+verify token signatures and enforce authorization for every protected API.
+
+## Checks
+
+```sh
+npm test
+npm run lint
+npm run build
+```
+
+The Vitest suite uses React Testing Library with jsdom and mocked HTTP responses
+to exercise login, session handling, and role routing without a running backend.

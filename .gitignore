@@ -1,5 +1,7 @@
 .env
+# Local AI instructions, agent state, prompts, and transcripts
 .agents/
+.agent/
 .ai/
 .codex/
 .cursor/
@@ -11,3 +13,8 @@ AGENTS.md
 CLAUDE.md
 ORIGINAL_REQUEST.md
 *.ai.log
+*.ai.prompt
+*.ai.transcript
+.aider*
+.gemini/
+GEMINI.md
