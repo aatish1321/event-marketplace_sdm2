@@ -1,134 +1,188 @@
 import { Link } from 'react-router-dom';
-import { ChevronRight, Ticket, LineChart, Globe } from 'lucide-react';
+import { ArrowRight, MapPin, CalendarDays, Search, Star } from 'lucide-react';
 import { Button } from '../components/ui/button';
 
 const Landing = () => {
   return (
-    <div className="min-h-screen bg-background text-foreground selection:bg-primary selection:text-primary-foreground">
+    <div className="min-h-screen bg-background text-foreground font-sans selection:bg-foreground selection:text-background">
       {/* Navigation */}
-      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto flex h-14 max-w-7xl items-center justify-between px-6">
-          <div className="flex items-center gap-2">
-            <div className="h-6 w-6 rounded-md bg-primary flex items-center justify-center">
-              <Ticket className="h-3.5 w-3.5 text-primary-foreground" />
-            </div>
-            <span className="text-sm font-bold tracking-tight">Eventify</span>
+      <nav className="fixed top-0 z-50 w-full bg-background/80 backdrop-blur-md border-b border-border/40">
+        <div className="flex h-16 items-center justify-between px-6 lg:px-12">
+          <Link to="/" className="text-xl font-bold tracking-tighter uppercase">
+            Eventify
+          </Link>
+          <div className="hidden md:flex items-center gap-8 text-sm font-medium">
+            <Link to="/discover" className="hover:text-muted-foreground transition-colors">Discover</Link>
+            <Link to="/trending" className="hover:text-muted-foreground transition-colors">Trending</Link>
+            <Link to="/cities" className="hover:text-muted-foreground transition-colors">Cities</Link>
           </div>
-          <nav className="flex items-center gap-4">
-            <Link to="/login" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+          <div className="flex items-center gap-4">
+            <Link to="/login" className="text-sm font-medium hover:underline underline-offset-4 hidden sm:block">
               Log in
             </Link>
             <Link to="/register">
-              <Button size="sm" className="h-8 rounded-md px-3 text-xs">
-                Get Started
+              <Button className="rounded-full px-6 font-semibold">
+                Sign up
               </Button>
             </Link>
-          </nav>
+          </div>
         </div>
-      </header>
+      </nav>
 
-      {/* Hero Section */}
       <main>
-        <section className="container mx-auto max-w-7xl px-6 pt-24 pb-16 md:pt-32 md:pb-24">
-          <div className="flex flex-col items-start max-w-[800px] gap-6">
-            <div className="inline-flex items-center rounded-full border border-border bg-muted/50 px-3 py-1 text-sm font-medium">
-              <span className="flex h-2 w-2 rounded-full bg-primary mr-2"></span>
-              Eventify 2.0 is now live
-            </div>
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tighter text-balance">
-              Curate your scene. <br />
-              <span className="text-muted-foreground">Own your audience.</span>
+        {/* Hero Section */}
+        <section className="pt-32 pb-20 px-6 lg:px-12 min-h-[85vh] flex flex-col justify-center">
+          <div className="max-w-[90vw] md:max-w-5xl mx-auto w-full">
+            <h1 className="text-[12vw] sm:text-[8vw] md:text-8xl lg:text-9xl font-black leading-[0.85] tracking-tighter uppercase mb-8">
+              Don't let <br />
+              <span className="text-muted-foreground">the weekend</span> <br />
+              slip away.
             </h1>
-            <p className="max-w-[600px] text-lg text-muted-foreground leading-relaxed">
-              The modern marketplace for event organizers. Sell tickets, analyze attendance, and build your community without the friction of legacy platforms.
-            </p>
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mt-4">
-              <Link to="/register">
-                <Button size="lg" className="rounded-full px-8 h-12 text-base font-semibold">
-                  Start Building <ChevronRight className="ml-2 h-4 w-4" />
-                </Button>
+            
+            <div className="grid md:grid-cols-2 gap-12 items-end mt-12 md:mt-24">
+              <p className="text-xl md:text-2xl font-medium text-balance leading-snug">
+                Discover the best underground gigs, art shows, and cultural events happening in your city right now.
+              </p>
+              
+              <div className="flex flex-col sm:flex-row gap-4 md:justify-end">
+                <div className="relative flex-1 max-w-sm">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                  <input 
+                    type="text" 
+                    placeholder="Search events, artists, venues..." 
+                    className="w-full h-14 pl-12 pr-4 rounded-full border border-border bg-muted/30 focus:outline-none focus:ring-2 focus:ring-foreground transition-all"
+                  />
+                </div>
+                <Link to="/discover">
+                  <Button size="lg" className="h-14 rounded-full px-8 w-full sm:w-auto text-base">
+                    Explore
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Trending Events (Consumer Focus) */}
+        <section className="py-24 px-6 lg:px-12 bg-foreground text-background">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex items-end justify-between mb-12">
+              <div>
+                <h2 className="text-4xl md:text-6xl font-bold tracking-tighter uppercase">Trending Now</h2>
+                <p className="text-background/70 mt-2 text-lg">Curated picks for you.</p>
+              </div>
+              <Link to="/discover" className="hidden md:flex items-center gap-2 font-medium hover:opacity-70 transition-opacity">
+                See all <ArrowRight className="w-5 h-5" />
               </Link>
+            </div>
+
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Event Card 1 */}
+              <Link to="/register" className="group relative block aspect-[4/5] rounded-2xl overflow-hidden bg-neutral-900">
+                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/40 to-purple-900/80 group-hover:scale-105 transition-transform duration-700"></div>
+                <div className="absolute top-4 left-4 bg-background text-foreground text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">
+                  Selling Fast
+                </div>
+                <div className="absolute inset-0 p-6 flex flex-col justify-end bg-gradient-to-t from-black/80 via-black/20 to-transparent">
+                  <div className="text-white space-y-2">
+                    <div className="flex items-center gap-2 text-sm font-medium text-white/80">
+                      <CalendarDays className="w-4 h-4" /> Fri, Oct 24 • 10:00 PM
+                    </div>
+                    <h3 className="text-2xl font-bold leading-tight group-hover:underline underline-offset-4">
+                      Midnight Warehouse Project
+                    </h3>
+                    <div className="flex items-center justify-between pt-2">
+                      <span className="flex items-center gap-1 text-sm text-white/70"><MapPin className="w-4 h-4" /> Brooklyn, NY</span>
+                      <span className="font-bold">From $25</span>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+
+              {/* Event Card 2 */}
+              <Link to="/register" className="group relative block aspect-[4/5] rounded-2xl overflow-hidden bg-neutral-900">
+                <div className="absolute inset-0 bg-gradient-to-br from-orange-500/40 to-red-900/80 group-hover:scale-105 transition-transform duration-700"></div>
+                <div className="absolute inset-0 p-6 flex flex-col justify-end bg-gradient-to-t from-black/80 via-black/20 to-transparent">
+                  <div className="text-white space-y-2">
+                    <div className="flex items-center gap-2 text-sm font-medium text-white/80">
+                      <CalendarDays className="w-4 h-4" /> Sat, Oct 25 • 2:00 PM
+                    </div>
+                    <h3 className="text-2xl font-bold leading-tight group-hover:underline underline-offset-4">
+                      Independent Zine & Art Fair
+                    </h3>
+                    <div className="flex items-center justify-between pt-2">
+                      <span className="flex items-center gap-1 text-sm text-white/70"><MapPin className="w-4 h-4" /> Downtown Arts District</span>
+                      <span className="font-bold">Free</span>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+
+              {/* Event Card 3 */}
+              <Link to="/register" className="group relative block aspect-[4/5] rounded-2xl overflow-hidden bg-neutral-900 sm:hidden lg:block">
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/40 to-teal-900/80 group-hover:scale-105 transition-transform duration-700"></div>
+                <div className="absolute top-4 left-4 bg-background text-foreground text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider flex items-center gap-1">
+                  <Star className="w-3 h-3 fill-current" /> Top Pick
+                </div>
+                <div className="absolute inset-0 p-6 flex flex-col justify-end bg-gradient-to-t from-black/80 via-black/20 to-transparent">
+                  <div className="text-white space-y-2">
+                    <div className="flex items-center gap-2 text-sm font-medium text-white/80">
+                      <CalendarDays className="w-4 h-4" /> Sun, Oct 26 • 7:30 PM
+                    </div>
+                    <h3 className="text-2xl font-bold leading-tight group-hover:underline underline-offset-4">
+                      Rooftop Jazz Collective
+                    </h3>
+                    <div className="flex items-center justify-between pt-2">
+                      <span className="flex items-center gap-1 text-sm text-white/70"><MapPin className="w-4 h-4" /> The Highline Hotel</span>
+                      <span className="font-bold">From $40</span>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            </div>
+            <div className="mt-8 md:hidden">
               <Link to="/discover">
-                <Button variant="outline" size="lg" className="rounded-full px-8 h-12 text-base font-semibold border-border">
-                  Explore Events
+                <Button variant="outline" className="w-full h-14 rounded-full border-background text-background hover:bg-background hover:text-foreground">
+                  See all events
                 </Button>
               </Link>
             </div>
           </div>
         </section>
 
-        {/* Bento Grid Features */}
-        <section className="container mx-auto max-w-7xl px-6 py-24 border-t border-border/40">
-          <div className="flex flex-col gap-4 mb-12">
-            <h2 className="text-3xl font-bold tracking-tight">Built for modern organizers</h2>
-            <p className="text-muted-foreground text-lg">Everything you need, nothing you don't.</p>
-          </div>
-          
-          <div className="grid md:grid-cols-3 gap-6">
-            <div className="md:col-span-2 group relative overflow-hidden rounded-3xl border border-border bg-card p-8 md:p-10 hover:border-primary/50 transition-colors">
-              <div className="flex flex-col h-full justify-between gap-12">
-                <Ticket className="h-10 w-10 text-primary" />
-                <div className="space-y-3">
-                  <h3 className="font-bold text-2xl tracking-tight">Frictionless Ticketing</h3>
-                  <p className="text-muted-foreground text-lg text-balance max-w-md">
-                    Set up your event in seconds. Accept payments globally with instant payouts and low fees.
-                  </p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="group relative overflow-hidden rounded-3xl border border-border bg-card p-8 md:p-10 hover:border-primary/50 transition-colors">
-              <div className="flex flex-col h-full justify-between gap-12">
-                <LineChart className="h-10 w-10 text-primary" />
-                <div className="space-y-3">
-                  <h3 className="font-bold text-2xl tracking-tight">Real-time Analytics</h3>
-                  <p className="text-muted-foreground text-lg">
-                    Track page views, conversions, and revenue in real-time.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="group relative overflow-hidden rounded-3xl border border-border bg-card p-8 md:p-10 hover:border-primary/50 transition-colors">
-              <div className="flex flex-col h-full justify-between gap-12">
-                <Globe className="h-10 w-10 text-primary" />
-                <div className="space-y-3">
-                  <h3 className="font-bold text-2xl tracking-tight">Global Reach</h3>
-                  <p className="text-muted-foreground text-lg">
-                    Built-in SEO and discovery tools to help your event reach the right audience.
-                  </p>
-                </div>
-              </div>
-            </div>
-            
-             <div className="md:col-span-2 group relative overflow-hidden rounded-3xl border border-transparent bg-foreground text-background p-8 md:p-10">
-              <div className="flex flex-col md:flex-row h-full md:items-center justify-between gap-12">
-                <div className="space-y-3 max-w-md">
-                  <h3 className="font-bold text-3xl tracking-tight">Ready to launch?</h3>
-                  <p className="text-background/80 text-lg">
-                    Join thousands of organizers who have switched to Eventify.
-                  </p>
-                </div>
-                <div>
-                   <Link to="/register">
-                    <Button variant="secondary" size="lg" className="rounded-full px-8 h-12 text-base font-semibold">
-                      Create an account
-                    </Button>
-                  </Link>
-                </div>
-              </div>
+        {/* Social Proof / Call to action */}
+        <section className="py-32 px-6 lg:px-12 text-center border-t border-border/40">
+          <div className="max-w-3xl mx-auto space-y-8">
+            <h2 className="text-5xl md:text-7xl font-black tracking-tighter uppercase">
+              Get off the couch.
+            </h2>
+            <p className="text-xl text-muted-foreground">
+              Join thousands of others discovering their next favorite artist, venue, and community.
+            </p>
+            <div className="pt-8">
+              <Link to="/register">
+                <Button size="lg" className="h-16 rounded-full px-10 text-lg font-bold">
+                  Create your free profile
+                </Button>
+              </Link>
             </div>
           </div>
         </section>
       </main>
 
-      <footer className="border-t border-border/40 py-12">
-        <div className="container mx-auto max-w-7xl px-6 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
-          <div className="flex items-center gap-2">
-            <Ticket className="h-4 w-4" />
-            <span className="font-semibold text-foreground">Eventify</span>
+      <footer className="border-t border-border/40 py-12 px-6 lg:px-12">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="text-2xl font-black tracking-tighter uppercase">
+            Eventify
           </div>
-          <p>© {new Date().getFullYear()} Eventify Inc. All rights reserved.</p>
+          <div className="flex gap-6 text-sm font-medium text-muted-foreground">
+            <Link to="/about" className="hover:text-foreground">About</Link>
+            <Link to="/terms" className="hover:text-foreground">Terms</Link>
+            <Link to="/privacy" className="hover:text-foreground">Privacy</Link>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            © {new Date().getFullYear()} Eventify.
+          </p>
         </div>
       </footer>
     </div>
