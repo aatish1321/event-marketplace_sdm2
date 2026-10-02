@@ -19,9 +19,7 @@ describe('Landing Page', () => {
         <Landing />
       </BrowserRouter>
     );
-    // Updated test strings to match consumer-focused copy
     expect(screen.getByText(/Don't let/i)).toBeInTheDocument();
-    expect(screen.getByText(/the weekend/i)).toBeInTheDocument();
     expect(screen.getByText(/slip away/i)).toBeInTheDocument();
   });
 
@@ -32,21 +30,20 @@ describe('Landing Page', () => {
       </BrowserRouter>
     );
     
-    expect(screen.getByText(/Sign up/i)).toBeInTheDocument();
-    expect(screen.getByText(/Explore/i)).toBeInTheDocument();
-    expect(screen.getByPlaceholderText(/Search events, artists, venues.../i)).toBeInTheDocument();
+    expect(screen.getByText(/Create event/i)).toBeInTheDocument();
+    expect(screen.getByText(/Find an event/i)).toBeInTheDocument();
   });
 
-  it('renders trending events section', () => {
+  it('renders events section', () => {
     render(
       <BrowserRouter>
         <Landing />
       </BrowserRouter>
     );
     
-    expect(screen.getByText('Trending Now')).toBeInTheDocument();
-    expect(screen.getByText('Midnight Warehouse Project')).toBeInTheDocument();
-    expect(screen.getByText('Independent Zine & Art Fair')).toBeInTheDocument();
-    expect(screen.getByText('Rooftop Jazz Collective')).toBeInTheDocument();
+    expect(screen.getByText('Worth leaving the house for.')).toBeInTheDocument();
+    expect(screen.getByText('Solange: Notes From the Deep')).toBeInTheDocument();
+    expect(screen.getByText('The New City Food Festival')).toBeInTheDocument();
+    expect(screen.getByText('Designing Tomorrow: Live')).toBeInTheDocument();
   });
 });

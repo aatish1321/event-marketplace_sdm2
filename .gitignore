@@ -18,3 +18,7 @@ ORIGINAL_REQUEST.md
 .aider*
 .gemini/
 GEMINI.md
+
+# Backup files
+*.backup
+*.bak
