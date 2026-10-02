@@ -51,6 +51,22 @@ export default {
         sans: ["var(--font-sans)"],
         heading: ["var(--font-heading)"],
       },
+      keyframes: {
+        "fade-in-up": {
+          "0%": { opacity: 0, transform: "translateY(24px)" },
+          "100%": { opacity: 1, transform: "translateY(0)" },
+        },
+        "slide-in-right": {
+          "0%": { opacity: 0, transform: "translateX(100px)" },
+          "100%": { opacity: 1, transform: "translateX(0)" },
+        },
+      },
+      animation: {
+        "fade-in-up": "fade-in-up 0.8s ease-out forwards",
+        "fade-in-up-delay-1": "fade-in-up 0.8s ease-out 0.2s forwards",
+        "fade-in-up-delay-2": "fade-in-up 0.8s ease-out 0.4s forwards",
+        "slide-in-right": "slide-in-right 1s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards",
+      },
     },
   },
   plugins: [],
