@@ -97,34 +97,28 @@ const Landing = () => {
         </section>
 
         {/* Event List Section */}
+        {/* Event List Section */}
         <section className="bg-[#2D2D2D] text-white py-24 px-6 lg:px-12">
           <div className="max-w-[1600px] mx-auto">
             <p className="text-[#FF5238] text-xs font-bold tracking-widest uppercase mb-4">Editors' Picks</p>
             <h2 className="text-4xl md:text-5xl lg:text-6xl font-medium tracking-tight mb-4">Worth leaving the house for.</h2>
             <p className="text-zinc-400 text-lg mb-12">Standout events selected by local tastemakers, updated every week.</p>
 
-            <div className="flex gap-3 mb-10 overflow-x-auto pb-2 scrollbar-hide">
-              <button className="px-5 py-2 rounded-full bg-white text-zinc-950 text-sm font-semibold whitespace-nowrap">For you</button>
-              <button className="px-5 py-2 rounded-full bg-zinc-800 text-white hover:bg-zinc-700 text-sm font-semibold whitespace-nowrap transition-colors">Trending</button>
-              <button className="px-5 py-2 rounded-full bg-zinc-800 text-white hover:bg-zinc-700 text-sm font-semibold whitespace-nowrap transition-colors">New this week</button>
-              <button className="px-5 py-2 rounded-full bg-zinc-800 text-white hover:bg-zinc-700 text-sm font-semibold whitespace-nowrap transition-colors">Under $50</button>
-            </div>
-
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {events.map((event, idx) => (
-                <div key={idx} className="bg-white rounded-2xl overflow-hidden text-zinc-950 flex flex-col">
-                  <div className="relative aspect-[16/10]">
-                    <img src={event.image} alt={event.title} className="w-full h-full object-cover" />
+                <div key={idx} className="bg-white rounded-2xl overflow-hidden text-zinc-950 flex flex-col group cursor-pointer hover:shadow-xl transition-shadow">
+                  <div className="relative h-64 lg:h-56 overflow-hidden">
+                    <img src={event.image} alt={event.title} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                     <div className="absolute top-4 left-4 bg-zinc-950/80 backdrop-blur-sm text-white text-xs font-bold px-3 py-1 rounded-md uppercase tracking-wider">
                       {event.category}
                     </div>
-                    <button className="absolute top-4 right-4 p-2 bg-white rounded-full hover:scale-105 transition-transform shadow-sm text-zinc-400 hover:text-red-500">
+                    <button className="absolute top-4 right-4 p-2 bg-white rounded-full hover:scale-110 transition-transform shadow-sm text-zinc-400 hover:text-red-500">
                       <Heart className="w-5 h-5" />
                     </button>
                   </div>
                   <div className="p-6 flex-1 flex flex-col">
                     <p className="text-[#FF5238] text-xs font-bold uppercase tracking-wider mb-2">{event.date}</p>
-                    <h3 className="text-xl font-medium mb-1 line-clamp-1">{event.title}</h3>
+                    <h3 className="text-xl font-medium mb-1 line-clamp-1 group-hover:text-[#FF5238] transition-colors">{event.title}</h3>
                     <div className="flex items-start gap-1 text-zinc-500 text-sm mb-6">
                       <MapPin className="w-4 h-4 mt-0.5 shrink-0" />
                       <span className="line-clamp-1">{event.location}</span>

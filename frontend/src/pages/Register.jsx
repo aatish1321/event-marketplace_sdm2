@@ -32,7 +32,7 @@ function Field({ label, name, type = 'text', value, onChange, error, hint, ...re
   const describedBy = [error && `${name}-error`, hint && `${name}-hint`].filter(Boolean).join(' ')
   return (
     <div>
-      <label htmlFor={name} className="mb-2 block text-sm font-bold text-foreground">
+      <label htmlFor={name} className="mb-2 block text-sm font-semibold text-zinc-950">
         {label}
       </label>
       <input
@@ -43,20 +43,20 @@ function Field({ label, name, type = 'text', value, onChange, error, hint, ...re
         onChange={onChange}
         aria-invalid={Boolean(error)}
         aria-describedby={describedBy || undefined}
-        className={`w-full rounded-xl border bg-background px-4 py-3 text-sm outline-none transition focus:ring-2 ${
+        className={`w-full rounded-xl border bg-white px-4 py-3.5 text-sm outline-none transition focus:ring-4 ${
           error
-            ? 'border-destructive focus:ring-destructive/20'
-            : 'border-input focus:ring-foreground focus:border-foreground/30'
+            ? 'border-red-300 focus:border-red-500 focus:ring-red-100'
+            : 'border-zinc-200 focus:border-zinc-400 focus:ring-zinc-100'
         }`}
         {...rest}
       />
       {hint && !error && (
-        <p id={`${name}-hint`} className="mt-2 text-xs text-muted-foreground">
+        <p id={`${name}-hint`} className="mt-2 text-xs font-medium text-zinc-500">
           {hint}
         </p>
       )}
       {error && (
-        <p id={`${name}-error`} className="mt-2 text-xs font-medium text-destructive">
+        <p id={`${name}-error`} className="mt-2 text-xs font-medium text-red-600">
           {error}
         </p>
       )}
@@ -182,24 +182,24 @@ export default function Register() {
 
   if (registered) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-background px-4 py-10 selection:bg-foreground selection:text-background">
-        <Link to="/" className="absolute top-8 left-8 text-xl font-bold tracking-tighter uppercase hidden md:block">
+      <main className="flex min-h-screen items-center justify-center bg-[#F6F5F4] px-4 py-10 selection:bg-zinc-900 selection:text-white">
+        <Link to="/" className="absolute top-8 left-8 text-xl font-black tracking-widest uppercase text-zinc-950 hidden md:block">
           Eventify
         </Link>
-        <div className="w-full max-w-md rounded-3xl border border-border/40 bg-card p-8 md:p-10 text-center shadow-sm">
-          <h1 className="text-3xl font-black tracking-tight uppercase text-foreground">You're in!</h1>
-          <p className="mt-3 text-base text-muted-foreground">
+        <div className="w-full max-w-[440px] rounded-[2.5rem] bg-white p-10 md:p-12 text-center shadow-xl shadow-zinc-200/50">
+          <h1 className="text-4xl font-medium tracking-tight text-zinc-950">You're in!</h1>
+          <p className="mt-3 text-base text-zinc-500 font-medium">
             Welcome, {registered.full_name}. Your account has been created.
           </p>
           {isAuthenticated ? (
             <>
-              <Link to={getRoleHome(userRole) ?? '/login'} className="mt-8 block h-14 w-full rounded-full bg-foreground px-4 py-3.5 text-base font-bold text-background transition hover:bg-foreground/90 uppercase tracking-wide">
+              <Link to={getRoleHome(userRole) ?? '/login'} className="mt-8 flex h-14 w-full items-center justify-center rounded-full bg-[#FF5238] hover:bg-[#e0452e] px-4 text-base font-semibold text-white transition-transform hover:scale-[1.02] shadow-sm">
                 Start Exploring
               </Link>
               <button
                 type="button"
                 onClick={logout}
-                className="mt-4 w-full h-14 rounded-full border border-border bg-background px-4 text-sm font-bold text-foreground transition hover:bg-muted uppercase tracking-wide"
+                className="mt-4 w-full h-14 rounded-full border-2 border-zinc-200 bg-white px-4 text-sm font-semibold text-zinc-950 transition-colors hover:bg-zinc-50"
               >
                 Log out
               </button>
@@ -207,7 +207,7 @@ export default function Register() {
           ) : (
             <Link
               to="/login"
-              className="mt-8 block h-14 w-full rounded-full bg-foreground px-4 py-3.5 text-base font-bold text-background transition hover:bg-foreground/90 uppercase tracking-wide"
+              className="mt-8 flex h-14 w-full items-center justify-center rounded-full bg-[#FF5238] hover:bg-[#e0452e] px-4 text-base font-semibold text-white transition-transform hover:scale-[1.02] shadow-sm"
             >
               Go to login
             </Link>
@@ -218,19 +218,19 @@ export default function Register() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-background px-4 py-10 selection:bg-foreground selection:text-background">
-      <Link to="/" className="absolute top-8 left-8 text-xl font-bold tracking-tighter uppercase hidden md:block">
+    <main className="flex min-h-screen items-center justify-center bg-[#F6F5F4] px-4 py-10 selection:bg-zinc-900 selection:text-white">
+      <Link to="/" className="absolute top-8 left-8 text-xl font-black tracking-widest uppercase text-zinc-950 hidden md:block">
         Eventify
       </Link>
-      <div className="w-full max-w-md rounded-3xl border border-border/40 bg-card p-8 md:p-10 shadow-sm">
-        <h1 className="text-3xl font-black tracking-tight uppercase text-foreground">Join the club</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Sign up to discover the best local events.</p>
+      <div className="w-full max-w-[440px] rounded-[2.5rem] bg-white p-10 md:p-12 shadow-xl shadow-zinc-200/50">
+        <h1 className="text-4xl font-medium tracking-tight text-zinc-950">Join the club</h1>
+        <p className="mt-3 text-base text-zinc-500 font-medium">Sign up to discover the best local events.</p>
 
         {/* Role toggle */}
         <div
           role="radiogroup"
           aria-label="Account type"
-          className="mt-8 grid grid-cols-2 gap-1 rounded-full bg-muted/50 p-1"
+          className="mt-8 grid grid-cols-2 gap-1 rounded-full bg-zinc-100 p-1"
         >
           {ROLE_OPTIONS.map((r) => {
             const active = role === r.value
@@ -241,8 +241,8 @@ export default function Register() {
                 role="radio"
                 aria-checked={active}
                 onClick={() => handleRoleChange(r.value)}
-                className={`rounded-full px-4 py-2.5 text-sm font-bold transition ${
-                  active ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+                className={`rounded-full px-4 py-2.5 text-sm font-semibold transition-all ${
+                  active ? 'bg-white text-zinc-950 shadow-sm' : 'text-zinc-500 hover:text-zinc-950'
                 }`}
               >
                 {r.label}
@@ -253,7 +253,7 @@ export default function Register() {
 
         <form onSubmit={handleSubmit} noValidate className="mt-8 space-y-5">
           {errors.form && (
-            <div role="alert" className="rounded-xl bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">
+            <div role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
               {errors.form}
             </div>
           )}
@@ -264,8 +264,8 @@ export default function Register() {
           <Field label="Confirm password" name="confirm_password" type="password" value={form.confirm_password} onChange={handleChange} error={errors.confirm_password} autoComplete="new-password" />
 
           {isOrganizer && (
-            <fieldset className="space-y-5 rounded-2xl border border-border/50 bg-muted/30 p-5 mt-4">
-              <legend className="px-2 text-sm font-bold text-foreground">Organization details</legend>
+            <fieldset className="space-y-5 rounded-3xl border border-zinc-200 bg-zinc-50 p-6 mt-6">
+              <legend className="px-2 text-sm font-semibold text-zinc-950">Organization details</legend>
               <Field label="Organization name" name="organization_name" value={form.organization_name} onChange={handleChange} error={errors.organization_name} autoComplete="organization" />
               <Field label="Organization email" name="organization_email" type="email" value={form.organization_email} onChange={handleChange} error={errors.organization_email} />
               <Field label="Organization ID" name="organization_id" value={form.organization_id} onChange={handleChange} error={errors.organization_id} hint="Your company or registration number, e.g. org-123." />
@@ -275,13 +275,13 @@ export default function Register() {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full h-14 mt-4 rounded-full bg-foreground px-4 text-base font-bold text-background transition hover:bg-foreground/90 disabled:cursor-not-allowed disabled:opacity-60 uppercase tracking-wide"
+            className="w-full h-14 mt-6 rounded-full bg-[#FF5238] hover:bg-[#e0452e] px-4 text-base font-semibold text-white transition-transform hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100 shadow-sm"
           >
             {submitting ? 'Creating account…' : isOrganizer ? 'Register as Organizer' : 'Create profile'}
           </button>
         </form>
-        <p className="mt-8 text-center text-sm font-medium text-muted-foreground">
-          Already registered? <Link to="/login" className="text-foreground hover:underline underline-offset-4">Log in</Link>
+        <p className="mt-8 text-center text-sm font-medium text-zinc-500">
+          Already registered? <Link to="/login" className="text-zinc-950 font-semibold hover:text-[#FF5238] transition-colors">Log in</Link>
         </p>
       </div>
     </main>
