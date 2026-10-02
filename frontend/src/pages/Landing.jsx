@@ -37,7 +37,7 @@ const Landing = () => {
   return (
     <div className="min-h-screen bg-[#FDFDFD] text-zinc-950 font-sans selection:bg-zinc-900 selection:text-white">
       {/* Navigation */}
-      <nav className="w-full bg-white border-b border-zinc-100">
+      <nav className="w-full bg-white border-b border-zinc-100 opacity-0 animate-fade-in-up">
         <div className="flex h-20 items-center justify-between px-6 lg:px-12 max-w-[1600px] mx-auto">
           <Link to="/" className="text-xl font-black tracking-widest uppercase">
             Eventify
@@ -50,7 +50,7 @@ const Landing = () => {
               Sign in
             </Link>
             <Link to="/register">
-              <Button className="rounded-full px-6 py-5 bg-zinc-950 hover:bg-zinc-800 text-white font-medium">
+              <Button className="rounded-full px-6 py-5 bg-zinc-950 hover:bg-zinc-800 text-white font-medium transition-transform hover:scale-105">
                 Create event
               </Button>
             </Link>
@@ -60,38 +60,42 @@ const Landing = () => {
 
       <main>
         {/* Hero Section */}
-        <section className="px-6 lg:px-12 max-w-[1600px] mx-auto pt-16 pb-24 lg:pt-24 lg:pb-32 grid lg:grid-cols-[45%_1fr] gap-12 lg:gap-24 items-center">
-          <div className="w-full">
-            <h1 className="text-[12vw] sm:text-[6rem] lg:text-[6.5rem] xl:text-[7.5rem] font-black leading-[0.85] tracking-tighter mb-8">
-              Don't let<br />
-              <span className="whitespace-nowrap">the weekend</span><br />
-              <span className="whitespace-nowrap">slip away</span>
-            </h1>
-            <p className="text-lg text-zinc-600 font-medium mb-10 max-w-lg lg:max-w-[90%] leading-relaxed">
-              Discover concerts, comedy, sports, talks, and one-of-a-kind experiences. Book in seconds—or bring your own event to life with tools built for organizers.
-            </p>
-            <div className="flex items-center gap-3 flex-wrap">
-              <span className="text-sm font-medium text-zinc-500 mr-2">Popular:</span>
-              <span className="text-sm font-medium px-4 py-2 bg-zinc-100 rounded-full cursor-pointer hover:bg-zinc-200 transition-colors">Live music</span>
-              <span className="text-sm font-medium px-4 py-2 bg-zinc-100 rounded-full cursor-pointer hover:bg-zinc-200 transition-colors">This weekend</span>
-              <span className="text-sm font-medium px-4 py-2 bg-zinc-100 rounded-full cursor-pointer hover:bg-zinc-200 transition-colors">Comedy</span>
+        <section className="relative pt-16 pb-24 lg:pt-24 lg:pb-32 overflow-hidden lg:overflow-visible">
+          <div className="max-w-[1600px] mx-auto px-6 lg:px-12">
+            <div className="grid lg:grid-cols-[45%_1fr] gap-12 lg:gap-24 items-center lg:min-h-[70vh]">
+              <div className="w-full relative z-10 opacity-0 animate-fade-in-up-delay-1">
+                <h1 className="text-[12vw] sm:text-[6rem] lg:text-[6.5rem] xl:text-[7.5rem] font-black leading-[0.85] tracking-tighter mb-8">
+                  Don't let<br />
+                  <span className="whitespace-nowrap">the weekend</span><br />
+                  <span className="whitespace-nowrap">slip away</span>
+                </h1>
+                <p className="text-lg text-zinc-600 font-medium mb-10 max-w-lg lg:max-w-[90%] leading-relaxed opacity-0 animate-fade-in-up-delay-2">
+                  Discover concerts, comedy, sports, talks, and one-of-a-kind experiences. Book in seconds—or bring your own event to life with tools built for organizers.
+                </p>
+                <div className="flex items-center gap-3 flex-wrap opacity-0 animate-fade-in-up-delay-2">
+                  <span className="text-sm font-medium text-zinc-500 mr-2">Popular:</span>
+                  <span className="text-sm font-medium px-4 py-2 bg-zinc-100 rounded-full cursor-pointer hover:bg-zinc-200 transition-colors">Live music</span>
+                  <span className="text-sm font-medium px-4 py-2 bg-zinc-100 rounded-full cursor-pointer hover:bg-zinc-200 transition-colors">This weekend</span>
+                  <span className="text-sm font-medium px-4 py-2 bg-zinc-100 rounded-full cursor-pointer hover:bg-zinc-200 transition-colors">Comedy</span>
+                </div>
+              </div>
             </div>
           </div>
           
-          <div className="relative rounded-[2.5rem] overflow-hidden aspect-[4/5] lg:aspect-[1.1/1] w-full">
+          <div className="lg:absolute lg:top-0 lg:bottom-0 lg:right-0 lg:w-[50%] xl:w-[53%] mt-12 lg:mt-0 relative h-[60vh] lg:h-auto rounded-[2.5rem] lg:rounded-none lg:rounded-l-[3rem] overflow-hidden group mx-6 lg:mx-0 w-[calc(100%-3rem)] lg:w-auto opacity-0 animate-slide-in-right">
             <img 
               src={afterglowImg} 
               alt="Festival" 
-              className="absolute inset-0 w-full h-full object-cover"
+              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000"
             />
-            <div className="absolute top-6 left-6 bg-white px-3 py-1.5 rounded-full flex items-center gap-2">
-               <div className="w-2 h-2 rounded-full bg-[#FF5238]"></div>
+            <div className="absolute top-6 left-6 bg-white px-3 py-1.5 rounded-full flex items-center gap-2 shadow-lg">
+               <div className="w-2 h-2 rounded-full bg-[#FF5238] animate-pulse"></div>
                <span className="text-xs font-bold uppercase tracking-wider">Trending Now</span>
             </div>
-            <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black/80 via-black/40 to-transparent text-white">
-              <p className="text-xs font-bold text-[#FF5238] uppercase mb-2">Sat, Oct 17 • 7:30 PM</p>
-              <h3 className="text-4xl font-medium mb-2">Afterglow Festival</h3>
-              <p className="text-white/80">Brooklyn Mirage • New York</p>
+            <div className="absolute bottom-0 left-0 right-0 p-8 lg:p-12 bg-gradient-to-t from-black/80 via-black/40 to-transparent text-white">
+              <p className="text-xs font-bold text-[#FF5238] uppercase mb-2 tracking-widest">Sat, Oct 17 • 7:30 PM</p>
+              <h3 className="text-4xl lg:text-5xl font-medium mb-2">Afterglow Festival</h3>
+              <p className="text-white/80 font-medium">Brooklyn Mirage • New York</p>
             </div>
           </div>
         </section>
@@ -112,26 +116,29 @@ const Landing = () => {
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {events.map((event, idx) => (
-                <div key={idx} className="bg-white rounded-2xl overflow-hidden text-zinc-950 flex flex-col">
-                  <div className="relative aspect-[16/10]">
-                    <img src={event.image} alt={event.title} className="w-full h-full object-cover" />
+                <div 
+                  key={idx} 
+                  className="bg-white rounded-2xl overflow-hidden text-zinc-950 flex flex-col group cursor-pointer shadow-sm hover:shadow-xl transition-all hover:-translate-y-2 duration-300"
+                >
+                  <div className="relative aspect-[16/10] overflow-hidden">
+                    <img src={event.image} alt={event.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                     <div className="absolute top-4 left-4 bg-zinc-950/80 backdrop-blur-sm text-white text-xs font-bold px-3 py-1 rounded-md uppercase tracking-wider">
                       {event.category}
                     </div>
-                    <button className="absolute top-4 right-4 p-2 bg-white rounded-full hover:scale-105 transition-transform shadow-sm text-zinc-400 hover:text-red-500">
+                    <button className="absolute top-4 right-4 p-2 bg-white rounded-full hover:scale-110 transition-transform shadow-sm text-zinc-400 hover:text-red-500">
                       <Heart className="w-5 h-5" />
                     </button>
                   </div>
                   <div className="p-6 flex-1 flex flex-col">
                     <p className="text-[#FF5238] text-xs font-bold uppercase tracking-wider mb-2">{event.date}</p>
-                    <h3 className="text-xl font-medium mb-1 line-clamp-1">{event.title}</h3>
+                    <h3 className="text-xl font-medium mb-1 line-clamp-1 group-hover:text-[#FF5238] transition-colors">{event.title}</h3>
                     <div className="flex items-start gap-1 text-zinc-500 text-sm mb-6">
                       <MapPin className="w-4 h-4 mt-0.5 shrink-0" />
                       <span className="line-clamp-1">{event.location}</span>
                     </div>
                     <div className="mt-auto pt-4 border-t border-zinc-100 flex items-center justify-between">
                       <p className="text-zinc-500 text-sm">From <span className="text-zinc-950 font-semibold">{event.price}</span></p>
-                      <button className="text-[#FF5238] font-semibold text-sm flex items-center gap-1 hover:gap-2 transition-all">
+                      <button className="text-[#FF5238] font-semibold text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
                         Get tickets <ArrowRight className="w-4 h-4" />
                       </button>
                     </div>
@@ -143,13 +150,13 @@ const Landing = () => {
         </section>
 
         {/* Organizers Section */}
-        <section className="py-24 px-6 lg:px-12 bg-[#EBEBEB]">
+        <section className="py-24 px-6 lg:px-12 bg-[#EBEBEB] overflow-hidden">
           <div className="max-w-[1600px] mx-auto grid lg:grid-cols-2 gap-16 items-center">
-            <div className="rounded-2xl overflow-hidden aspect-[4/3] lg:aspect-[4/3] w-full">
+            <div className="rounded-2xl overflow-hidden aspect-[4/3] lg:aspect-[4/3] w-full group">
                <img 
                  src={createEventImg} 
                  alt="Organizer" 
-                 className="w-full h-full object-cover grayscale opacity-90 hover:grayscale-0 transition-all duration-700"
+                 className="w-full h-full object-cover grayscale opacity-90 group-hover:scale-105 group-hover:grayscale-0 transition-all duration-700"
                />
             </div>
             <div className="max-w-xl">
@@ -162,25 +169,23 @@ const Landing = () => {
               </p>
               
               <div className="space-y-8 mb-10 text-zinc-900">
-                <div>
-                  <h4 className="font-medium mb-1">Launch a polished event page</h4>
-                  <p className="text-zinc-600 text-sm">Add tickets, schedules, media, and custom checkout questions in minutes.</p>
-                </div>
-                <div>
-                  <h4 className="font-medium mb-1">Know what's working</h4>
-                  <p className="text-zinc-600 text-sm">Track sales, conversion, payouts, and channel performance in real time.</p>
-                </div>
-                <div>
-                  <h4 className="font-medium mb-1">Grow your audience</h4>
-                  <p className="text-zinc-600 text-sm">Reach relevant local buyers with built-in discovery and targeted promotion.</p>
-                </div>
+                {[
+                  { title: "Launch a polished event page", desc: "Add tickets, schedules, media, and custom checkout questions in minutes." },
+                  { title: "Know what's working", desc: "Track sales, conversion, payouts, and channel performance in real time." },
+                  { title: "Grow your audience", desc: "Reach relevant local buyers with built-in discovery and targeted promotion." }
+                ].map((item, i) => (
+                  <div key={i}>
+                    <h4 className="font-medium mb-1">{item.title}</h4>
+                    <p className="text-zinc-600 text-sm">{item.desc}</p>
+                  </div>
+                ))}
               </div>
 
               <div className="flex flex-wrap items-center gap-4">
-                <Button className="rounded-full px-8 py-6 bg-[#FF5238] hover:bg-[#e0452e] text-white font-semibold text-base flex items-center gap-2">
+                <Button className="rounded-full px-8 py-6 bg-[#FF5238] hover:bg-[#e0452e] text-white font-semibold text-base flex items-center gap-2 transition-transform hover:scale-105">
                   Create an event <ArrowUpRight className="w-4 h-4" />
                 </Button>
-                <Button className="rounded-full px-8 py-6 bg-zinc-200 text-zinc-900 hover:bg-zinc-300 font-semibold text-base">
+                <Button className="rounded-full px-8 py-6 bg-zinc-200 text-zinc-900 hover:bg-zinc-300 font-semibold text-base transition-transform hover:scale-105">
                   Explore organizer tools
                 </Button>
                 <span className="text-sm text-zinc-500 ml-2">Free to publish</span>
@@ -202,28 +207,28 @@ const Landing = () => {
 
             <div className="grid lg:grid-cols-2 gap-8">
               {/* Card 1 */}
-              <div className="bg-white rounded-3xl p-10 md:p-12 border border-zinc-100 shadow-sm">
+              <div className="bg-white rounded-3xl p-10 md:p-12 border border-zinc-100 shadow-sm hover:shadow-md transition-shadow">
                 <p className="text-[#FF5238] text-xs font-bold tracking-widest uppercase mb-4">Find your next favorite night</p>
                 <h3 className="text-3xl font-medium mb-12">For event-goers</h3>
                 
                 <div className="space-y-10">
-                  <div className="flex gap-6 pb-10 border-b border-zinc-100 last:border-0 last:pb-0">
+                  <div className="flex gap-6 pb-10 border-b border-zinc-100 last:border-0 last:pb-0 group">
                     <div className="flex-1">
-                      <h4 className="text-lg font-medium mb-2">Search your way</h4>
+                      <h4 className="text-lg font-medium mb-2 group-hover:text-[#FF5238] transition-colors">Search your way</h4>
                       <p className="text-zinc-500 text-sm">Browse by date, neighborhood, category, or the artists you already love.</p>
                     </div>
                     <span className="text-xs font-medium text-zinc-400 pt-1">01</span>
                   </div>
-                  <div className="flex gap-6 pb-10 border-b border-zinc-100 last:border-0 last:pb-0">
+                  <div className="flex gap-6 pb-10 border-b border-zinc-100 last:border-0 last:pb-0 group">
                     <div className="flex-1">
-                      <h4 className="text-lg font-medium mb-2">Book with confidence</h4>
+                      <h4 className="text-lg font-medium mb-2 group-hover:text-[#FF5238] transition-colors">Book with confidence</h4>
                       <p className="text-zinc-500 text-sm">See clear pricing, choose your ticket, and check out securely in seconds.</p>
                     </div>
                     <span className="text-xs font-medium text-zinc-400 pt-1">02</span>
                   </div>
-                  <div className="flex gap-6 pb-10 border-b border-zinc-100 last:border-0 last:pb-0">
+                  <div className="flex gap-6 pb-10 border-b border-zinc-100 last:border-0 last:pb-0 group">
                     <div className="flex-1">
-                      <h4 className="text-lg font-medium mb-2">Show up and enjoy</h4>
+                      <h4 className="text-lg font-medium mb-2 group-hover:text-[#FF5238] transition-colors">Show up and enjoy</h4>
                       <p className="text-zinc-500 text-sm">Your mobile ticket is ready when you are, with reminders before doors open.</p>
                     </div>
                     <span className="text-xs font-medium text-zinc-400 pt-1">03</span>
@@ -232,28 +237,28 @@ const Landing = () => {
               </div>
 
               {/* Card 2 */}
-              <div className="bg-[#1A1A1A] text-white rounded-3xl p-10 md:p-12">
+              <div className="bg-[#1A1A1A] text-white rounded-3xl p-10 md:p-12 shadow-sm hover:shadow-lg transition-shadow">
                 <p className="text-[#FF5238] text-xs font-bold tracking-widest uppercase mb-4">Turn an idea into a full room</p>
                 <h3 className="text-3xl font-medium mb-12">For organizers</h3>
                 
                 <div className="space-y-10">
-                  <div className="flex gap-6 pb-10 border-b border-zinc-800 last:border-0 last:pb-0">
+                  <div className="flex gap-6 pb-10 border-b border-zinc-800 last:border-0 last:pb-0 group">
                     <div className="flex-1">
-                      <h4 className="text-lg font-medium mb-2">Build your page</h4>
+                      <h4 className="text-lg font-medium mb-2 group-hover:text-white transition-colors text-zinc-300">Build your page</h4>
                       <p className="text-zinc-400 text-sm">Create ticket types, add your story, and publish a beautiful event page.</p>
                     </div>
                     <span className="text-xs font-medium text-zinc-600 pt-1">01</span>
                   </div>
-                  <div className="flex gap-6 pb-10 border-b border-zinc-800 last:border-0 last:pb-0">
+                  <div className="flex gap-6 pb-10 border-b border-zinc-800 last:border-0 last:pb-0 group">
                     <div className="flex-1">
-                      <h4 className="text-lg font-medium mb-2">Reach the right crowd</h4>
+                      <h4 className="text-lg font-medium mb-2 group-hover:text-white transition-colors text-zinc-300">Reach the right crowd</h4>
                       <p className="text-zinc-400 text-sm">Share anywhere or tap into Eventify discovery and promotion tools.</p>
                     </div>
                     <span className="text-xs font-medium text-zinc-600 pt-1">02</span>
                   </div>
-                  <div className="flex gap-6 pb-10 border-b border-zinc-800 last:border-0 last:pb-0">
+                  <div className="flex gap-6 pb-10 border-b border-zinc-800 last:border-0 last:pb-0 group">
                     <div className="flex-1">
-                      <h4 className="text-lg font-medium mb-2">Run it from one place</h4>
+                      <h4 className="text-lg font-medium mb-2 group-hover:text-white transition-colors text-zinc-300">Run it from one place</h4>
                       <p className="text-zinc-400 text-sm">Scan guests, monitor sales, message attendees, and receive fast payouts.</p>
                     </div>
                     <span className="text-xs font-medium text-zinc-600 pt-1">03</span>
@@ -266,7 +271,7 @@ const Landing = () => {
 
         {/* Call to action section */}
         <section className="py-24 px-6 lg:px-12 bg-[#F6F5F4]">
-          <div className="max-w-[1600px] mx-auto bg-[#FF5238] rounded-[2.5rem] p-12 md:p-20 text-white flex flex-col lg:flex-row justify-between items-start lg:items-center gap-12">
+          <div className="max-w-[1600px] mx-auto bg-[#FF5238] rounded-[2.5rem] p-12 md:p-20 text-white flex flex-col lg:flex-row justify-between items-start lg:items-center gap-12 hover:shadow-xl transition-shadow">
             <div className="max-w-2xl">
               <p className="text-white/80 text-xs font-bold tracking-widest uppercase mb-4">Make a night of it</p>
               <h2 className="text-5xl md:text-6xl font-medium tracking-tight leading-[1.1] mb-6">
@@ -277,10 +282,10 @@ const Landing = () => {
               </p>
             </div>
             <div className="flex flex-col gap-4 shrink-0 w-full lg:w-auto">
-              <Button className="rounded-full px-8 py-7 bg-white text-zinc-950 hover:bg-zinc-100 font-semibold text-lg flex items-center justify-between gap-4 w-full">
+              <Button className="rounded-full px-8 py-7 bg-white text-zinc-950 hover:bg-zinc-100 font-semibold text-lg flex items-center justify-between gap-4 w-full transition-transform hover:scale-105">
                 Find an event <ArrowUpRight className="w-5 h-5" />
               </Button>
-              <Button className="rounded-full px-8 py-7 bg-zinc-950 text-white hover:bg-zinc-800 font-semibold text-lg flex items-center justify-between gap-4 w-full">
+              <Button className="rounded-full px-8 py-7 bg-zinc-950 text-white hover:bg-zinc-800 font-semibold text-lg flex items-center justify-between gap-4 w-full transition-transform hover:scale-105">
                 Create your event <ArrowUpRight className="w-5 h-5" />
               </Button>
               <div className="flex items-center gap-2 mt-2 text-xs font-medium text-white/90 justify-center">
