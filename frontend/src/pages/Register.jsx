@@ -222,7 +222,7 @@ export default function Register() {
       <Link to="/" className="absolute top-8 left-8 text-xl font-black tracking-widest uppercase text-zinc-950 hidden md:block">
         Eventify
       </Link>
-      <div className="w-full max-w-[440px] rounded-[2.5rem] bg-white p-10 md:p-12 shadow-xl shadow-zinc-200/50">
+      <div className={`w-full transition-all duration-300 ${isOrganizer ? 'max-w-4xl' : 'max-w-[440px]'} rounded-[2.5rem] bg-white p-10 md:p-12 shadow-xl shadow-zinc-200/50`}>
         <h1 className="text-4xl font-medium tracking-tight text-zinc-950">Join the club</h1>
         <p className="mt-3 text-base text-zinc-500 font-medium">Sign up to discover the best local events.</p>
 
@@ -251,38 +251,50 @@ export default function Register() {
           })}
         </div>
 
-        <form onSubmit={handleSubmit} noValidate className="mt-8 space-y-5">
+        <form onSubmit={handleSubmit} noValidate className="mt-8 space-y-6">
           {errors.form && (
             <div role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
               {errors.form}
             </div>
           )}
 
-          <Field label="Full name" name="full_name" value={form.full_name} onChange={handleChange} error={errors.full_name} autoComplete="name" />
-          <Field label="Email" name="email" type="email" value={form.email} onChange={handleChange} error={errors.email} autoComplete="email" />
-          <Field label="Password" name="password" type="password" value={form.password} onChange={handleChange} error={errors.password} autoComplete="new-password" />
-          <Field label="Confirm password" name="confirm_password" type="password" value={form.confirm_password} onChange={handleChange} error={errors.confirm_password} autoComplete="new-password" />
+          <div className={`grid grid-cols-1 gap-8 ${isOrganizer ? 'md:grid-cols-2' : ''}`}>
+            {/* Left Column */}
+            <div className="space-y-5">
+              <Field label="Full name" name="full_name" value={form.full_name} onChange={handleChange} error={errors.full_name} autoComplete="name" />
+              <Field label="Email" name="email" type="email" value={form.email} onChange={handleChange} error={errors.email} autoComplete="email" />
+              <Field label="Password" name="password" type="password" value={form.password} onChange={handleChange} error={errors.password} autoComplete="new-password" />
+              <Field label="Confirm password" name="confirm_password" type="password" value={form.confirm_password} onChange={handleChange} error={errors.confirm_password} autoComplete="new-password" />
+            </div>
 
-          {isOrganizer && (
-            <fieldset className="space-y-5 rounded-3xl border border-zinc-200 bg-zinc-50 p-6 mt-6">
-              <legend className="px-2 text-sm font-semibold text-zinc-950">Organization details</legend>
-              <Field label="Organization name" name="organization_name" value={form.organization_name} onChange={handleChange} error={errors.organization_name} autoComplete="organization" />
-              <Field label="Organization email" name="organization_email" type="email" value={form.organization_email} onChange={handleChange} error={errors.organization_email} />
-              <Field label="Organization ID" name="organization_id" value={form.organization_id} onChange={handleChange} error={errors.organization_id} hint="Your company or registration number, e.g. org-123." />
-            </fieldset>
-          )}
+            {/* Right Column */}
+            {isOrganizer && (
+              <div className="space-y-5 h-full">
+                <fieldset className="space-y-5 rounded-3xl border border-zinc-200 bg-zinc-50 p-6 h-full min-h-[320px]">
+                  <legend className="px-2 text-sm font-semibold text-zinc-950">Organization details</legend>
+                  <Field label="Organization name" name="organization_name" value={form.organization_name} onChange={handleChange} error={errors.organization_name} autoComplete="organization" />
+                  <Field label="Organization email" name="organization_email" type="email" value={form.organization_email} onChange={handleChange} error={errors.organization_email} />
+                  <Field label="Organization ID" name="organization_id" value={form.organization_id} onChange={handleChange} error={errors.organization_id} hint="Your company or registration number, e.g. org-123." />
+                </fieldset>
+              </div>
+            )}
+          </div>
 
-          <button
-            type="submit"
-            disabled={submitting}
-            className="w-full h-14 mt-6 rounded-full bg-[#FF5238] hover:bg-[#e0452e] px-4 text-base font-semibold text-white transition-transform hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100 shadow-sm"
-          >
-            {submitting ? 'Creating account…' : isOrganizer ? 'Register as Organizer' : 'Create profile'}
-          </button>
+          <div className={`${isOrganizer ? 'md:w-1/2 md:pr-4' : ''}`}>
+            <button
+              type="submit"
+              disabled={submitting}
+              className="w-full h-14 mt-2 rounded-full bg-[#FF5238] hover:bg-[#e0452e] px-4 text-base font-semibold text-white transition-transform hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100 shadow-sm"
+            >
+              {submitting ? 'Creating account…' : isOrganizer ? 'Register as Organizer' : 'Create profile'}
+            </button>
+          </div>
         </form>
-        <p className="mt-8 text-center text-sm font-medium text-zinc-500">
-          Already registered? <Link to="/login" className="text-zinc-950 font-semibold hover:text-[#FF5238] transition-colors">Log in</Link>
-        </p>
+        <div className={`${isOrganizer ? 'md:w-1/2 md:pr-4' : ''}`}>
+          <p className="mt-8 text-center text-sm font-medium text-zinc-500">
+            Already registered? <Link to="/login" className="text-zinc-950 font-semibold hover:text-[#FF5238] transition-colors">Log in</Link>
+          </p>
+        </div>
       </div>
     </main>
   )
