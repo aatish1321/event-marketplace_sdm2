@@ -85,7 +85,7 @@ const Landing = () => {
               </div>
             </div>
             
-            <div className="lg:absolute lg:top-0 lg:bottom-0 lg:right-0 lg:w-[48%] xl:w-[48%] relative w-full h-[60vh] lg:h-auto rounded-[2rem] lg:rounded-none lg:rounded-l-[2rem] overflow-hidden group mx-6 lg:mx-0 w-[calc(100%-3rem)] lg:w-auto z-20 shadow-2xl">
+            <div className="lg:absolute lg:top-6 lg:bottom-24 lg:right-0 lg:w-[48%] xl:w-[48%] relative w-full h-[60vh] lg:h-auto rounded-[2rem] lg:rounded-none lg:rounded-l-[2rem] overflow-hidden group mx-6 lg:mx-0 w-[calc(100%-3rem)] lg:w-auto z-20 shadow-2xl">
               <img 
                 src={afterglowImg} 
                 alt="Festival" 
