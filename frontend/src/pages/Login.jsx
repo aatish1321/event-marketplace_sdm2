@@ -48,16 +48,16 @@ export default function Login() {
   if (isAuthenticated && home) return <Navigate to={home} replace />
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-background px-4 py-10 selection:bg-foreground selection:text-background">
-      <Link to="/" className="absolute top-8 left-8 text-xl font-bold tracking-tighter uppercase hidden md:block">
+    <main className="flex min-h-screen items-center justify-center bg-[#F6F5F4] px-4 py-10 selection:bg-zinc-900 selection:text-white">
+      <Link to="/" className="absolute top-8 left-8 text-xl font-black tracking-widest uppercase text-zinc-950 hidden md:block">
         Eventify
       </Link>
-      <div className="w-full max-w-md rounded-3xl border border-border/40 bg-card p-8 md:p-10 shadow-sm">
-        <h1 className="text-3xl font-black tracking-tight uppercase text-foreground">Welcome back</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Pick up right where you left off.</p>
+      <div className="w-full max-w-[440px] rounded-[2.5rem] bg-white p-10 md:p-12 shadow-xl shadow-zinc-200/50">
+        <h1 className="text-4xl font-medium tracking-tight text-zinc-950">Welcome back</h1>
+        <p className="mt-3 text-base text-zinc-500 font-medium">Pick up right where you left off.</p>
         <form onSubmit={handleSubmit} noValidate aria-busy={submitting} className="mt-8 space-y-5">
           {errors.form && (
-            <div role="alert" className="rounded-xl bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">
+            <div role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
               {errors.form}
             </div>
           )}
@@ -66,7 +66,7 @@ export default function Login() {
             { name: 'password', label: 'Password', type: 'password', autoComplete: 'current-password', value: password, setter: setPassword },
           ].map(({ name, label, setter, ...input }) => (
             <div key={name}>
-              <label htmlFor={name} className="mb-2 block text-sm font-bold text-foreground">{label}</label>
+              <label htmlFor={name} className="mb-2 block text-sm font-semibold text-zinc-950">{label}</label>
               <input
                 {...input}
                 id={name}
@@ -79,25 +79,25 @@ export default function Login() {
                 }}
                 aria-invalid={Boolean(errors[name])}
                 aria-describedby={errors[name] ? `${name}-error` : undefined}
-                className={`w-full rounded-xl border bg-background px-4 py-3 text-sm outline-none transition focus:ring-2 ${
+                className={`w-full rounded-xl border bg-white px-4 py-3.5 text-sm outline-none transition focus:ring-4 ${
                   errors[name]
-                    ? 'border-destructive focus:ring-destructive/20'
-                    : 'border-input focus:ring-foreground focus:border-foreground/30'
+                    ? 'border-red-300 focus:border-red-500 focus:ring-red-100'
+                    : 'border-zinc-200 focus:border-zinc-400 focus:ring-zinc-100'
                 }`}
               />
-              {errors[name] && <p id={`${name}-error`} role="alert" className="mt-2 text-xs font-medium text-destructive">{errors[name]}</p>}
+              {errors[name] && <p id={`${name}-error`} role="alert" className="mt-2 text-xs font-medium text-red-600">{errors[name]}</p>}
             </div>
           ))}
           <button
             type="submit"
             disabled={submitting}
-            className="w-full h-14 mt-2 rounded-full bg-foreground px-4 text-base font-bold text-background transition hover:bg-foreground/90 disabled:cursor-not-allowed disabled:opacity-60 uppercase tracking-wide"
+            className="w-full h-14 mt-4 rounded-full bg-[#FF5238] hover:bg-[#e0452e] px-4 text-base font-semibold text-white transition-transform hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100 shadow-sm"
           >
             {submitting ? 'Logging in…' : 'Log in'}
           </button>
         </form>
-        <p className="mt-8 text-center text-sm font-medium text-muted-foreground">
-          New here? <Link to="/register" className="text-foreground hover:underline underline-offset-4">Create an account</Link>
+        <p className="mt-8 text-center text-sm font-medium text-zinc-500">
+          New here? <Link to="/register" className="text-zinc-950 font-semibold hover:text-[#FF5238] transition-colors">Create an account</Link>
         </p>
       </div>
     </main>
