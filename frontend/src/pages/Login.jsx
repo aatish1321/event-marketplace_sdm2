@@ -48,13 +48,16 @@ export default function Login() {
   if (isAuthenticated && home) return <Navigate to={home} replace />
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-10">
-      <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg">
-        <h1 className="text-2xl font-semibold text-slate-900">Log in</h1>
-        <p className="mt-1 text-sm text-slate-500">Welcome back to the event marketplace.</p>
-        <form onSubmit={handleSubmit} noValidate aria-busy={submitting} className="mt-6 space-y-4">
+    <main className="flex min-h-screen items-center justify-center bg-background px-4 py-10 selection:bg-foreground selection:text-background">
+      <Link to="/" className="absolute top-8 left-8 text-xl font-bold tracking-tighter uppercase hidden md:block">
+        Eventify
+      </Link>
+      <div className="w-full max-w-md rounded-3xl border border-border/40 bg-card p-8 md:p-10 shadow-sm">
+        <h1 className="text-3xl font-black tracking-tight uppercase text-foreground">Welcome back</h1>
+        <p className="mt-2 text-sm text-muted-foreground">Pick up right where you left off.</p>
+        <form onSubmit={handleSubmit} noValidate aria-busy={submitting} className="mt-8 space-y-5">
           {errors.form && (
-            <div role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+            <div role="alert" className="rounded-xl bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">
               {errors.form}
             </div>
           )}
@@ -63,7 +66,7 @@ export default function Login() {
             { name: 'password', label: 'Password', type: 'password', autoComplete: 'current-password', value: password, setter: setPassword },
           ].map(({ name, label, setter, ...input }) => (
             <div key={name}>
-              <label htmlFor={name} className="mb-1 block text-sm font-medium text-slate-700">{label}</label>
+              <label htmlFor={name} className="mb-2 block text-sm font-bold text-foreground">{label}</label>
               <input
                 {...input}
                 id={name}
@@ -76,25 +79,25 @@ export default function Login() {
                 }}
                 aria-invalid={Boolean(errors[name])}
                 aria-describedby={errors[name] ? `${name}-error` : undefined}
-                className={`w-full rounded-lg border px-3 py-2 text-sm shadow-sm outline-none transition focus:ring-2 ${
+                className={`w-full rounded-xl border bg-background px-4 py-3 text-sm outline-none transition focus:ring-2 ${
                   errors[name]
-                    ? 'border-red-400 focus:border-red-500 focus:ring-red-200'
-                    : 'border-slate-300 focus:border-indigo-500 focus:ring-indigo-200'
+                    ? 'border-destructive focus:ring-destructive/20'
+                    : 'border-input focus:ring-foreground focus:border-foreground/30'
                 }`}
               />
-              {errors[name] && <p id={`${name}-error`} role="alert" className="mt-1 text-xs text-red-600">{errors[name]}</p>}
+              {errors[name] && <p id={`${name}-error`} role="alert" className="mt-2 text-xs font-medium text-destructive">{errors[name]}</p>}
             </div>
           ))}
           <button
             type="submit"
             disabled={submitting}
-            className="w-full rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
+            className="w-full h-14 mt-2 rounded-full bg-foreground px-4 text-base font-bold text-background transition hover:bg-foreground/90 disabled:cursor-not-allowed disabled:opacity-60 uppercase tracking-wide"
           >
             {submitting ? 'Logging in…' : 'Log in'}
           </button>
         </form>
-        <p className="mt-6 text-center text-sm text-slate-600">
-          New here? <Link to="/register" className="font-medium text-indigo-600 hover:underline">Create an account</Link>
+        <p className="mt-8 text-center text-sm font-medium text-muted-foreground">
+          New here? <Link to="/register" className="text-foreground hover:underline underline-offset-4">Create an account</Link>
         </p>
       </div>
     </main>

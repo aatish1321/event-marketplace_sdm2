@@ -9,7 +9,7 @@ describe('application auth routes', () => {
   it.each(['/discover', '/dashboard', '/admin-logs'])('guards direct navigation to %s', (path) => {
     window.history.replaceState({}, '', path)
     render(<AuthProvider><App /></AuthProvider>)
-    expect(screen.getByRole('heading', { name: 'Log in' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Welcome back' })).toBeInTheDocument()
     expect(window.location.pathname).toBe('/login')
   })
 
@@ -28,7 +28,7 @@ describe('application auth routes', () => {
     expect(await screen.findByRole('heading', { name: heading })).toBeInTheDocument()
     expect(window.location.pathname).toBe(path)
     await user.click(screen.getByRole('button', { name: /log out/i }))
-    expect(await screen.findByRole('heading', { name: 'Log in' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Welcome back' })).toBeInTheDocument()
     expect(window.location.pathname).toBe('/login')
     expect(localStorage.getItem('access_token')).toBeNull()
   })
