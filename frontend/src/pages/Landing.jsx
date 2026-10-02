@@ -36,67 +36,79 @@ const events = [
 const Landing = () => {
   return (
     <div className="min-h-screen bg-[#FDFDFD] text-zinc-950 font-sans selection:bg-zinc-900 selection:text-white">
-      {/* Navigation */}
-      <nav className="w-full bg-white border-b border-zinc-100">
-        <div className="flex h-20 items-center justify-between px-6 lg:px-12 max-w-[1600px] mx-auto">
-          <Link to="/" className="text-xl font-black tracking-widest uppercase">
-            Eventify
-          </Link>
-          <div className="flex items-center gap-6 md:gap-8">
-            <Link to="/organizer" className="text-sm font-medium hover:text-zinc-600 hidden sm:block">
-              For organizers
+      {/* Navigation + Hero Wrapper */}
+      <div className="bg-[#F8F7F4] relative overflow-hidden lg:overflow-visible">
+        {/* Navigation */}
+        <nav className="w-full relative z-30">
+          <div className="flex h-24 items-center justify-between px-6 lg:px-12 max-w-[1600px] mx-auto">
+            <Link to="/" className="text-2xl font-black tracking-widest uppercase text-zinc-950">
+              EVENTIFY
             </Link>
-            <Link to="/login" className="text-sm font-medium hover:text-zinc-600">
-              Sign in
-            </Link>
-            <Link to="/register">
-              <Button className="rounded-full px-6 py-5 bg-zinc-950 hover:bg-zinc-800 text-white font-medium">
-                Create event
-              </Button>
-            </Link>
+            <div className="flex items-center gap-6 md:gap-8">
+              <Link to="/organizer" className="text-sm font-medium hover:text-zinc-600 hidden sm:block text-zinc-800">
+                For organizers
+              </Link>
+              <Link to="/login" className="text-sm font-medium hover:text-zinc-600 text-zinc-800">
+                Sign in
+              </Link>
+              <Link to="/register">
+                <Button className="rounded-full px-6 py-5 bg-[#1A1A1A] hover:bg-black text-white font-medium shadow-sm">
+                  Create event
+                </Button>
+              </Link>
+            </div>
           </div>
-        </div>
-      </nav>
+        </nav>
 
-      <main>
         {/* Hero Section */}
-        <section className="px-6 lg:px-12 max-w-[1600px] mx-auto pt-16 pb-24 lg:pt-24 lg:pb-32 grid lg:grid-cols-[45%_1fr] gap-12 lg:gap-24 items-center">
-          <div className="w-full">
-            <h1 className="text-[12vw] sm:text-[6rem] lg:text-[6.5rem] xl:text-[7.5rem] font-black leading-[0.85] tracking-tighter mb-8">
-              Don't let<br />
-              <span className="whitespace-nowrap">the weekend</span><br />
-              <span className="whitespace-nowrap">slip away</span>
-            </h1>
-            <p className="text-lg text-zinc-600 font-medium mb-10 max-w-lg lg:max-w-[90%] leading-relaxed">
-              Discover concerts, comedy, sports, talks, and one-of-a-kind experiences. Book in seconds—or bring your own event to life with tools built for organizers.
-            </p>
-            <div className="flex items-center gap-3 flex-wrap">
-              <span className="text-sm font-medium text-zinc-500 mr-2">Popular:</span>
-              <span className="text-sm font-medium px-4 py-2 bg-zinc-100 rounded-full cursor-pointer hover:bg-zinc-200 transition-colors">Live music</span>
-              <span className="text-sm font-medium px-4 py-2 bg-zinc-100 rounded-full cursor-pointer hover:bg-zinc-200 transition-colors">This weekend</span>
-              <span className="text-sm font-medium px-4 py-2 bg-zinc-100 rounded-full cursor-pointer hover:bg-zinc-200 transition-colors">Comedy</span>
+        <section className="relative pt-4 pb-24 lg:pt-10 lg:pb-32">
+            <div className="max-w-[1600px] mx-auto px-6 lg:px-12">
+              <div className="grid lg:grid-cols-[52%_1fr] gap-12 lg:gap-16 items-center">
+                
+                <div className="w-full flex flex-col items-center text-center relative z-10 lg:pr-8 py-8 lg:py-16">
+                  <h1 className="text-[11vw] sm:text-[5.5rem] lg:text-[6.5rem] xl:text-[7.5rem] font-black leading-[0.95] tracking-tight mb-8 uppercase text-[#1A1A1A]">
+                    DON'T LET THE<br />
+                    <span className="whitespace-nowrap">WEEKEND</span><br />
+                    <span className="whitespace-nowrap">SLIP AWAY</span>
+                  </h1>
+                  <p className="text-[1.1rem] text-zinc-500 font-medium mb-12 max-w-lg leading-relaxed">
+                    Discover concerts, comedy, sports, talks, and one-of-a-kind experiences. Book in seconds—or bring your own event to life with tools built for organizers.
+                  </p>
+                  <div className="flex items-center justify-center gap-3 flex-wrap">
+                    <span className="text-sm font-bold text-zinc-500 mr-2">Popular:</span>
+                    <span className="text-sm font-semibold px-4 py-2 border border-zinc-200/80 bg-white/50 rounded-full cursor-pointer hover:bg-white transition-colors text-zinc-600 shadow-sm">Live music</span>
+                    <span className="text-sm font-semibold px-4 py-2 border border-zinc-200/80 bg-white/50 rounded-full cursor-pointer hover:bg-white transition-colors text-zinc-600 shadow-sm">This weekend</span>
+                    <span className="text-sm font-semibold px-4 py-2 border border-zinc-200/80 bg-white/50 rounded-full cursor-pointer hover:bg-white transition-colors text-zinc-600 shadow-sm">Comedy</span>
+                  </div>
+                </div>
+                
+              </div>
             </div>
-          </div>
-          
-          <div className="relative rounded-[2.5rem] overflow-hidden aspect-[4/5] lg:aspect-[1.1/1] w-full">
-            <img 
-              src={afterglowImg} 
-              alt="Festival" 
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-            <div className="absolute top-6 left-6 bg-white px-3 py-1.5 rounded-full flex items-center gap-2">
-               <div className="w-2 h-2 rounded-full bg-[#FF5238]"></div>
-               <span className="text-xs font-bold uppercase tracking-wider">Trending Now</span>
+            
+            <div className="lg:absolute lg:top-0 lg:bottom-0 lg:right-0 lg:w-[48%] xl:w-[48%] relative w-full h-[60vh] lg:h-auto rounded-[2rem] lg:rounded-none lg:rounded-l-[2rem] overflow-hidden group mx-6 lg:mx-0 w-[calc(100%-3rem)] lg:w-auto z-20 shadow-2xl">
+              <img 
+                src={afterglowImg} 
+                alt="Festival" 
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+              <div className="absolute top-8 right-8 flex gap-1.5 z-30">
+                 <div className="w-5 h-1.5 bg-white rounded-full"></div>
+                 <div className="w-5 h-1.5 bg-white/30 rounded-full"></div>
+              </div>
+              <div className="absolute top-8 left-8 bg-white px-3 py-1.5 rounded-full flex items-center gap-2 shadow-lg z-30">
+                 <div className="w-2 h-2 rounded-full bg-[#FF5238]"></div>
+                 <span className="text-[10px] font-black uppercase tracking-wider text-zinc-950">Trending Now</span>
+              </div>
+              <div className="absolute bottom-0 left-0 right-0 p-8 lg:p-10 bg-gradient-to-t from-black/90 via-black/40 to-transparent text-white z-30">
+                <p className="text-xs font-bold text-[#FF5238] uppercase mb-2 tracking-widest">Sat, Oct 17 • 7:30 PM</p>
+                <h3 className="text-3xl lg:text-4xl font-medium mb-1">Afterglow Festival</h3>
+                <p className="text-white/70 text-sm font-medium">Brooklyn Mirage • New York</p>
+              </div>
             </div>
-            <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black/80 via-black/40 to-transparent text-white">
-              <p className="text-xs font-bold text-[#FF5238] uppercase mb-2">Sat, Oct 17 • 7:30 PM</p>
-              <h3 className="text-4xl font-medium mb-2">Afterglow Festival</h3>
-              <p className="text-white/80">Brooklyn Mirage • New York</p>
-            </div>
-          </div>
-        </section>
+          </section>
+        </div>
 
-        {/* Event List Section */}
+        <main>
         {/* Event List Section */}
         <section className="bg-[#2D2D2D] text-white py-24 px-6 lg:px-12">
           <div className="max-w-[1600px] mx-auto">
