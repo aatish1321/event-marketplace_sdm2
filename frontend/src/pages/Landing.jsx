@@ -1,95 +1,134 @@
 import { Link } from 'react-router-dom';
-import { Calendar, Users, Zap, Shield, ArrowRight } from 'lucide-react';
+import { ChevronRight, Ticket, LineChart, Globe } from 'lucide-react';
+import { Button } from '../components/ui/button';
 
 const Landing = () => {
   return (
-    <div className="min-h-screen bg-gray-50 font-sans text-gray-900">
+    <div className="min-h-screen bg-background text-foreground selection:bg-primary selection:text-primary-foreground">
       {/* Navigation */}
-      <nav className="flex items-center justify-between px-6 py-4 bg-white shadow-sm border-b border-gray-100">
-        <div className="flex items-center space-x-2">
-          <Calendar className="w-8 h-8 text-blue-600" />
-          <span className="text-xl font-bold tracking-tight text-gray-900">Eventify</span>
+      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container mx-auto flex h-14 max-w-7xl items-center justify-between px-6">
+          <div className="flex items-center gap-2">
+            <div className="h-6 w-6 rounded-md bg-primary flex items-center justify-center">
+              <Ticket className="h-3.5 w-3.5 text-primary-foreground" />
+            </div>
+            <span className="text-sm font-bold tracking-tight">Eventify</span>
+          </div>
+          <nav className="flex items-center gap-4">
+            <Link to="/login" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+              Log in
+            </Link>
+            <Link to="/register">
+              <Button size="sm" className="h-8 rounded-md px-3 text-xs">
+                Get Started
+              </Button>
+            </Link>
+          </nav>
         </div>
-        <div className="flex items-center space-x-4">
-          <Link to="/login" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
-            Log in
-          </Link>
-          <Link
-            to="/register"
-            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-100 transition-all"
-          >
-            Get Started
-          </Link>
-        </div>
-      </nav>
+      </header>
 
       {/* Hero Section */}
-      <main className="max-w-7xl mx-auto px-6 pt-20 pb-24 text-center sm:pt-32 sm:pb-40">
-        <h1 className="text-5xl font-extrabold tracking-tight text-gray-900 sm:text-6xl max-w-4xl mx-auto leading-tight">
-          The all-in-one platform for your next <span className="text-blue-600">unforgettable event</span>.
-        </h1>
-        <p className="mt-6 text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-          Discover incredible local events, or create and manage your own with our powerful, intuitive organizer tools. Built for attendees and organizers alike.
-        </p>
-        <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Link
-            to="/register"
-            className="w-full sm:w-auto px-8 py-3 text-base font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 focus:ring-4 focus:ring-blue-100 transition-all shadow-sm flex items-center justify-center"
-          >
-            Start Exploring <ArrowRight className="ml-2 w-5 h-5" />
-          </Link>
-          <Link
-            to="/login"
-            className="w-full sm:w-auto px-8 py-3 text-base font-semibold text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 focus:ring-4 focus:ring-gray-100 transition-all"
-          >
-            Sign In
-          </Link>
-        </div>
+      <main>
+        <section className="container mx-auto max-w-7xl px-6 pt-24 pb-16 md:pt-32 md:pb-24">
+          <div className="flex flex-col items-start max-w-[800px] gap-6">
+            <div className="inline-flex items-center rounded-full border border-border bg-muted/50 px-3 py-1 text-sm font-medium">
+              <span className="flex h-2 w-2 rounded-full bg-primary mr-2"></span>
+              Eventify 2.0 is now live
+            </div>
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tighter text-balance">
+              Curate your scene. <br />
+              <span className="text-muted-foreground">Own your audience.</span>
+            </h1>
+            <p className="max-w-[600px] text-lg text-muted-foreground leading-relaxed">
+              The modern marketplace for event organizers. Sell tickets, analyze attendance, and build your community without the friction of legacy platforms.
+            </p>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mt-4">
+              <Link to="/register">
+                <Button size="lg" className="rounded-full px-8 h-12 text-base font-semibold">
+                  Start Building <ChevronRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+              <Link to="/discover">
+                <Button variant="outline" size="lg" className="rounded-full px-8 h-12 text-base font-semibold border-border">
+                  Explore Events
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Bento Grid Features */}
+        <section className="container mx-auto max-w-7xl px-6 py-24 border-t border-border/40">
+          <div className="flex flex-col gap-4 mb-12">
+            <h2 className="text-3xl font-bold tracking-tight">Built for modern organizers</h2>
+            <p className="text-muted-foreground text-lg">Everything you need, nothing you don't.</p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="md:col-span-2 group relative overflow-hidden rounded-3xl border border-border bg-card p-8 md:p-10 hover:border-primary/50 transition-colors">
+              <div className="flex flex-col h-full justify-between gap-12">
+                <Ticket className="h-10 w-10 text-primary" />
+                <div className="space-y-3">
+                  <h3 className="font-bold text-2xl tracking-tight">Frictionless Ticketing</h3>
+                  <p className="text-muted-foreground text-lg text-balance max-w-md">
+                    Set up your event in seconds. Accept payments globally with instant payouts and low fees.
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="group relative overflow-hidden rounded-3xl border border-border bg-card p-8 md:p-10 hover:border-primary/50 transition-colors">
+              <div className="flex flex-col h-full justify-between gap-12">
+                <LineChart className="h-10 w-10 text-primary" />
+                <div className="space-y-3">
+                  <h3 className="font-bold text-2xl tracking-tight">Real-time Analytics</h3>
+                  <p className="text-muted-foreground text-lg">
+                    Track page views, conversions, and revenue in real-time.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="group relative overflow-hidden rounded-3xl border border-border bg-card p-8 md:p-10 hover:border-primary/50 transition-colors">
+              <div className="flex flex-col h-full justify-between gap-12">
+                <Globe className="h-10 w-10 text-primary" />
+                <div className="space-y-3">
+                  <h3 className="font-bold text-2xl tracking-tight">Global Reach</h3>
+                  <p className="text-muted-foreground text-lg">
+                    Built-in SEO and discovery tools to help your event reach the right audience.
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+             <div className="md:col-span-2 group relative overflow-hidden rounded-3xl border border-transparent bg-foreground text-background p-8 md:p-10">
+              <div className="flex flex-col md:flex-row h-full md:items-center justify-between gap-12">
+                <div className="space-y-3 max-w-md">
+                  <h3 className="font-bold text-3xl tracking-tight">Ready to launch?</h3>
+                  <p className="text-background/80 text-lg">
+                    Join thousands of organizers who have switched to Eventify.
+                  </p>
+                </div>
+                <div>
+                   <Link to="/register">
+                    <Button variant="secondary" size="lg" className="rounded-full px-8 h-12 text-base font-semibold">
+                      Create an account
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
 
-      {/* Features Section */}
-      <section className="bg-white py-24 border-t border-gray-100">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold tracking-tight text-gray-900">Why choose Eventify?</h2>
-            <p className="mt-4 text-lg text-gray-600">Everything you need to manage events from end to end.</p>
+      <footer className="border-t border-border/40 py-12">
+        <div className="container mx-auto max-w-7xl px-6 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2">
+            <Ticket className="h-4 w-4" />
+            <span className="font-semibold text-foreground">Eventify</span>
           </div>
-          <div className="grid md:grid-cols-3 gap-12">
-            <div className="flex flex-col items-center text-center">
-              <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center mb-6">
-                <Users className="w-7 h-7 text-blue-600" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Community First</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Connect with like-minded individuals. Find events tailored to your interests and expand your network.
-              </p>
-            </div>
-            <div className="flex flex-col items-center text-center">
-              <div className="w-14 h-14 bg-green-50 rounded-2xl flex items-center justify-center mb-6">
-                <Zap className="w-7 h-7 text-green-600" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Lightning Fast</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Seamless booking, instant confirmations, and real-time updates keep you informed every step of the way.
-              </p>
-            </div>
-            <div className="flex flex-col items-center text-center">
-              <div className="w-14 h-14 bg-purple-50 rounded-2xl flex items-center justify-center mb-6">
-                <Shield className="w-7 h-7 text-purple-600" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Secure Platform</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Enterprise-grade security ensures your data and transactions are protected at all times.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="bg-gray-50 py-12 border-t border-gray-200">
-        <div className="max-w-7xl mx-auto px-6 text-center text-gray-500">
-          <p>&copy; {new Date().getFullYear()} Eventify. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Eventify Inc. All rights reserved.</p>
         </div>
       </footer>
     </div>

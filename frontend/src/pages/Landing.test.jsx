@@ -10,7 +10,8 @@ describe('Landing Page', () => {
         <Landing />
       </BrowserRouter>
     );
-    expect(screen.getByText('Eventify')).toBeInTheDocument();
+    // Brand name appears in header and footer
+    expect(screen.getAllByText('Eventify').length).toBeGreaterThan(0);
   });
 
   it('renders the main hero text', () => {
@@ -19,18 +20,20 @@ describe('Landing Page', () => {
         <Landing />
       </BrowserRouter>
     );
-    expect(screen.getByText(/The all-in-one platform for your next/i)).toBeInTheDocument();
+    expect(screen.getByText(/Curate your scene./i)).toBeInTheDocument();
+    expect(screen.getByText(/Own your audience./i)).toBeInTheDocument();
   });
 
-  it('renders Get Started and Log in buttons', () => {
+  it('renders call to action buttons', () => {
     render(
       <BrowserRouter>
         <Landing />
       </BrowserRouter>
     );
     
-    const getStartedButtons = screen.getAllByText(/Get Started/i);
-    expect(getStartedButtons.length).toBeGreaterThan(0);
+    // There are multiple Get Started/Create account/Start Building equivalents
+    expect(screen.getByText(/Get Started/i)).toBeInTheDocument();
+    expect(screen.getByText(/Start Building/i)).toBeInTheDocument();
     
     const logInLinks = screen.getAllByText(/Log in/i);
     expect(logInLinks.length).toBeGreaterThan(0);
@@ -43,8 +46,8 @@ describe('Landing Page', () => {
       </BrowserRouter>
     );
     
-    expect(screen.getByText('Community First')).toBeInTheDocument();
-    expect(screen.getByText('Lightning Fast')).toBeInTheDocument();
-    expect(screen.getByText('Secure Platform')).toBeInTheDocument();
+    expect(screen.getByText('Frictionless Ticketing')).toBeInTheDocument();
+    expect(screen.getByText('Real-time Analytics')).toBeInTheDocument();
+    expect(screen.getByText('Global Reach')).toBeInTheDocument();
   });
 });
