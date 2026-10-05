@@ -45,15 +45,12 @@ const Landing = () => {
               EVENTIFY
             </Link>
             <div className="flex items-center gap-6 md:gap-8">
-              <Link to="/organizer" className="text-sm font-medium hover:text-secondary hidden sm:block text-primary">
-                For organizers
-              </Link>
               <Link to="/login" className="text-sm font-medium hover:text-secondary text-primary">
-                Sign in
+                Log in
               </Link>
               <Link to="/register">
                 <Button className="rounded-full px-6 py-5 bg-primary hover:bg-black text-white font-medium shadow-sm">
-                  Create event
+                  Sign up
                 </Button>
               </Link>
             </div>
@@ -130,7 +127,7 @@ const Landing = () => {
           <div className="max-w-[1600px] mx-auto">
             <p className="text-tertiary text-xs font-bold tracking-widest uppercase mb-4">Editors' Picks</p>
             <h2 className="text-4xl md:text-5xl lg:text-6xl font-medium tracking-tight mb-4">Worth leaving the house for.</h2>
-            <p className="text-secondary text-lg mb-12">Standout events selected by local tastemakers, updated every week.</p>
+            <p className="text-white/70 text-lg mb-12">Standout events selected by local tastemakers, updated every week.</p>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {events.map((event, idx) => (
