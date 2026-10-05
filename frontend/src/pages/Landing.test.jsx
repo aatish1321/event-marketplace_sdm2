@@ -37,7 +37,7 @@ describe('Landing Page', () => {
       </BrowserRouter>
     );
     
-    expect(screen.getByText(/Create event/i)).toBeInTheDocument();
+    expect(screen.getByText(/Sign up/i)).toBeInTheDocument();
     expect(screen.getByText(/Find an event/i)).toBeInTheDocument();
   });
 
