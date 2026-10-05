@@ -8,64 +8,28 @@ export default {
   theme: {
     extend: {
       colors: {
-        border: "var(--border)",
-        input: "var(--input)",
-        ring: "var(--ring)",
-        background: "var(--background)",
-        foreground: "var(--foreground)",
-        primary: {
-          DEFAULT: "var(--primary)",
-          foreground: "var(--primary-foreground)",
-        },
-        secondary: {
-          DEFAULT: "var(--secondary)",
-          foreground: "var(--secondary-foreground)",
-        },
-        destructive: {
-          DEFAULT: "var(--destructive)",
-          foreground: "var(--destructive-foreground)",
-        },
-        muted: {
-          DEFAULT: "var(--muted)",
-          foreground: "var(--muted-foreground)",
-        },
-        accent: {
-          DEFAULT: "var(--accent)",
-          foreground: "var(--accent-foreground)",
-        },
-        popover: {
-          DEFAULT: "var(--popover)",
-          foreground: "var(--popover-foreground)",
-        },
-        card: {
-          DEFAULT: "var(--card)",
-          foreground: "var(--card-foreground)",
-        },
-      },
-      borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        canvas: '#F8F6F2',
+        surface: '#FFFFFF',
+        'surface-dark': '#252525',
+        ink: '#17161C',
+        muted: '#6C6872',
+        border: '#E6E1D9',
+        coral: '#FF5A47',
+        'coral-strong': '#C9382E',
+        success: '#0F8A5F',
+        warning: '#B45309',
+        danger: '#B42318',
+        focus: '#2563EB',
       },
       fontFamily: {
-        sans: ["var(--font-sans)"],
-        heading: ["var(--font-heading)"],
+        sans: ['Manrope', 'Inter', 'system-ui', 'sans-serif'],
       },
-      keyframes: {
-        "fade-in-up": {
-          "0%": { opacity: 0, transform: "translateY(24px)" },
-          "100%": { opacity: 1, transform: "translateY(0)" },
-        },
-        "slide-in-right": {
-          "0%": { opacity: 0, transform: "translateX(100px)" },
-          "100%": { opacity: 1, transform: "translateX(0)" },
-        },
+      borderRadius: {
+        card: "12px",
+        pill: "9999px",
       },
-      animation: {
-        "fade-in-up": "fade-in-up 0.8s ease-out forwards",
-        "fade-in-up-delay-1": "fade-in-up 0.8s ease-out 0.2s forwards",
-        "fade-in-up-delay-2": "fade-in-up 0.8s ease-out 0.4s forwards",
-        "slide-in-right": "slide-in-right 1s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards",
+      boxShadow: {
+        card: "0 8px 24px rgba(23, 22, 28, 0.08)",
       },
     },
   },

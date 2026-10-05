@@ -22,3 +22,6 @@ GEMINI.md
 # Backup files
 *.backup
 *.bak
+
+# AI Prompts & Design System files
+UI_DESIGN_SYSTEM.md
