@@ -1,4 +1,3 @@
-import React from 'react';
 import { Heart, Calendar, MapPin, Ticket } from 'lucide-react';
 
 export default function EventCard({
