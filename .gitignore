@@ -6,9 +6,13 @@
 .codex/
 .cursor/
 .cursorrules
+.cursorignore
+.cursorindexingignore
 .claude/
 .github/copilot/
 .github/copilot-instructions.md
+.github/prompts/
+.github/instructions/
 AGENTS.md
 CLAUDE.md
 ORIGINAL_REQUEST.md
@@ -21,6 +25,9 @@ ORIGINAL_REQUEST.md
 .aider*
 .gemini/
 GEMINI.md
+.windsurf/
+.windsurfrules
+.continue/
 
 # Backup files
 *.backup

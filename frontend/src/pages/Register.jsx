@@ -43,7 +43,7 @@ function Field({ label, name, type = 'text', value, onChange, error, hint, ...re
         onChange={onChange}
         aria-invalid={Boolean(error)}
         aria-describedby={describedBy || undefined}
-        className={`w-full rounded-xl border bg-white px-4 py-3.5 text-sm outline-none transition focus:ring-4 ${
+        className={`w-full rounded-xl border bg-surface px-4 py-3.5 text-sm outline-none transition focus:ring-4 ${
           error
             ? 'border-red-300 focus:border-red-500 focus:ring-red-100'
             : 'border-border focus:border-focus focus:ring-focus/20'
@@ -182,11 +182,11 @@ export default function Register() {
 
   if (registered) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-neutral px-4 py-10 selection:bg-primary selection:text-white">
+      <main className="flex min-h-screen items-center justify-center bg-canvas px-4 py-10 selection:bg-primary selection:text-white">
         <Link to="/" className="absolute top-8 left-8 text-xl font-black tracking-widest uppercase text-primary hidden md:block">
           Eventify
         </Link>
-        <div className="w-full max-w-[440px] rounded-[2.5rem] bg-white p-10 md:p-12 text-center shadow-xl shadow-primary/5">
+        <div className="w-full max-w-[440px] rounded-[2.5rem] bg-surface p-10 md:p-12 text-center shadow-xl shadow-primary/5">
           <h1 className="text-4xl font-medium tracking-tight text-primary">You're in!</h1>
           <p className="mt-3 text-base text-secondary font-medium">
             Welcome, {registered.full_name}. Your account has been created.
@@ -199,7 +199,7 @@ export default function Register() {
               <button
                 type="button"
                 onClick={logout}
-                className="mt-4 w-full h-14 rounded-full border-2 border-border bg-white px-4 text-sm font-semibold text-primary transition-colors hover:bg-surface"
+                className="mt-4 w-full h-14 rounded-full border-2 border-border bg-surface px-4 text-sm font-semibold text-primary transition-colors hover:bg-surface"
               >
                 Log out
               </button>
@@ -218,11 +218,11 @@ export default function Register() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-neutral px-4 py-10 selection:bg-primary selection:text-white">
+    <main className="flex min-h-screen items-center justify-center bg-canvas px-4 py-10 selection:bg-primary selection:text-white">
       <Link to="/" className="absolute top-8 left-8 text-xl font-black tracking-widest uppercase text-primary hidden md:block">
         Eventify
       </Link>
-      <div className={`w-full transition-all duration-300 ${isOrganizer ? 'max-w-4xl' : 'max-w-[440px]'} rounded-[2.5rem] bg-white p-10 md:p-12 shadow-xl shadow-primary/5`}>
+      <div className={`w-full transition-all duration-300 ${isOrganizer ? 'max-w-4xl' : 'max-w-[440px]'} rounded-[2.5rem] bg-surface p-10 md:p-12 shadow-xl shadow-primary/5`}>
         <h1 className="text-4xl font-medium tracking-tight text-primary">Join the club</h1>
         <p className="mt-3 text-base text-secondary font-medium">Sign up to discover the best local events.</p>
 
@@ -242,7 +242,7 @@ export default function Register() {
                 aria-checked={active}
                 onClick={() => handleRoleChange(r.value)}
                 className={`rounded-full px-4 py-2.5 text-sm font-semibold transition-all ${
-                  active ? 'bg-white text-primary shadow-sm' : 'text-secondary hover:text-primary'
+                  active ? 'bg-surface text-primary shadow-sm' : 'text-secondary hover:text-primary'
                 }`}
               >
                 {r.label}
