@@ -17,9 +17,11 @@ Including another URLconf
 
 from django.urls import path
 
-from . import auth_views
+from . import auth_views, event_views
 
 urlpatterns = [
     path("api/auth/register/", auth_views.register, name="auth-register"),
     path("api/auth/login/", auth_views.login, name="auth-login"),
+    path("api/events/", event_views.events, name="events"),
+    path("api/events/<str:event_id>/", event_views.event_detail, name="event-detail"),
 ]
