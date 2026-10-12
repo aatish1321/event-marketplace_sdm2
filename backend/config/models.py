@@ -14,11 +14,15 @@ from mongoengine import (
     EmbeddedDocumentField,
     IntField,
     StringField,
+    URLField,
 )
 
 __all__ = [
     "OrganizerProfile",
     "User",
+    "Event",
+    "PhysicalEvent",
+    "OnlineEvent",
     "SystemLog",
 ]
 
@@ -99,6 +103,38 @@ class User(Document):
 
     def __str__(self):
         return self.email or super().__str__()
+
+
+class Event(Document):
+    """Shared event details stored in a polymorphic event collection."""
+
+    title = StringField(required=True)
+    organizer_id = StringField(required=True)
+    status = StringField()
+    continent = StringField()
+    country = StringField()
+    available_tickets = IntField(default=0, min_value=0)
+
+    meta = {
+        "allow_inheritance": True,
+        "indexes": [
+            # Keep geography first for queries across all event types.
+            {"fields": ["continent", "country"], "cls": False},
+        ],
+    }
+
+
+class PhysicalEvent(Event):
+    """An event hosted at a physical venue."""
+
+    venue_name = StringField(required=True)
+    address = StringField(required=True)
+
+
+class OnlineEvent(Event):
+    """An event hosted through an online stream."""
+
+    stream_url = URLField(required=True)
 
 
 class SystemLog(Document):
