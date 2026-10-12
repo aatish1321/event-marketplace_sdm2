@@ -15,6 +15,9 @@ ORIGINAL_REQUEST.md
 *.ai.log
 *.ai.prompt
 *.ai.transcript
+*.ai.prompt.md
+*.ai.log.json
+.copilot/
 .aider*
 .gemini/
 GEMINI.md

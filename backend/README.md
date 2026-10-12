@@ -75,13 +75,40 @@ If saving to MongoDB fails, the middleware reports the logging failure through
 Python logging and preserves the original exception. As with Django's
 `process_exception` hook, errors outside view execution are not captured.
 
+## Events API
+
+`GET /api/events/` returns a JSON array; `GET /api/events/<event_id>/` returns
+one event. Both reads are public. Events contain `id`, `event_type`, and their
+model fields. `event_type` is `event`, `physical`, or `online`.
+
+All writes require `Authorization: Bearer <token>` with the `organizer` role.
+Administrators and attendees cannot write events.
+
+- `POST /api/events/` returns 201 with the created event. Supply a nonblank
+  `title`; optionally supply `status`, `continent`, `country`, and
+  `available_tickets` (an integer from 0 to 9223372036854775807, default 0).
+  `event_type` defaults
+  to `event`. Physical events require `venue_name` and `address`; online events
+  require a valid `stream_url`.
+- `PUT /api/events/<event_id>/` returns 200 with the updated event. Supplied
+  fields replace their current values; omitted fields retain their values.
+  Event type cannot be changed.
+- `DELETE /api/events/<event_id>/` returns 204 with no body.
+
+Creation sets `organizer_id` from the verified JWT. Client-supplied
+`organizer_id` is ignored on creation and update. Only the exact matching
+JWT user ID can update or delete an event; other organizers receive 403.
+Unknown fields, invalid JSON, and invalid field values return 400. Invalid or
+missing event IDs return 404; unsupported methods return 405. Unexpected
+database errors use the existing exception logging middleware.
+
 ## Verification
 
 From `backend/`, with the project's environment configured:
 
 ```sh
 uv sync --group dev
-uv run manage.py test config.test_auth config.tests config.test_security
+uv run manage.py test config.test_auth config.tests config.test_security config.test_events config.test_event_views
 uv run manage.py check
 ```
 
