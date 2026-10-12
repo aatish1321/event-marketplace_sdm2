@@ -37,7 +37,7 @@ const Landing = () => {
   return (
     <div className="min-h-screen bg-surface text-primary font-sans selection:bg-primary selection:text-white">
       {/* Navigation + Hero Wrapper */}
-      <div className="bg-neutral relative overflow-hidden lg:overflow-visible">
+      <div className="bg-canvas relative overflow-hidden lg:overflow-visible">
         {/* Navigation */}
         <nav className="w-full relative z-30">
           <div className="flex h-24 items-center justify-between px-6 lg:px-12 max-w-[1600px] mx-auto">
@@ -89,9 +89,9 @@ const Landing = () => {
                   </p>
                   <div className="flex items-center justify-center gap-3 flex-wrap">
                     <span className="text-sm font-bold text-secondary mr-2">Popular:</span>
-                    <span className="text-sm font-semibold px-4 py-2 border border-border/80 bg-white/50 rounded-full cursor-pointer hover:bg-white transition-colors text-secondary shadow-sm">Live music</span>
-                    <span className="text-sm font-semibold px-4 py-2 border border-border/80 bg-white/50 rounded-full cursor-pointer hover:bg-white transition-colors text-secondary shadow-sm">This weekend</span>
-                    <span className="text-sm font-semibold px-4 py-2 border border-border/80 bg-white/50 rounded-full cursor-pointer hover:bg-white transition-colors text-secondary shadow-sm">Comedy</span>
+                    <span className="text-sm font-semibold px-4 py-2 border border-border/80 bg-surface/50 rounded-full cursor-pointer hover:bg-surface transition-colors text-secondary shadow-sm">Live music</span>
+                    <span className="text-sm font-semibold px-4 py-2 border border-border/80 bg-surface/50 rounded-full cursor-pointer hover:bg-surface transition-colors text-secondary shadow-sm">This weekend</span>
+                    <span className="text-sm font-semibold px-4 py-2 border border-border/80 bg-surface/50 rounded-full cursor-pointer hover:bg-surface transition-colors text-secondary shadow-sm">Comedy</span>
                   </div>
                 </div>
                 
@@ -105,15 +105,15 @@ const Landing = () => {
                 className="absolute inset-0 w-full h-full object-cover"
               />
               <div className="absolute top-8 right-8 flex gap-1.5 z-30">
-                 <div className="w-5 h-1.5 bg-white rounded-full"></div>
-                 <div className="w-5 h-1.5 bg-white/30 rounded-full"></div>
+                 <div className="w-5 h-1.5 bg-surface rounded-full"></div>
+                 <div className="w-5 h-1.5 bg-surface/30 rounded-full"></div>
               </div>
-              <div className="absolute top-8 left-8 bg-white px-3 py-1.5 rounded-full flex items-center gap-2 shadow-lg z-30">
+              <div className="absolute top-8 left-8 bg-surface px-3 py-1.5 rounded-full flex items-center gap-2 shadow-lg z-30">
                  <div className="w-2 h-2 rounded-full bg-tertiary"></div>
                  <span className="text-[10px] font-black uppercase tracking-wider text-primary">Trending Now</span>
               </div>
               <div className="absolute bottom-0 left-0 right-0 p-8 lg:p-10 bg-gradient-to-t from-black/90 via-black/40 to-transparent text-white z-30">
-                <p className="text-xs font-bold text-tertiary uppercase mb-2 tracking-widest">Sat, Oct 17 • 7:30 PM</p>
+                <p className="text-xs font-bold text-tertiary-light uppercase mb-2 tracking-widest">Sat, Oct 17 • 7:30 PM</p>
                 <h3 className="text-3xl lg:text-4xl font-medium mb-1">Afterglow Festival</h3>
                 <p className="text-white/70 text-sm font-medium">Brooklyn Mirage • New York</p>
               </div>
@@ -125,32 +125,32 @@ const Landing = () => {
         {/* Event List Section */}
         <section className="bg-primary text-white py-24 px-6 lg:px-12">
           <div className="max-w-[1600px] mx-auto">
-            <p className="text-tertiary text-xs font-bold tracking-widest uppercase mb-4">Editors' Picks</p>
+            <p className="text-tertiary-light text-xs font-bold tracking-widest uppercase mb-4">Editors' Picks</p>
             <h2 className="text-4xl md:text-5xl lg:text-6xl font-medium tracking-tight mb-4">Worth leaving the house for.</h2>
             <p className="text-white/70 text-lg mb-12">Standout events selected by local tastemakers, updated every week.</p>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {events.map((event, idx) => (
-                <div key={idx} className="bg-white rounded-2xl overflow-hidden text-primary flex flex-col group cursor-pointer hover:shadow-xl transition-shadow">
+                <div key={idx} className="bg-surface rounded-2xl overflow-hidden text-primary flex flex-col group cursor-pointer hover:shadow-xl transition-shadow">
                   <div className="relative h-64 lg:h-56 overflow-hidden">
                     <img src={event.image} alt={event.title} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                     <div className="absolute top-4 left-4 bg-primary/80 backdrop-blur-sm text-white text-xs font-bold px-3 py-1 rounded-md uppercase tracking-wider">
                       {event.category}
                     </div>
-                    <button className="absolute top-4 right-4 p-2 bg-white rounded-full hover:scale-110 transition-transform shadow-sm text-secondary hover:text-red-500">
+                    <button className="absolute top-4 right-4 p-2 bg-surface rounded-full hover:scale-110 transition-transform shadow-sm text-secondary hover:text-red-500">
                       <Heart className="w-5 h-5" />
                     </button>
                   </div>
                   <div className="p-6 flex-1 flex flex-col">
-                    <p className="text-tertiary text-xs font-bold uppercase tracking-wider mb-2">{event.date}</p>
-                    <h3 className="text-xl font-medium mb-1 line-clamp-1 group-hover:text-tertiary transition-colors">{event.title}</h3>
+                    <p className="text-tertiary-strong text-xs font-bold uppercase tracking-wider mb-2">{event.date}</p>
+                    <h3 className="text-xl font-medium mb-1 line-clamp-1 group-hover:text-tertiary-strong transition-colors">{event.title}</h3>
                     <div className="flex items-start gap-1 text-secondary text-sm mb-6">
                       <MapPin className="w-4 h-4 mt-0.5 shrink-0" />
                       <span className="line-clamp-1">{event.location}</span>
                     </div>
                     <div className="mt-auto pt-4 border-t border-border flex items-center justify-between">
                       <p className="text-secondary text-sm">From <span className="text-primary font-semibold">{event.price}</span></p>
-                      <button className="text-tertiary font-semibold text-sm flex items-center gap-1 hover:gap-2 transition-all">
+                      <button className="text-tertiary-strong font-semibold text-sm flex items-center gap-1 hover:gap-2 transition-all">
                         Get tickets <ArrowRight className="w-4 h-4" />
                       </button>
                     </div>
@@ -162,7 +162,7 @@ const Landing = () => {
         </section>
 
         {/* Organizers Section */}
-        <section className="py-24 px-6 lg:px-12 bg-neutral">
+        <section className="py-24 px-6 lg:px-12 bg-canvas">
           <div className="max-w-[1600px] mx-auto grid lg:grid-cols-2 gap-16 items-center">
             <div className="rounded-2xl overflow-hidden aspect-[4/3] lg:aspect-[4/3] w-full">
                <img 
@@ -172,7 +172,7 @@ const Landing = () => {
                />
             </div>
             <div className="max-w-xl">
-              <p className="text-tertiary text-xs font-bold tracking-widest uppercase mb-4">For Organizers</p>
+              <p className="text-tertiary-strong text-xs font-bold tracking-widest uppercase mb-4">For Organizers</p>
               <h2 className="text-5xl md:text-6xl font-medium tracking-tight leading-[1.1] mb-6 text-primary">
                 Create the event. We'll help fill the room.
               </h2>
@@ -209,9 +209,9 @@ const Landing = () => {
         </section>
 
         {/* Features Section */}
-        <section className="py-24 px-6 lg:px-12 bg-neutral">
+        <section className="py-24 px-6 lg:px-12 bg-canvas">
           <div className="max-w-[1600px] mx-auto">
-            <p className="text-tertiary text-xs font-bold tracking-widest uppercase mb-4">Simple by design</p>
+            <p className="text-tertiary-strong text-xs font-bold tracking-widest uppercase mb-4">Simple by design</p>
             <h2 className="text-5xl md:text-6xl font-medium tracking-tight leading-[1.1] mb-6 max-w-2xl text-primary">
               One marketplace. Two easy journeys.
             </h2>
@@ -221,8 +221,8 @@ const Landing = () => {
 
             <div className="grid lg:grid-cols-2 gap-8">
               {/* Card 1 */}
-              <div className="bg-white rounded-3xl p-10 md:p-12 border border-border shadow-sm">
-                <p className="text-tertiary text-xs font-bold tracking-widest uppercase mb-4">Find your next favorite night</p>
+              <div className="bg-surface rounded-3xl p-10 md:p-12 border border-border shadow-sm">
+                <p className="text-tertiary-strong text-xs font-bold tracking-widest uppercase mb-4">Find your next favorite night</p>
                 <h3 className="text-3xl font-medium mb-12">For event-goers</h3>
                 
                 <div className="space-y-10">
@@ -252,7 +252,7 @@ const Landing = () => {
 
               {/* Card 2 */}
               <div className="bg-primary text-white rounded-3xl p-10 md:p-12">
-                <p className="text-tertiary text-xs font-bold tracking-widest uppercase mb-4">Turn an idea into a full room</p>
+                <p className="text-tertiary-light text-xs font-bold tracking-widest uppercase mb-4">Turn an idea into a full room</p>
                 <h3 className="text-3xl font-medium mb-12">For organizers</h3>
                 
                 <div className="space-y-10">
@@ -284,8 +284,8 @@ const Landing = () => {
         </section>
 
         {/* Call to action section */}
-        <section className="py-24 px-6 lg:px-12 bg-neutral">
-          <div className="max-w-[1600px] mx-auto bg-tertiary rounded-[2.5rem] p-12 md:p-20 text-white flex flex-col lg:flex-row justify-between items-start lg:items-center gap-12">
+        <section className="py-24 px-6 lg:px-12 bg-canvas">
+          <div className="max-w-[1600px] mx-auto bg-tertiary-strong rounded-[2.5rem] p-12 md:p-20 text-white flex flex-col lg:flex-row justify-between items-start lg:items-center gap-12">
             <div className="max-w-2xl">
               <p className="text-white/80 text-xs font-bold tracking-widest uppercase mb-4">Make a night of it</p>
               <h2 className="text-5xl md:text-6xl font-medium tracking-tight leading-[1.1] mb-6">
@@ -296,7 +296,7 @@ const Landing = () => {
               </p>
             </div>
             <div className="flex flex-col gap-4 shrink-0 w-full lg:w-auto">
-              <Button className="rounded-full px-8 py-7 bg-white text-primary hover:bg-surface font-semibold text-lg flex items-center justify-between gap-4 w-full">
+              <Button className="rounded-full px-8 py-7 bg-surface text-primary hover:bg-surface font-semibold text-lg flex items-center justify-between gap-4 w-full">
                 Find an event <ArrowUpRight className="w-5 h-5" />
               </Button>
               <Button className="rounded-full px-8 py-7 bg-primary text-white hover:bg-zinc-800 font-semibold text-lg flex items-center justify-between gap-4 w-full">
@@ -319,7 +319,7 @@ const Landing = () => {
           
           <div className="max-w-md w-full">
             <p className="text-sm font-medium mb-1">The good stuff, once a week.</p>
-            <p className="text-xs text-secondary mb-4">New events, local favorites, and smart ideas for organizers. No noise.</p>
+            <p className="text-xs text-white/70 mb-4">New events, local favorites, and smart ideas for organizers. No noise.</p>
             <div className="relative">
               <input 
                 type="email" 

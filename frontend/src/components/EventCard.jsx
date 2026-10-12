@@ -39,7 +39,7 @@ export default function EventCard({
             e.stopPropagation();
             onSave?.();
           }}
-          className="absolute right-4 top-4 z-10 flex h-11 w-11 items-center justify-center rounded-pill bg-surface/90 text-ink backdrop-blur-sm transition-colors hover:text-coral focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+          className="absolute right-4 top-4 z-10 flex h-11 w-11 items-center justify-center rounded-pill bg-surface/90 text-ink backdrop-blur-sm transition-colors hover:text-tertiary-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
           aria-label="Save event"
         >
           <Heart className="h-5 w-5" />
@@ -48,7 +48,7 @@ export default function EventCard({
 
       {/* Content */}
       <div className="flex flex-1 flex-col p-4 md:p-6">
-        <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-coral">
+        <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-tertiary-strong">
           <Calendar className="h-4 w-4" />
           <span>{date}</span>
         </div>
