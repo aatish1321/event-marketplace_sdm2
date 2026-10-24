@@ -35,3 +35,9 @@ GEMINI.md
 
 # AI Prompts & Design System files
 UI_DESIGN_SYSTEM.md
+
+# Local Graphify tooling, configuration, graphs, and caches
+.graphify*/
+.graphify*
+graphify-out/
+GRAPH_REPORT.md
