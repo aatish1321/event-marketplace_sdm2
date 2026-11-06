@@ -47,3 +47,35 @@ event-marketplace_sdm2/
 - **Ajoy**
 
 ---
+
+## Automated checks
+
+GitHub Actions runs the `CI` workflow on every pull request and on pushes to
+`main`. You can also run it manually from the Actions tab. New pushes to the
+same PR cancel its older run.
+
+- **Backend tests:** Python 3.14, dependencies from `backend/uv.lock`, and the
+  Django test suite. Tests use `mongomock` with dummy settings; no MongoDB server
+  or repository secrets are needed.
+- **Frontend checks:** Node 26, dependencies from `frontend/package-lock.json`,
+  ESLint, Vitest, and the production build.
+
+Run the same checks locally with your development environment configured:
+
+```sh
+cd backend
+uv sync --locked --group dev
+uv run --no-sync python manage.py test
+```
+
+```sh
+cd frontend
+npm ci
+npm run lint
+npm test
+npm run build
+```
+
+The workflow reports failures but does not configure branch protection or merge
+PRs. To block failed PRs, make `Backend tests` and `Frontend checks` required
+checks in the GitHub rules for `main` after the workflow's first run.

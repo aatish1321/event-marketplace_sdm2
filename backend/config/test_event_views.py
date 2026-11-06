@@ -229,10 +229,17 @@ class EventViewsTests(BaseMongoTestCase):
                 self.assertEqual(event.title, self.details["title"])
                 self.assertEqual(event.stream_url, "https://example.com/live")
 
-    def test_token_from_login_can_create_update_and_delete_owned_event(self):
-        user = User(email="owner@example.com", role="organizer")
-        user.set_password("event test password")
-        user.save()
+    def test_registered_organizer_can_log_in_create_update_and_delete_owned_event(self):
+        registered = self.client.post("/api/auth/register/", {
+            "email": "owner@example.com", "password": "event test password",
+            "full_name": "Event Owner", "role": "organizer",
+            "organizer_profile": {
+                "name": "Owner Events", "contact_email": "owner@example.com",
+                "organization_id": "owner-org",
+            },
+        }, content_type="application/json")
+        self.assertEqual(registered.status_code, 201)
+        user = User.objects.get(id=registered.json()["user_id"])
         login = self.client.post("/api/auth/login/", {
             "email": user.email, "password": "event test password",
         }, content_type="application/json")
@@ -244,3 +251,26 @@ class EventViewsTests(BaseMongoTestCase):
         event_id = created.json()["id"]
         self.assertEqual(self.write("put", {"title": "Updated"}, event_id, authorization).status_code, 200)
         self.assertEqual(self.write("delete", event_id=event_id, authorization=authorization).status_code, 204)
+        self.assertEqual(self.client.get(f"/api/events/{event_id}/").status_code, 404)
+
+    def test_registered_attendee_cannot_gain_organizer_permissions_at_login(self):
+        registered = self.client.post("/api/auth/register/", {
+            "email": "attendee@example.com", "password": "attendee test password",
+            "full_name": "Test Attendee", "role": "attendee",
+        }, content_type="application/json")
+        self.assertEqual(registered.status_code, 201)
+        login = self.client.post("/api/auth/login/", {
+            "email": "attendee@example.com", "password": "attendee test password",
+            "role": "organizer",
+        }, content_type="application/json")
+        self.assertEqual(login.status_code, 200)
+        authorization = {"HTTP_AUTHORIZATION": f"Bearer {login.json()['token']}"}
+        event = self.event()
+        original = event.to_mongo().to_dict()
+        for method in ("post", "put", "delete"):
+            with self.subTest(method=method):
+                response = self.write(method, self.details,
+                                      None if method == "post" else str(event.id), authorization)
+                self.assertEqual(response.status_code, 403)
+                self.assertEqual(Event.objects.count(), 1)
+                self.assertEqual(event.reload().to_mongo().to_dict(), original)

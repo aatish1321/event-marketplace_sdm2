@@ -51,7 +51,7 @@ export function AuthProvider({ children }) {
   // Keep tabs in sync when another tab logs in or out
   useEffect(() => {
     const onStorage = (e) => {
-      if (e.key === TOKEN_KEY) setToken(readStoredToken())
+      if (e.key === TOKEN_KEY || e.key === null) setToken(readStoredToken())
     }
     window.addEventListener('storage', onStorage)
     return () => window.removeEventListener('storage', onStorage)
