@@ -42,8 +42,8 @@ def _search_parameters(query):
 def nearby_events(request):
     try:
         values, filters = _search_parameters(request.GET)
-    except ValueError as exc:
-        return JsonResponse({"error": str(exc)}, status=400)
+    except ValueError:
+        return JsonResponse({"error": "Invalid search parameters."}, status=400)
 
     # Use the collection directly: QuerySet.aggregate may prepend inheritance
     # filters, whereas MongoDB requires $geoNear to be the first stage.
