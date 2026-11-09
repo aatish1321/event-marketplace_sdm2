@@ -13,6 +13,7 @@
 .github/copilot-instructions.md
 .github/prompts/
 .github/instructions/
+.github/agents/
 AGENTS.md
 CLAUDE.md
 ORIGINAL_REQUEST.md
@@ -21,6 +22,7 @@ ORIGINAL_REQUEST.md
 *.ai.transcript
 *.ai.prompt.md
 *.ai.log.json
+*.ai.transcript.json
 .copilot/
 .aider*
 .gemini/
