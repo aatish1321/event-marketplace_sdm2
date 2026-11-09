@@ -18,6 +18,16 @@ jobs:
     name: Backend tests
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    services:
+      mongo:
+        image: mongo:7.0.14
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.adminCommand({ping: 1})'"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     defaults:
       run:
         working-directory: backend
@@ -25,6 +35,7 @@ jobs:
       DJANGO_SECRET_KEY: ci-only-placeholder-signing-key-at-least-32-bytes
       DEBUG: 'False'
       MONGO_URI: mongodb://127.0.0.1:27017/marketplace_ci
+      GEODISCOVERY_TEST_MONGO_URI: mongodb://127.0.0.1:27017
     steps:
       - uses: actions/checkout@v7.0.1
         with:
