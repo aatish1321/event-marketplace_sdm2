@@ -13,6 +13,7 @@ from .models import Event, OnlineEvent, PhysicalEvent, User
 EVENT_TYPES = {"event": Event, "physical": PhysicalEvent, "online": OnlineEvent}
 COMMON_FIELDS = ("title", "status", "continent", "country", "available_tickets")
 TYPE_FIELDS = {Event: (), PhysicalEvent: ("venue_name", "address"), OnlineEvent: ("stream_url",)}
+OPTIONAL_FIELDS = {Event: (), PhysicalEvent: ("location",), OnlineEvent: ()}
 
 
 def _serialize_event(event):
@@ -20,12 +21,12 @@ def _serialize_event(event):
         "id": str(event.id),
         "organizer_id": event.organizer_id,
         "event_type": next(name for name, model in EVENT_TYPES.items() if type(event) is model),
-        **{field: getattr(event, field) for field in COMMON_FIELDS + TYPE_FIELDS[type(event)]},
+        **{field: getattr(event, field) for field in COMMON_FIELDS + TYPE_FIELDS[type(event)] + OPTIONAL_FIELDS[type(event)]},
     }
 
 
 def _event_fields(data, model, creating=False):
-    fields = COMMON_FIELDS + TYPE_FIELDS[model]
+    fields = COMMON_FIELDS + TYPE_FIELDS[model] + OPTIONAL_FIELDS[model]
     if set(data) - set(fields) - {"event_type", "organizer_id"}:
         raise ValueError("Unknown event fields.")
     values = {field: data[field] for field in fields if field in data}
@@ -33,7 +34,10 @@ def _event_fields(data, model, creating=False):
     for field in fields:
         if field not in values and not (creating and field in required):
             continue
-        if field in required:
+        if field == "location":
+            # PointField validates the GeoJSON shape, numeric types and ranges.
+            continue
+        elif field in required:
             values[field] = _required_string(data, field)
         elif field == "available_tickets":
             if type(values[field]) is not int or not 0 <= values[field] <= 2**63 - 1:

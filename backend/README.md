@@ -102,14 +102,88 @@ Unknown fields, invalid JSON, and invalid field values return 400. Invalid or
 missing event IDs return 404; unsupported methods return 405. Unexpected
 database errors use the existing exception logging middleware.
 
+## Geographic discovery (Task 2.3)
+
+`GET /api/events/nearby/?latitude=47.4979&longitude=19.0402&radius_km=10`
+is public and returns a JSON array of physical events, nearest first. Each
+result includes the usual event fields, `location`, and `distance_km` (a
+numeric distance in kilometres). No matches returns `[]` with status 200.
+
+| Parameter | Required | Accepted values |
+| --- | --- | --- |
+| `latitude` | Yes | Finite number from -90 to 90 |
+| `longitude` | Yes | Finite number from -180 to 180 |
+| `radius_km` | Yes | Finite number greater than 0 and at most 1000 |
+| `limit` | No | Integer from 1 to 100; default 20 |
+| `country` | No | Nonblank exact, case-sensitive match; surrounding whitespace trimmed |
+| `continent` | No | Nonblank exact, case-sensitive match; surrounding whitespace trimmed |
+
+Missing, invalid, unknown, or repeated query parameters return status 400 with
+an `error` message. Unsupported HTTP methods return 405. Equal-distance result
+order is unspecified. The response is a limited nearest-results list, without
+pagination or a total count. Event status and ticket availability are not
+implicitly filtered, matching the existing public event reads.
+
+Organizers can provide coordinates through the existing create/update routes:
+
+```json
+{
+  "event_type": "physical",
+  "title": "Budapest Meetup",
+  "venue_name": "Conference Hall",
+  "address": "Budapest, Hungary",
+  "continent": "Europe",
+  "country": "Hungary",
+  "location": {"type": "Point", "coordinates": [19.0402, 47.4979]}
+}
+```
+
+GeoJSON uses **longitude first, latitude second**. Coordinates must be two
+finite JSON numbers within the ranges above; booleans and numeric strings are
+rejected. `location` is optional and only accepted for physical events. An
+update omitting it preserves the existing point; `"location": null` clears it.
+Existing events without coordinates remain valid but are excluded from nearby
+searches, as are online and base events. Addresses are not automatically geocoded.
+The existing organizer ownership rules apply to location changes.
+
+MongoEngine creates a `2dsphere` index for the new optional field. No SQL
+migration or dependency change is required. On deployment, you can explicitly
+prepare the index in the backend environment:
+
+```sh
+uv run python manage.py shell -c "from config.models import PhysicalEvent; PhysicalEvent.ensure_indexes()"
+```
+
+Discovery uses MongoDB's `$geoNear` aggregation with a bounded radius and result
+limit. See the [MongoDB reference](https://www.mongodb.com/docs/manual/reference/operator/aggregation/geonear/).
+
 ## Verification
 
 From `backend/`, with the project's environment configured:
 
 ```sh
 uv sync --group dev
-uv run manage.py test config.test_auth config.tests config.test_security config.test_events config.test_event_views
+uv run manage.py test
 uv run manage.py check
 ```
 
-The tests use `mongomock` and do not write to the configured MongoDB database.
+The default tests use `mongomock` and do not write to the configured MongoDB
+database. Because mongomock does not implement `$geoNear`, discovery unit tests
+mock only the aggregation boundary. The opt-in integration suite verifies real
+MongoDB distances, radius filtering, ordering, and geospatial indexes.
+
+To run the real MongoDB suite, start a disposable MongoDB instance and set
+`GEODISCOVERY_TEST_MONGO_URI` to its connection URI. For example, in PowerShell
+from the backend directory, with the normal Django environment configured:
+
+```powershell
+docker run --detach --rm --name marketplace-geo-tests --publish 127.0.0.1:27028:27017 mongo:7.0.14
+$env:GEODISCOVERY_TEST_MONGO_URI = "mongodb://127.0.0.1:27028"
+uv run manage.py test config.test_discovery config.test_discovery_mongo
+docker stop marketplace-geo-tests
+Remove-Item Env:GEODISCOVERY_TEST_MONGO_URI
+```
+
+The real MongoDB tests create and remove their own randomly named test database.
+Without the opt-in variable, those tests are skipped.
+The backend CI job supplies a MongoDB service and enables these integration tests.

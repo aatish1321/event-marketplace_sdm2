@@ -13,8 +13,10 @@ from mongoengine import (
     EmbeddedDocument,
     EmbeddedDocumentField,
     IntField,
+    PointField,
     StringField,
     URLField,
+    ValidationError,
 )
 
 __all__ = [
@@ -124,11 +126,25 @@ class Event(Document):
     }
 
 
+def validate_location(value):
+    """Validate a two-dimensional GeoJSON point in longitude/latitude order."""
+    if not isinstance(value, dict) or set(value) != {"type", "coordinates"}:
+        raise ValidationError("location must be a GeoJSON Point.")
+    coordinates = value["coordinates"]
+    if value["type"] != "Point" or not isinstance(coordinates, (list, tuple)) or len(coordinates) != 2:
+        raise ValidationError("location must contain exactly two Point coordinates.")
+    for coordinate, bound in zip(coordinates, (180, 90)):
+        # Range comparisons also reject NaN and infinities without float coercion.
+        if type(coordinate) not in (int, float) or not -bound <= coordinate <= bound:
+            raise ValidationError("location coordinates must be finite longitude/latitude values.")
+
+
 class PhysicalEvent(Event):
     """An event hosted at a physical venue."""
 
     venue_name = StringField(required=True)
     address = StringField(required=True)
+    location = PointField(validation=validate_location)
 
 
 class OnlineEvent(Event):
