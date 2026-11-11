@@ -1,4 +1,4 @@
-import { Heart, Calendar, MapPin, Ticket } from 'lucide-react';
+import { Heart, Calendar, Globe, MapPin, Ticket } from 'lucide-react';
 
 export default function EventCard({
   imageUrl,
@@ -7,10 +7,14 @@ export default function EventCard({
   title,
   venue,
   price,
+  eventType = 'physical',
   onSave,
   onTicketsClick,
   href = '#',
 }) {
+  // Physical events show a map pin, online events a globe.
+  const PlaceIcon = eventType === 'online' ? Globe : MapPin;
+
   return (
     <div className="group relative flex flex-col overflow-hidden rounded-card bg-surface border border-border shadow-card transition-transform hover:-translate-y-1">
       {/* Fully clickable card background link */}
@@ -22,7 +26,7 @@ export default function EventCard({
           <img src={imageUrl} alt={title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
         ) : (
           <div className="h-full w-full bg-canvas flex items-center justify-center">
-            <span className="text-muted text-sm">No Image</span>
+            <PlaceIcon className="h-12 w-12 text-muted" aria-hidden="true" />
           </div>
         )}
         
@@ -48,10 +52,12 @@ export default function EventCard({
 
       {/* Content */}
       <div className="flex flex-1 flex-col p-4 md:p-6">
-        <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-tertiary-strong">
-          <Calendar className="h-4 w-4" />
-          <span>{date}</span>
-        </div>
+        {date && (
+          <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-tertiary-strong">
+            <Calendar className="h-4 w-4" />
+            <span>{date}</span>
+          </div>
+        )}
 
         <h3 className="mb-3 text-xl font-bold leading-tight text-ink line-clamp-2">
           {title}
@@ -59,7 +65,7 @@ export default function EventCard({
 
         <div className="mb-4 space-y-1.5 text-sm font-medium text-muted">
           <div className="flex items-center gap-2">
-            <MapPin className="h-4 w-4 shrink-0" />
+            <PlaceIcon className="h-4 w-4 shrink-0" data-testid={`${eventType}-icon`} aria-hidden="true" />
             <span className="truncate">{venue}</span>
           </div>
           <div className="flex items-center gap-2 text-ink">
