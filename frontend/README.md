@@ -12,6 +12,26 @@ npm run dev
 Vite proxies `/api` to `http://localhost:8000` when running locally and to
 `http://backend:8000` inside Docker. Set `API_PROXY_TARGET` to override the target.
 
+### Docker development
+
+Compose mounts source files and frontend configuration for live editing. Both
+services keep their dependencies inside their images; `node_modules` and `.venv`
+are not mounted or retained in separate volumes. Each build context excludes
+host dependencies and environment files.
+
+After changing `package.json`, `package-lock.json`, `pyproject.toml`, or `uv.lock`,
+rebuild the affected service from the project root:
+
+```sh
+docker compose up -d --build --no-deps frontend
+# For backend dependency changes:
+docker compose up -d --build --no-deps backend
+```
+
+New images supply their own dependencies, so old dependency volumes cannot hide
+updated packages. Source edits still reload without rebuilding. Changes to other
+image files, such as Dockerfiles or backend project metadata, require a rebuild.
+
 ## Authentication and routing
 
 `/register` creates an account; `/login` sends `{ email, password }` to
