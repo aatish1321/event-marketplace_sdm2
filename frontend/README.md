@@ -12,6 +12,20 @@ npm run dev
 Vite proxies `/api` to `http://localhost:8000` when running locally and to
 `http://backend:8000` inside Docker. Set `API_PROXY_TARGET` to override the target.
 
+### Blank page after rebuilding Docker
+
+Compose preserves the frontend's anonymous `node_modules` volume across rebuilds.
+If Vite reports a missing dependency (for example, `@tailwindcss/postcss`) after
+rebuilding the image, refresh only the frontend dependency volume from the new
+image. Run from the project root:
+
+```sh
+docker compose up -d --no-deps --no-build --pull never --force-recreate --renew-anon-volumes frontend
+```
+
+The existing frontend image must already contain the updated dependencies.
+This leaves the backend and database containers untouched.
+
 ## Authentication and routing
 
 `/register` creates an account; `/login` sends `{ email, password }` to
