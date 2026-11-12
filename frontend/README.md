@@ -46,13 +46,35 @@ After login, users go to their role's home:
 | Organizer | `/dashboard` |
 | Admin | `/admin-logs` |
 
-These destinations currently contain minimal landing views for future features.
+The organizer dashboard lists the signed-in organizer's events and provides a
+Create New Event modal. Attendees use the discovery catalog; the admin destination
+remains a minimal landing view for future features.
 `ProtectedRoute` sends anonymous users to `/login`; `allowedRoles` restricts a
 route to the specified roles and sends other authenticated users to their own
 home. It supports both nested routes through `Outlet` and wrapped children.
 
 JWT decoding and route guards control the browser UI only. The backend must
 verify token signatures and enforce authorization for every protected API.
+
+## Organizer events
+
+At `/dashboard`, organizers can review their events and create physical or online
+events. The form accepts a title, optional description, and start/end date and
+time. Physical events require a venue name and address; online events require an
+HTTP(S) event URL. Changing event type sends only the active location fields.
+
+Date inputs use the browser's local time zone and are sent as UTC ISO timestamps.
+The list displays dates in the viewer's local time. End time must follow start
+time. A successful create adds the saved event to the list without a page reload.
+
+Requests use the AuthContext token as `Authorization: Bearer <token>` with
+`GET /api/events/?mine=1` and `POST /api/events/`. Ownership is assigned and checked
+by the backend; the client does not choose an organizer ID. Public event discovery
+continues to use `GET /api/events/` without `mine`.
+
+Creation uses the existing event schema: `venue_name` and `address` for physical
+events, or `stream_url` for online events. Older events without scheduled dates
+remain visible with a date-unavailable label.
 
 ## Checks
 

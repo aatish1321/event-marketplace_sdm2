@@ -19,7 +19,10 @@ describe('application auth routes', () => {
     ['admin', '/admin-logs', 'Admin logs'],
   ])('logs in a %s, displays its real destination, and logs out', async (role, path, heading) => {
     window.history.replaceState({}, '', '/login')
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({ token: makeToken({ role }) }) }))
+    vi.stubGlobal('fetch', vi.fn().mockImplementation(async (url) => ({
+      ok: true,
+      json: async () => url.startsWith('/api/events/') ? [] : { token: makeToken({ role }) },
+    })))
     render(<AuthProvider><App /></AuthProvider>)
     const user = userEvent.setup()
     await user.type(screen.getByLabelText(/^email$/i), 'user@example.com')
