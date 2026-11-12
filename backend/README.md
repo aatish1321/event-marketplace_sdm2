@@ -102,6 +102,42 @@ Unknown fields, invalid JSON, and invalid field values return 400. Invalid or
 missing event IDs return 404; unsupported methods return 405. Unexpected
 database errors use the existing exception logging middleware.
 
+### Organizer dashboard
+
+`GET /api/events/?mine=1` requires an organizer bearer token and returns a JSON
+array containing only events whose `organizer_id` matches the verified JWT.
+Responses prevent caching. A supplied organizer ID cannot select another user's
+events. The public list, public detail, mutation, and nearby-discovery endpoints
+retain their existing contracts.
+
+The dashboard creates physical or online events through `POST /api/events/`:
+
+```json
+{
+  "event_type": "physical",
+  "title": "Community meetup",
+  "description": "An evening of talks and networking.",
+  "start_at": "2026-12-01T17:00:00Z",
+  "end_at": "2026-12-01T19:00:00Z",
+  "venue_name": "Community Hall",
+  "address": "10 Main Street, Budapest"
+}
+```
+
+For online events, replace the venue fields with `stream_url`. The dashboard
+accepts HTTP(S) links and submits only fields relevant to the selected event type.
+Description and dates are additive optional model fields, preserving older event
+documents and clients. If scheduling dates are supplied, they must include a
+timezone and form a valid pair with end after start. Updates validate the final
+stored date pair. Responses serialize dates in UTC; unscheduled events have null
+dates. `created_at` is assigned by the server. Description is limited to 5000
+characters. An organizer/start-time index supports the dashboard query.
+
+The dashboard requires dates for new events and converts local input to UTC.
+API authentication remains stateless as described above: issued JWTs stay valid
+until expiry. No separate event collection or migration of existing events is
+required.
+
 ## Geographic discovery (Task 2.3)
 
 `GET /api/events/nearby/?latitude=47.4979&longitude=19.0402&radius_km=10`

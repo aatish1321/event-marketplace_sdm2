@@ -4,6 +4,7 @@ import Register from './pages/Register'
 import Login from './pages/Login'
 import Discover from './pages/Discover'
 import RoleHome from './pages/RoleHome'
+import OrganizerDashboard from './pages/OrganizerDashboard'
 import ProtectedRoute from './components/ProtectedRoute'
 import { ROLES } from './lib/authRoutes'
 
@@ -18,7 +19,7 @@ function App() {
           <Route path="/discover" element={<Discover />} />
         </Route>
         <Route element={<ProtectedRoute allowedRoles={[ROLES.ORGANIZER]} />}>
-          <Route path="/dashboard" element={<RoleHome title="Organizer dashboard" description="Event management will be available here soon." />} />
+          <Route path="/dashboard" element={<OrganizerDashboard />} />
         </Route>
         <Route element={<ProtectedRoute allowedRoles={[ROLES.ADMIN]} />}>
           <Route path="/admin-logs" element={<RoleHome title="Admin logs" description="Audit logs will be available here soon." />} />

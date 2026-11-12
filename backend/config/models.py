@@ -107,6 +107,12 @@ class User(Document):
         return self.email or super().__str__()
 
 
+def _mongo_utc_now():
+    """Use MongoDB's naive UTC millisecond representation consistently."""
+    now = datetime.datetime.now(datetime.timezone.utc)
+    return now.replace(tzinfo=None, microsecond=(now.microsecond // 1000) * 1000)
+
+
 class Event(Document):
     """Shared event details stored in a polymorphic event collection."""
 
@@ -116,12 +122,17 @@ class Event(Document):
     continent = StringField()
     country = StringField()
     available_tickets = IntField(default=0, min_value=0)
+    description = StringField(default="", max_length=5000)
+    start_at = DateTimeField()
+    end_at = DateTimeField()
+    created_at = DateTimeField(default=_mongo_utc_now)
 
     meta = {
         "allow_inheritance": True,
         "indexes": [
             # Keep geography first for queries across all event types.
             {"fields": ["continent", "country"], "cls": False},
+            {"fields": ["organizer_id", "start_at"], "cls": False},
         ],
     }
 
