@@ -25,6 +25,9 @@ __all__ = [
     "Event",
     "PhysicalEvent",
     "OnlineEvent",
+    "BuyerSnapshot",
+    "EventSnapshot",
+    "TicketPurchase",
     "SystemLog",
 ]
 
@@ -113,6 +116,11 @@ def _mongo_utc_now():
     return now.replace(tzinfo=None, microsecond=(now.microsecond // 1000) * 1000)
 
 
+def _validate_available_tickets(value):
+    # Validate stored inventory without rejecting the negative delta of atomic decrements.
+    IntField(min_value=0).validate(value)
+
+
 class Event(Document):
     """Shared event details stored in a polymorphic event collection."""
 
@@ -121,7 +129,7 @@ class Event(Document):
     status = StringField()
     continent = StringField()
     country = StringField()
-    available_tickets = IntField(default=0, min_value=0)
+    available_tickets = IntField(default=0, validation=_validate_available_tickets)
     description = StringField(default="", max_length=5000)
     start_at = DateTimeField()
     end_at = DateTimeField()
@@ -162,6 +170,37 @@ class OnlineEvent(Event):
     """An event hosted through an online stream."""
 
     stream_url = URLField(required=True)
+
+
+class BuyerSnapshot(EmbeddedDocument):
+    """Buyer details retained independently of later account changes."""
+
+    user_id = StringField(required=True)
+    email = EmailField(required=True)
+    full_name = StringField()
+
+
+class EventSnapshot(EmbeddedDocument):
+    """Event details retained independently of later edits or deletion."""
+
+    event_id = StringField(required=True)
+    title = StringField(required=True)
+    organizer_id = StringField(required=True)
+    event_type = StringField(required=True, choices=("event", "physical", "online"))
+    start_at = DateTimeField()
+    end_at = DateTimeField()
+    venue_name = StringField()
+    address = StringField()
+    stream_url = StringField()
+
+
+class TicketPurchase(Document):
+    """Purchased quantity with embedded historical buyer and event details."""
+
+    buyer_snapshot = EmbeddedDocumentField(BuyerSnapshot, required=True)
+    event_snapshot = EmbeddedDocumentField(EventSnapshot, required=True)
+    quantity = IntField(required=True, min_value=1, max_value=2**63 - 1)
+    created_at = DateTimeField(default=_mongo_utc_now)
 
 
 class SystemLog(Document):

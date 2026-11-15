@@ -1,11 +1,14 @@
 """Event API authorization and persistence regressions using mongomock."""
 
 from datetime import datetime, timedelta, timezone
+from unittest.mock import patch
 
 import jwt
+from bson import ObjectId
 from django.conf import settings
 from django.test import Client, override_settings
 
+from config.event_views import _find_event
 from config.models import Event, OnlineEvent, PhysicalEvent, User
 from config.tests import BaseMongoTestCase
 
@@ -152,6 +155,27 @@ class EventViewsTests(BaseMongoTestCase):
                 with self.subTest(event_id=event_id, method=method):
                     response = self.write(method, self.details, event_id)
                     self.assertEqual(response.status_code, 404)
+
+    def test_find_event_rejects_invalid_ids_before_querying(self):
+        invalid_ids = (
+            {"$ne": None}, {"$gt": ""}, [], ["012345678901234567890123"],
+            None, True, 42, b"012345678901234567890123", "", "invalid-id",
+            "g" * 24, '{"$ne":null}',
+        )
+        with patch("config.event_views.Event.objects") as objects:
+            for event_id in invalid_ids:
+                with self.subTest(event_id=event_id):
+                    self.assertIsNone(_find_event(event_id))
+            objects.assert_not_called()
+
+    def test_find_event_queries_with_typed_object_id(self):
+        event = self.event()
+        for event_id in (str(event.id), str(event.id).upper()):
+            with self.subTest(event_id=event_id):
+                with patch("config.event_views.Event.objects", wraps=Event.objects) as objects:
+                    self.assertEqual(_find_event(event_id).id, event.id)
+                    objects.assert_called_once_with(id=ObjectId(event_id))
+                    self.assertIsInstance(objects.call_args.kwargs["id"], ObjectId)
 
     def test_unsupported_methods_return_405(self):
         event = self.event()
