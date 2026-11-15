@@ -2,6 +2,8 @@
 
 from datetime import datetime, timezone
 
+from bson import ObjectId
+from bson.errors import InvalidId
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_exempt
@@ -103,9 +105,11 @@ def _create_event(request):
 
 
 def _find_event(event_id):
+    if not isinstance(event_id, str):
+        return None
     try:
-        return Event.objects(id=event_id).first()
-    except ValidationError:
+        return Event.objects(id=ObjectId(event_id)).first()
+    except (InvalidId, ValidationError):
         return None
 
 

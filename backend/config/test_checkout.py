@@ -100,7 +100,7 @@ class CheckoutTests(BaseMongoTestCase):
         valid = {"event_id": str(self.event.id), "quantity": 1}
         invalid = [{}, {"event_id": str(self.event.id)}, {"quantity": 1}]
         invalid += [{**valid, "quantity": value} for value in (0, -1, True, False, 1.0, "1", None, [], {}, 2**63)]
-        invalid += [{**valid, "event_id": value} for value in (None, True, 42, [], {}, "", " ")]
+        invalid += [{**valid, "event_id": value} for value in (None, True, 42, [], {}, {"$ne": None}, {"$gt": ""}, "", " ")]
         invalid += [{**valid, field: "spoofed"} for field in ("user_id", "buyer_snapshot", "unknown")]
         for data in invalid:
             with self.subTest(data=data):
