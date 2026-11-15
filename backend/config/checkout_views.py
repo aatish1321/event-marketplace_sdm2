@@ -29,6 +29,7 @@ def checkout(request):
         qty = data["quantity"]
         if type(qty) is not int or not 1 <= qty <= 2**63 - 1:
             raise ValueError("quantity must be a positive BSON integer.")
+        safe_qty = int(qty)
     except ValueError:
         return JsonResponse({"error": "Invalid request payload."}, status=400)
 
@@ -46,10 +47,10 @@ def checkout(request):
                 "start_at", "end_at", "venue_name", "address", "stream_url",
             )},
         ),
-        quantity=qty,
+        quantity=safe_qty,
     )
     purchase.validate()
-    if not Event.objects(id=event.id, available_tickets__gte=qty).update_one(dec__available_tickets=qty):
+    if not Event.objects(id=event.id, available_tickets__gte=safe_qty).update_one(dec__available_tickets=safe_qty):
         return JsonResponse({"error": "Not enough tickets available."}, status=409)
     # shortcut: failed saves or crashes can strand stock; add transactions or reconciliation for recovery.
     # A failed acknowledgement may follow a successful insert, so refunding here could oversell.
