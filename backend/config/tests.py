@@ -409,11 +409,12 @@ class SystemLogModelTests(BaseMongoTestCase):
         self.assertIsInstance(saved_log.timestamp, datetime.datetime)
 
     def test_system_log_default_timestamp(self):
-        """SystemLog automatically sets current timestamp when not provided."""
-        before = datetime.datetime.now()
+        """SystemLog automatically sets the current UTC timestamp when not provided."""
+        utc_now = lambda: datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
+        before = utc_now()
         log = SystemLog(level="INFO", message="Server started")
         log.save()
-        after = datetime.datetime.now()
+        after = utc_now()
 
         self.assertIsNotNone(log.timestamp)
         self.assertIsInstance(log.timestamp, datetime.datetime)
