@@ -212,7 +212,7 @@ class SystemLog(Document):
     status_code = IntField()
     message = StringField()
     traceback = StringField()
-    timestamp = DateTimeField(default=datetime.datetime.now)
+    timestamp = DateTimeField(default=_mongo_utc_now)
 
     def __str__(self):
         parts = []

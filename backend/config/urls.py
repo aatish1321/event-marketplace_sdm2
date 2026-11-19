@@ -17,9 +17,10 @@ Including another URLconf
 
 from django.urls import path
 
-from . import auth_views, checkout_views, discovery_views, event_views
+from . import admin_views, auth_views, checkout_views, discovery_views, event_views
 
 urlpatterns = [
+    path("api/admin/logs/", admin_views.system_logs, name="admin-logs"),
     path("api/auth/register/", auth_views.register, name="auth-register"),
     path("api/auth/login/", auth_views.login, name="auth-login"),
     path("api/checkout/", checkout_views.checkout, name="checkout"),
