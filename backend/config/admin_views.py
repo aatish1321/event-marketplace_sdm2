@@ -26,8 +26,8 @@ def system_logs(request):
     try:
         limit = _bounded_int(request.GET, "limit", "20", 1, 100)
         offset = _bounded_int(request.GET, "offset", "0", 0, 2**31 - 1)
-    except ValueError as exc:
-        return JsonResponse({"error": str(exc)}, status=400)
+    except ValueError:
+        return JsonResponse({"error": "Invalid request parameters."}, status=400)
     logs = SystemLog.objects.order_by("-timestamp", "-id")
     return JsonResponse({
         "count": logs.count(),
