@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { Heart, Calendar, Globe, MapPin, Ticket } from 'lucide-react';
 
 export default function EventCard({
@@ -18,7 +19,7 @@ export default function EventCard({
   return (
     <div className="group relative flex flex-col overflow-hidden rounded-card bg-surface border border-border shadow-card transition-transform hover:-translate-y-1">
       {/* Fully clickable card background link */}
-      <a href={href} className="absolute inset-0 z-0" aria-label={`View details for ${title}`} />
+      <Link to={href} className="absolute inset-0 z-0" aria-label={`View details for ${title}`} />
 
       {/* Image & Top Badges */}
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-canvas">
