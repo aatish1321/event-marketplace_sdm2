@@ -3,6 +3,7 @@ import Landing from './pages/Landing'
 import Register from './pages/Register'
 import Login from './pages/Login'
 import Discover from './pages/Discover'
+import EventDetails from './pages/EventDetails'
 import RoleHome from './pages/RoleHome'
 import OrganizerDashboard from './pages/OrganizerDashboard'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -17,6 +18,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route element={<ProtectedRoute allowedRoles={[ROLES.ATTENDEE]} />}>
           <Route path="/discover" element={<Discover />} />
+          <Route path="/events/:eventId" element={<EventDetails />} />
         </Route>
         <Route element={<ProtectedRoute allowedRoles={[ROLES.ORGANIZER]} />}>
           <Route path="/dashboard" element={<OrganizerDashboard />} />

@@ -1,0 +1,30 @@
+import { Link, NavLink } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
+
+export const focusRing = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus'
+
+// Dark top bar and footer shared by the attendee pages (design: Designpages).
+export default function AttendeeLayout({ children }) {
+  const { logout } = useAuth()
+  return (
+    <div className="flex min-h-screen flex-col bg-canvas font-sans text-ink">
+      <nav className="bg-primary text-white">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 md:px-6">
+          <Link to="/" className={`text-xl font-black uppercase tracking-widest ${focusRing}`}>Eventify</Link>
+          <div className="flex items-center gap-6 text-sm font-medium">
+            <NavLink to="/discover" end className={`rounded-pill px-3 py-2 hover:bg-white/10 ${focusRing}`}>Discover events</NavLink>
+            <button type="button" onClick={logout} className={`rounded-pill px-3 py-2 hover:bg-white/10 ${focusRing}`}>
+              Log out
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-12 md:px-6">{children}</main>
+
+      <footer className="bg-primary py-10 text-white">
+        <div className="mx-auto max-w-6xl px-4 text-xl font-black uppercase tracking-widest md:px-6">Eventify</div>
+      </footer>
+    </div>
+  )
+}

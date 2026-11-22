@@ -52,3 +52,24 @@ export async function createEvent(token, payload, signal) {
   if (!data?.id || typeof data.title !== 'string') throw new Error('Invalid event response')
   return data
 }
+
+// Public single-event read, used for the live ticket count on the details page.
+export async function fetchEvent(eventId, { signal } = {}) {
+  const res = await fetch(`/api/events/${encodeURIComponent(eventId)}/`, { signal })
+  const data = await res.json().catch(() => null)
+  if (!res.ok) throw new ApiError(res.status, data)
+  return data
+}
+
+// POST /api/checkout/ { event_id, quantity } -> 201 purchase
+// 400 invalid · 403 not an attendee · 404 unknown event · 409 not enough tickets
+export async function checkout(token, eventId, quantity) {
+  const res = await fetch('/api/checkout/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ event_id: eventId, quantity }),
+  })
+  const data = await res.json().catch(() => null)
+  if (!res.ok) throw new ApiError(res.status, data)
+  return data
+}
