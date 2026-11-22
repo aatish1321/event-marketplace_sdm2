@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft, CheckCircle2, Globe, MapPin, Minus, Plus } from 'lucide-react'
 import { ApiError } from '../api/auth'
@@ -9,6 +9,7 @@ import { dateParts, tileColor } from '../lib/tiles'
 import AttendeeLayout, { focusRing } from '../components/AttendeeLayout'
 import usePageTitle from '../lib/usePageTitle'
 import { pageContainer } from '../lib/layout'
+import { CURRENCIES, formatMoney } from '../lib/money'
 
 // User-facing text for each checkout error status (see backend checkout contract).
 const CHECKOUT_ERRORS = {
@@ -27,6 +28,12 @@ function ticketsLabel(count) {
 export default function EventDetails() {
   const { eventId } = useParams()
   const { token } = useAuth()
+  return <EventSession key={`${token}:${eventId}`} eventId={eventId} token={token} />
+}
+
+function EventSession({ eventId, token }) {
+  const purchaseRequest = useRef(null)
+  useEffect(() => () => purchaseRequest.current?.abort(), [])
   // Bumping the version re-reads the event, which keeps the ticket count live.
   const [version, setVersion] = useState(0)
   const [loaded, setLoaded] = useState({ key: null, event: null, error: null })
@@ -40,9 +47,9 @@ export default function EventDetails() {
     const controller = new AbortController()
     const requestKey = `${eventId}:${version}`
     fetchEvent(eventId, { signal: controller.signal })
-      .then((event) => setLoaded({ key: requestKey, event, error: null }))
+      .then((event) => { if (!controller.signal.aborted) setLoaded({ key: requestKey, event, error: null }) })
       .catch((error) => {
-        if (error.name === 'AbortError') return
+        if (controller.signal.aborted || error.name === 'AbortError') return
         const notFound = error instanceof ApiError && error.status === 404
         setLoaded((prev) => ({ key: requestKey, event: notFound ? null : prev.event, error: notFound ? 'notfound' : 'failed' }))
       })
@@ -78,23 +85,34 @@ export default function EventDetails() {
   const buying = order.status === 'buying'
   // Clamp so a refreshed, lower count can never leave an impossible quantity selected.
   const qty = Math.min(Math.max(quantity, 1), Math.max(available, 1))
+  const priced = Number.isSafeInteger(event.ticket_price_minor) && event.ticket_price_minor >= 0 && CURRENCIES.includes(event.currency)
   const place = online ? 'Online event' : [event.venue_name, event.address, event.country].filter(Boolean).join(' · ')
   const date = formatEventDate(event.start_at)
 
   const buy = async () => {
-    if (buying || soldOut) return
+    if (buying || soldOut || purchaseRequest.current) return
+    const controller = new AbortController()
+    purchaseRequest.current = controller
     setOrder({ status: 'buying', purchase: null, message: '' })
     try {
-      const purchase = await checkout(token, event.id, qty)
+      const purchase = await checkout(token, event.id, qty, {
+        expected_unit_price_minor: priced ? event.ticket_price_minor : null,
+        expected_currency: priced ? event.currency : null,
+      }, { signal: controller.signal })
+      if (controller.signal.aborted) return
       setOrder({ status: 'done', purchase, message: '' })
       setQuantity(1)
     } catch (error) {
-      const message = error instanceof ApiError
+      if (controller.signal.aborted) return
+      const message = error instanceof ApiError && error.data?.code === 'price_changed'
+        ? 'The ticket price changed. Review the updated price and try again.'
+        : error instanceof ApiError
         ? CHECKOUT_ERRORS[error.status] ?? CHECKOUT_ERRORS[400]
         : 'Could not reach the server. Check your connection and try again.'
       setOrder({ status: 'error', purchase: null, message })
     } finally {
-      refresh() // the count changed either way: our purchase, or someone else's
+      purchaseRequest.current = null
+      if (!controller.signal.aborted) refresh()
     }
   }
 
@@ -153,6 +171,7 @@ export default function EventDetails() {
             {soldOut ? 'Sold out' : `${ticketsLabel(available)} left`}
           </p>
           <p className="mt-1 text-sm font-medium text-muted">General admission · Digital ticket</p>
+          <p className="mt-3 text-sm font-semibold">Unit price: {formatMoney(event.ticket_price_minor, event.currency)}</p>
 
           {!soldOut && (
             <>
@@ -170,7 +189,7 @@ export default function EventDetails() {
               </div>
               <p className="mt-4 flex justify-between border-t border-border pt-4 text-sm">
                 <span className="text-muted">Total</span>
-                <span className="font-bold">{ticketsLabel(qty)}</span>
+                <span className="font-bold">{priced ? formatMoney(BigInt(event.ticket_price_minor) * BigInt(qty), event.currency) : 'Amount not recorded'}</span>
               </p>
             </>
           )}
@@ -193,6 +212,7 @@ export default function EventDetails() {
           {order.status === 'error' && (
             <p role="alert" className="mt-4 rounded-card bg-danger/10 px-4 py-3 text-sm font-medium text-danger">{order.message}</p>
           )}
+          {order.status === 'done' && <><p className="mt-3 text-sm">Order total: {formatMoney(order.purchase.total_amount_minor, order.purchase.currency)}</p><Link to="/my-tickets" className={`mt-4 inline-block text-sm font-semibold text-accent underline ${focusRing}`}>View my tickets</Link></>}
         </aside>
       </div>
     </AttendeeLayout>

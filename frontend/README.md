@@ -47,8 +47,8 @@ After login, users go to their role's home:
 | Admin | `/admin-logs` |
 
 The organizer dashboard lists the signed-in organizer's events and provides a
-Create New Event modal. Attendees use the discovery catalog; the admin destination
-remains a minimal landing view for future features.
+Create New Event modal and sales analytics. Attendees use the discovery catalog
+and My tickets receipts; admins can review the system log table.
 `ProtectedRoute` sends anonymous users to `/login`; `allowedRoles` restricts a
 route to the specified roles and sends other authenticated users to their own
 home. It supports both nested routes through `Outlet` and wrapped children.
@@ -76,7 +76,29 @@ Creation uses the existing event schema: `venue_name` and `address` for physical
 events, or `stream_url` for online events. Older events without scheduled dates
 remain visible with a date-unavailable label.
 
-## Checks
+## Tickets, analytics, and admin logs
+
+- Attendees can open `/my-tickets` from their navigation or checkout confirmation.
+  Receipt cards show saved event details, ticket quantity, purchase ID, booking
+  date, unit price, and total. Older receipts show "Amount not recorded".
+- The organizer dashboard includes `AnalyticsWidget`: order and ticket counts,
+  events with sales, and booked revenue grouped by currency. Legacy purchases
+  without amounts are identified separately. Refresh reloads the totals.
+- `/admin-logs` displays the admin-only error table with timestamp, severity,
+  request details, and expandable diagnostics. Pagination keeps long histories
+  manageable.
+
+The create-event form accepts ticket price, currency (EUR/USD/HUF), and available
+tickets. Prices are converted to integer minor units without floating-point
+rounding. Checkout displays the unit price and order total, submits the expected
+price, and asks the attendee to review the updated price if it changed. The
+recorded total is an order value; the app does not collect payments.
+
+All three views support loading, empty, retry, and expired-session states. Reads
+are cancelled on navigation or account changes so private data cannot remain
+visible under a different session.
+
+## Verification
 
 ```sh
 npm test

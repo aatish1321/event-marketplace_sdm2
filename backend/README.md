@@ -195,6 +195,46 @@ limit. See the [MongoDB reference](https://www.mongodb.com/docs/manual/reference
 
 ## Verification
 
+### Ticket pricing and role reports
+
+Event create/update accepts `ticket_price_minor` and `currency` as a pair.
+Supported currencies are EUR, USD, and HUF; amounts use integer hundredths of the
+currency (for example, `1250` means EUR 12.50). Prices must be nonnegative safe
+integers, at most 9007199254740991. Zero is an explicitly free ticket. Older events
+without prices remain unpriced; they are not silently assigned a zero price.
+
+`POST /api/checkout/` still accepts `event_id` and `quantity`. Clients may also
+send the pair `expected_unit_price_minor` / `expected_currency` to confirm the
+price they displayed. A changed price returns 409 with `code: "price_changed"`,
+without reserving tickets. The server calculates `unit_price_minor`,
+`total_amount_minor`, and `currency` from the event and stores them on the
+purchase; client-supplied totals are not accepted. Amount overflow is rejected
+before inventory is changed. Historical purchases without amounts retain null
+amounts. These are recorded order values, not proof of payment collection; no
+payment gateway is integrated.
+
+Role-specific authenticated reads:
+
+| Route | Role | Response |
+| --- | --- | --- |
+| `GET /api/tickets/?limit=20&offset=0` | Attendee | `{count, limit, offset, results}` with that buyer's purchase snapshots, newest first |
+| `GET /api/organizer/analytics/` | Organizer | Purchase count, tickets sold, events with sales, unpriced purchase count, and revenue grouped by currency |
+| `GET /api/admin/logs/?limit=20&offset=0` | Admin | `{count, limit, offset, results}` with persisted errors, newest first |
+
+Ticket history and logs accept `limit` from 1 to 100 and nonnegative `offset`.
+Each endpoint verifies the bearer token and role; query/body organizer or buyer
+IDs cannot select another account's data. Responses prevent caching. Saved event
+snapshots keep receipts and analytics available after event edits or deletion.
+
+Analytics returns `purchase_count`, `tickets_sold`, `events_with_sales`,
+`unpriced_purchase_count`, and `revenue_by_currency`. Each revenue entry contains
+`currency` and `total_amount_minor` as an exact decimal integer **string** to avoid
+rounding large totals in JavaScript. Currencies are never combined. Old unpriced
+purchases contribute to counts but not recorded revenue. Existing purchase
+documents need no backfill; new buyer/date and organizer indexes support reads.
+
+### Running checks
+
 From `backend/`, with the project's environment configured:
 
 ```sh

@@ -124,6 +124,15 @@ def _validate_available_tickets(value):
     IntField(min_value=0).validate(value)
 
 
+MAX_SAFE_AMOUNT = 9007199254740991
+CURRENCIES = ("EUR", "USD", "HUF")
+
+
+def _validate_amount(value):
+    if type(value) is not int or not 0 <= value <= MAX_SAFE_AMOUNT:
+        raise ValidationError("Amount must be a non-negative safe integer in minor units.")
+
+
 class Event(Document):
     """Shared event details stored in a polymorphic event collection."""
 
@@ -133,6 +142,8 @@ class Event(Document):
     continent = StringField()
     country = StringField()
     available_tickets = IntField(default=0, validation=_validate_available_tickets)
+    ticket_price_minor = IntField(null=True, validation=_validate_amount)
+    currency = StringField(null=True, choices=CURRENCIES)
     description = StringField(default="", max_length=5000)
     start_at = DateTimeField()
     end_at = DateTimeField()
@@ -148,6 +159,10 @@ class Event(Document):
             {"fields": ["organizer_id", "start_at"], "cls": False},
         ],
     }
+
+    def clean(self):
+        if (self.ticket_price_minor is None) != (self.currency is None):
+            raise ValidationError("Provide ticket_price_minor and currency together.")
 
 
 MAX_COVER_BYTES = 2 * 1024 * 1024
@@ -217,6 +232,25 @@ class TicketPurchase(Document):
     event_snapshot = EmbeddedDocumentField(EventSnapshot, required=True)
     quantity = IntField(required=True, min_value=1, max_value=2**63 - 1)
     created_at = DateTimeField(default=_mongo_utc_now)
+    unit_price_minor = IntField(null=True, validation=_validate_amount)
+    total_amount_minor = IntField(null=True, validation=_validate_amount)
+    currency = StringField(null=True, choices=CURRENCIES)
+
+    meta = {
+        "indexes": [
+            ("buyer_snapshot.user_id", "-created_at", "-id"),
+            "event_snapshot.organizer_id",
+        ],
+    }
+
+    def clean(self):
+        amounts = (self.unit_price_minor, self.total_amount_minor, self.currency)
+        if all(value is None for value in amounts):
+            return
+        if any(value is None for value in amounts):
+            raise ValidationError("Purchase amounts and currency must be recorded together.")
+        if self.total_amount_minor != self.unit_price_minor * self.quantity:
+            raise ValidationError("Purchase total must equal quantity times unit price.")
 
 
 class SystemLog(Document):

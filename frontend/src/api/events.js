@@ -79,11 +79,12 @@ export async function fetchEvent(eventId, { signal } = {}) {
 
 // POST /api/checkout/ { event_id, quantity } -> 201 purchase
 // 400 invalid · 403 not an attendee · 404 unknown event · 409 not enough tickets
-export async function checkout(token, eventId, quantity) {
+export async function checkout(token, eventId, quantity, expectedPrice, { signal } = {}) {
   const res = await fetch('/api/checkout/', {
+    signal,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-    body: JSON.stringify({ event_id: eventId, quantity }),
+    body: JSON.stringify({ event_id: eventId, quantity, ...(expectedPrice ?? {}) }),
   })
   const data = await res.json().catch(() => null)
   if (!res.ok) throw new ApiError(res.status, data)

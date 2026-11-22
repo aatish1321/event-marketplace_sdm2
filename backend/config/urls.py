@@ -17,9 +17,11 @@ Including another URLconf
 
 from django.urls import path
 
-from . import admin_views, auth_views, checkout_views, discovery_views, event_views
+from . import account_views, admin_views, auth_views, checkout_views, discovery_views, event_views
 
 urlpatterns = [
+    path("api/tickets/", account_views.my_tickets, name="my-tickets"),
+    path("api/organizer/analytics/", account_views.organizer_analytics, name="organizer-analytics"),
     path("api/admin/logs/", admin_views.system_logs, name="admin-logs"),
     path("api/auth/register/", auth_views.register, name="auth-register"),
     path("api/auth/login/", auth_views.login, name="auth-login"),

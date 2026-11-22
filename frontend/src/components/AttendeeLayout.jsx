@@ -16,6 +16,7 @@ export default function AttendeeLayout({ hero, children }) {
           <Link to="/" className={`text-lg font-extrabold uppercase tracking-[0.14em] sm:text-xl sm:tracking-[0.2em] ${focusRing}`}>Eventify</Link>
           <div className="flex items-center gap-1 whitespace-nowrap text-sm font-medium sm:gap-2">
             <NavLink to="/discover" end className={`rounded-control px-3 py-2 text-white/75 transition-colors hover:bg-white/10 hover:text-white aria-[current=page]:bg-white/10 aria-[current=page]:text-white ${focusRing}`}><span className="sm:hidden">Events</span><span className="hidden sm:inline">Discover events</span></NavLink>
+            <NavLink to="/my-tickets" className={`rounded-control px-2 py-2 text-white/75 transition-colors hover:bg-white/10 hover:text-white aria-[current=page]:bg-white/10 aria-[current=page]:text-white ${focusRing}`}>My tickets</NavLink>
             <button type="button" onClick={logout} className={`rounded-control px-3 py-2 text-white/75 transition-colors hover:bg-white/10 hover:text-white ${focusRing}`}>
               Log out
             </button>
