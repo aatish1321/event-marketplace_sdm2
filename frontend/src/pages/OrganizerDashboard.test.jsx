@@ -32,8 +32,8 @@ function renderDashboard(fetch) {
 
 async function openModal() {
   const user = userEvent.setup()
-  await waitFor(() => expect(screen.getByRole('button', { name: 'Create New Event' })).toBeEnabled())
-  await user.click(screen.getByRole('button', { name: 'Create New Event' }))
+  await waitFor(() => expect(screen.getByRole('button', { name: 'New event' })).toBeEnabled())
+  await user.click(screen.getByRole('button', { name: 'New event' }))
   return user
 }
 
@@ -63,6 +63,72 @@ describe('Organizer dashboard and creation', () => {
     expect(await screen.findByText('Community gathering')).toBeInTheDocument()
     expect(screen.getByText('Online workshop')).toBeInTheDocument()
     expect(screen.getByText(/Town Hall/)).toBeInTheDocument()
+  })
+
+  const fillPhysical = async (user) => {
+    await fillCommon(user)
+    await user.type(screen.getByLabelText('Venue name'), 'Town Hall')
+    await user.type(screen.getByLabelText('Venue address'), '1 Main Street')
+  }
+  const png = () => new File([new Uint8Array([137, 80, 78, 71])], 'cover.png', { type: 'image/png' })
+
+  it('uploads the chosen cover photo after creating the event and shows it', async () => {
+    const created = { ...physical, id: 'created', title: 'New community event', cover_url: null }
+    const withCover = { ...created, cover_url: '/api/events/created/cover/?v=1' }
+    const fetch = vi.fn().mockResolvedValueOnce(response([])).mockResolvedValueOnce(response(created, 201))
+      .mockResolvedValueOnce(response(withCover))
+    const token = renderDashboard(fetch)
+    const user = await openModal()
+    await fillPhysical(user)
+    const file = png()
+    await user.upload(screen.getByLabelText(/Cover photo/i), file)
+    await user.click(screen.getByRole('button', { name: 'Create event', exact: true }))
+    expect(await screen.findByText('New community event')).toBeInTheDocument()
+    const [url, options] = fetch.mock.calls[2]
+    expect(url).toBe('/api/events/created/cover/')
+    expect(options.method).toBe('PUT')
+    expect(options.body).toBe(file)
+    expect(options.headers.Authorization).toBe(`Bearer ${token}`)
+    expect(document.querySelector('img[src="/api/events/created/cover/?v=1"]')).not.toBeNull()
+    expect(screen.getByRole('status')).toHaveTextContent('was created successfully.')
+  })
+
+  it('keeps the new event and warns when only the photo upload fails', async () => {
+    const created = { ...physical, id: 'created', title: 'New community event' }
+    const fetch = vi.fn().mockResolvedValueOnce(response([])).mockResolvedValueOnce(response(created, 201))
+      .mockResolvedValueOnce(response({ error: 'Cover photo must be 2 MB or smaller.' }, 413))
+    renderDashboard(fetch)
+    const user = await openModal()
+    await fillPhysical(user)
+    await user.upload(screen.getByLabelText(/Cover photo/i), png())
+    await user.click(screen.getByRole('button', { name: 'Create event', exact: true }))
+    expect(await screen.findByText('New community event')).toBeInTheDocument()
+    expect(screen.getByRole('status')).toHaveTextContent('The photo could not be uploaded.')
+  })
+
+  it('does not create anything when the chosen file is too large or not an image', async () => {
+    const fetch = vi.fn().mockResolvedValue(response([]))
+    renderDashboard(fetch)
+    const user = await openModal()
+    await fillPhysical(user)
+    const input = screen.getByLabelText(/Cover photo/i)
+    fireEvent.change(input, { target: { files: [new File([new Uint8Array(2 * 1024 * 1024 + 1)], 'big.png', { type: 'image/png' })] } })
+    expect(await screen.findByText('Use a photo of 2 MB or less.')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Create event', exact: true }))
+    expect(fetch).toHaveBeenCalledTimes(1) // only the initial list request
+    fireEvent.change(input, { target: { files: [new File(['<svg/>'], 'logo.svg', { type: 'image/svg+xml' })] } })
+    expect(await screen.findByText('Choose a JPEG, PNG or WebP image.')).toBeInTheDocument()
+  })
+
+  it('creates an event without a photo exactly as before', async () => {
+    const created = { ...physical, id: 'created', title: 'New community event' }
+    const fetch = vi.fn().mockResolvedValueOnce(response([])).mockResolvedValueOnce(response(created, 201))
+    renderDashboard(fetch)
+    const user = await openModal()
+    await fillPhysical(user)
+    await user.click(screen.getByRole('button', { name: 'Create event', exact: true }))
+    expect(await screen.findByText('New community event')).toBeInTheDocument()
+    expect(fetch).toHaveBeenCalledTimes(2) // list + create, no upload
   })
 
   it('retries a failed list request', async () => {
@@ -187,7 +253,7 @@ describe('Organizer dashboard and creation', () => {
     })
     expect(screen.queryByText('Community gathering')).not.toBeInTheDocument()
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Create New Event' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'New event' })).toBeDisabled()
     await act(async () => resolveSecond(response([])))
     expect(await screen.findByText('Your next event starts here')).toBeInTheDocument()
   })

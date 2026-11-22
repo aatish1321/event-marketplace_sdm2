@@ -48,7 +48,7 @@ describe('Register', () => {
       }
     }
     await user.click(screen.getByRole('button', { name: role === 'organizer' ? 'Register as Organizer' : 'Create profile' }))
-    expect(await screen.findByRole('heading', { name: "You're in!" })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Account created' })).toBeInTheDocument()
     expect(fetch).toHaveBeenNthCalledWith(1, '/api/auth/register/', {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: expect.any(String),
     })
@@ -59,7 +59,7 @@ describe('Register', () => {
     })
     expect(fetch).toHaveBeenCalledTimes(2)
     expect(localStorage.getItem('access_token')).toBe(token)
-    expect(screen.getByRole('link', { name: 'Start Exploring' })).toHaveAttribute('href', destination)
+    expect(screen.getByRole('link', { name: 'Continue' })).toHaveAttribute('href', destination)
   })
 
   it('rejects missing fields, short passwords, and mismatched confirmation before making requests', async () => {
@@ -132,7 +132,7 @@ describe('Register', () => {
     expect(await screen.findByRole('alert')).not.toBeEmptyDOMElement()
     expect(screen.getByRole('button', { name: 'Create profile' })).toBeEnabled()
     await user.click(screen.getByRole('button', { name: 'Create profile' }))
-    expect(await screen.findByRole('heading', { name: "You're in!" })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Account created' })).toBeInTheDocument()
     expect(fetch).toHaveBeenCalledTimes(3)
   })
 
@@ -144,7 +144,7 @@ describe('Register', () => {
     const user = userEvent.setup()
     await fillAccount(user)
     await user.click(screen.getByRole('button', { name: 'Create profile' }))
-    expect(await screen.findByRole('heading', { name: "You're in!" })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Account created' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Go to login' })).toHaveAttribute('href', '/login')
     expect(localStorage.getItem('access_token')).toBeNull()
     expect(fetch).toHaveBeenCalledTimes(2)

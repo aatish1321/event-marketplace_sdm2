@@ -1,30 +1,33 @@
 import { Link, NavLink } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import SiteFooter from './SiteFooter'
+import { pageContainer } from '../lib/layout'
 
 export const focusRing = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus'
 
-// Dark top bar and footer shared by the attendee pages (design: Designpages).
-export default function AttendeeLayout({ children }) {
+// Dark top bar and compact footer shared by the signed-in attendee pages.
+// `hero` is an optional full-width band shown between the bar and the page content.
+export default function AttendeeLayout({ hero, children }) {
   const { logout } = useAuth()
   return (
     <div className="flex min-h-screen flex-col bg-canvas font-sans text-ink">
       <nav className="bg-primary text-white">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 md:px-6">
-          <Link to="/" className={`text-xl font-black uppercase tracking-widest ${focusRing}`}>Eventify</Link>
-          <div className="flex items-center gap-6 text-sm font-medium">
-            <NavLink to="/discover" end className={`rounded-pill px-3 py-2 hover:bg-white/10 ${focusRing}`}>Discover events</NavLink>
-            <button type="button" onClick={logout} className={`rounded-pill px-3 py-2 hover:bg-white/10 ${focusRing}`}>
+        <div className={`${pageContainer} flex h-16 items-center justify-between`}>
+          <Link to="/" className={`text-lg font-extrabold uppercase tracking-[0.14em] sm:text-xl sm:tracking-[0.2em] ${focusRing}`}>Eventify</Link>
+          <div className="flex items-center gap-1 whitespace-nowrap text-sm font-medium sm:gap-2">
+            <NavLink to="/discover" end className={`rounded-control px-3 py-2 text-white/75 transition-colors hover:bg-white/10 hover:text-white aria-[current=page]:bg-white/10 aria-[current=page]:text-white ${focusRing}`}><span className="sm:hidden">Events</span><span className="hidden sm:inline">Discover events</span></NavLink>
+            <button type="button" onClick={logout} className={`rounded-control px-3 py-2 text-white/75 transition-colors hover:bg-white/10 hover:text-white ${focusRing}`}>
               Log out
             </button>
           </div>
         </div>
       </nav>
 
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-12 md:px-6">{children}</main>
+      {hero}
 
-      <footer className="bg-primary py-10 text-white">
-        <div className="mx-auto max-w-6xl px-4 text-xl font-black uppercase tracking-widest md:px-6">Eventify</div>
-      </footer>
+      <main className={`${pageContainer} flex-1 py-12`}>{children}</main>
+
+      <SiteFooter compact />
     </div>
   )
 }

@@ -1,8 +1,13 @@
 import { useEffect, useState } from 'react'
+import { CalendarPlus, Globe, MapPin } from 'lucide-react'
 import { ApiError } from '../api/auth'
 import { listEvents } from '../api/events'
 import { useAuth } from '../context/AuthContext'
 import CreateEventModal from '../components/CreateEventModal'
+import { dateParts, tileColor } from '../lib/tiles'
+import SiteFooter from '../components/SiteFooter'
+import usePageTitle from '../lib/usePageTitle'
+import { pageContainer } from '../lib/layout'
 
 function formatDate(value) {
   if (!value) return 'Date unavailable'
@@ -29,6 +34,7 @@ function safeUrl(value) {
 
 export default function OrganizerDashboard() {
   const { token, logout } = useAuth()
+  usePageTitle('Organizer dashboard')
   // A new account/session must never inherit another organizer's visible data,
   // pending dialog or requests, including sessions changed in another tab.
   return <DashboardSession key={token} token={token} logout={logout} />
@@ -57,57 +63,68 @@ function DashboardSession({ token, logout }) {
   }, [token, logout, attempt])
 
   const retry = () => { setError(''); setLoading(true); setAttempt((previous) => previous + 1) }
-  const created = (event) => {
+  const created = (event, warning = '') => {
     setEvents((previous) => sortEvents([event, ...previous.filter((item) => item.id !== event.id)]))
     setCreating(false)
-    setNotice(`“${event.title}” was created successfully.`)
+    setNotice(`“${event.title}” was created successfully.${warning ? ` ${warning}` : ''}`)
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900">
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-5 sm:px-8">
-          <span className="text-lg font-semibold tracking-tight">Event marketplace<span className="ml-3 hidden text-xs font-medium uppercase tracking-widest text-indigo-600 sm:inline">Organizer</span></span>
-          <button type="button" onClick={logout} className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50">Log out</button>
+    <div className="flex min-h-screen flex-col bg-canvas text-ink">
+      <header className="bg-primary text-white">
+        <div className={`${pageContainer} flex h-16 items-center justify-between gap-4`}>
+          <span className="text-xl font-extrabold uppercase tracking-[0.2em]">Eventify<span className="ml-3 hidden text-sm font-normal normal-case tracking-normal text-white/60 sm:inline">Organizer</span></span>
+          <button type="button" onClick={logout} className="rounded-control px-3 py-2 text-sm font-medium text-white/75 transition-colors hover:bg-white/10 hover:text-white">Log out</button>
+        </div>
+        <div className={`${pageContainer} flex flex-col justify-between gap-6 pb-14 pt-12 sm:flex-row sm:items-end`}>
+          <div>
+            <h1 className="text-5xl font-extrabold leading-[0.92] tracking-[-0.045em] sm:text-7xl">Organizer dashboard</h1>
+            <p className="mt-5 text-lg text-white/80 sm:text-xl">Events you’ve created, in start order.</p>
+          </div>
+          <button type="button" onClick={() => setCreating(true)} disabled={loading || Boolean(error)} className="h-14 shrink-0 rounded-control bg-accent px-7 text-base font-semibold text-white transition-colors hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-50">New event</button>
         </div>
       </header>
-      <div className="mx-auto max-w-6xl px-5 py-10 sm:px-8 sm:py-14">
-        <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-center">
-          <div>
-            <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-indigo-600">Your events, all in one place</p>
-            <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Organizer dashboard</h1>
-            <p className="mt-3 text-sm text-slate-500">Create memorable experiences and keep track of what’s next.</p>
+      <main className={`${pageContainer} flex-1 py-12`}>
+        {notice && <p role="status" className="mb-8 rounded-card bg-success/10 px-4 py-3 text-sm font-medium text-success">{notice}</p>}
+        <section aria-labelledby="your-events-heading">
+          <div className="mb-5 flex items-baseline gap-3">
+            <h2 id="your-events-heading" className="text-3xl font-extrabold tracking-[-0.03em]">Your events</h2>
+            {!loading && !error && <span className="text-sm font-semibold tabular-nums text-muted">{events.length}</span>}
           </div>
-          <button type="button" onClick={() => setCreating(true)} disabled={loading || Boolean(error)} className="shrink-0 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50">Create New Event</button>
-        </div>
-        {notice && <p role="status" className="mt-6 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">{notice}</p>}
-        <section aria-labelledby="your-events-heading" className="mt-10">
-          <div className="mb-5 flex items-center gap-3">
-            <h2 id="your-events-heading" className="text-lg font-semibold">Your events</h2>
-            {!loading && !error && <span className="rounded-full bg-slate-200 px-2.5 py-0.5 text-xs font-medium text-slate-600">{events.length}</span>}
-          </div>
-          {loading ? <p role="status" className="rounded-2xl border border-slate-200 bg-white p-12 text-center text-sm text-slate-500">Loading your events…</p>
-            : error ? <div role="alert" className="rounded-2xl border border-red-200 bg-red-50 p-8 text-center"><p className="text-sm text-red-700">{error}</p><button type="button" onClick={retry} className="mt-4 rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-700">Try again</button></div>
-              : events.length === 0 ? <div className="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-16 text-center"><div aria-hidden="true" className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50 text-3xl text-indigo-500">+</div><h3 className="text-xl font-semibold">Your next event starts here</h3><p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-slate-500">You haven’t created any events yet. Select Create New Event to bring your first idea to life.</p></div>
-                : <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          {loading ? <p role="status" className="rounded-card border border-border bg-surface p-12 text-center text-sm text-muted">Loading your events…</p>
+            : error ? <div role="alert" className="rounded-card bg-danger/10 p-8 text-center"><p className="text-sm text-danger">{error}</p><button type="button" onClick={retry} className="mt-4 h-10 rounded-control border border-danger/30 bg-surface px-4 text-sm font-medium text-danger transition-colors hover:border-danger">Try again</button></div>
+              : events.length === 0 ? <div className="rounded-card border border-dashed border-ink/25 bg-surface px-6 py-16 text-center"><CalendarPlus aria-hidden="true" strokeWidth={1.5} className="mx-auto mb-4 h-6 w-6 text-muted" /><h3 className="text-xl font-bold">Your next event starts here</h3><p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-muted">You haven’t created any events yet. Select New event to create your first one.</p></div>
+                : <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
                   {events.map((event) => {
                     const url = safeUrl(event.stream_url)
-                    return <article key={event.id} className="flex flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                      <span className={`self-start rounded-full px-3 py-1 text-xs font-medium ${event.event_type === 'online' ? 'bg-indigo-50 text-indigo-700' : 'bg-emerald-50 text-emerald-700'}`}>{event.event_type === 'online' ? 'Online' : event.event_type === 'physical' ? 'Physical' : 'Event'}</span>
-                      <h3 className="mt-4 break-words text-xl font-semibold">{event.title}</h3>
-                      {event.description && <p className="mt-2 whitespace-pre-line break-words text-sm leading-6 text-slate-500">{event.description}</p>}
-                      <dl className="mt-5 space-y-3 border-t border-slate-100 pt-5 text-sm">
-                        <div><dt className="text-xs font-medium text-slate-400">Starts</dt><dd className="mt-1"><time dateTime={event.start_at}>{formatDate(event.start_at)}</time></dd></div>
-                        <div><dt className="text-xs font-medium text-slate-400">Ends</dt><dd className="mt-1"><time dateTime={event.end_at}>{formatDate(event.end_at)}</time></dd></div>
-                        {event.event_type === 'online' ? <div><dt className="text-xs font-medium text-slate-400">Event link</dt><dd className="mt-1 break-words">{url ? <a href={url} target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline">Open event website ↗</a> : 'Link unavailable'}</dd></div>
-                          : event.event_type === 'physical' ? <div><dt className="text-xs font-medium text-slate-400">Venue</dt><dd className="mt-1 break-words">{event.venue_name || 'Venue unavailable'}<span className="mt-1 block text-slate-500">{event.address}</span></dd></div> : null}
-                      </dl>
+                    const online = event.event_type === 'online'
+                    const physical = event.event_type === 'physical'
+                    const TypeIcon = online ? Globe : MapPin
+                    const parts = dateParts(event.start_at)
+                    return <article key={event.id} className="flex flex-col overflow-hidden rounded-card border border-border bg-surface shadow-sm">
+                      <div className={`relative h-40 overflow-hidden ${event.cover_url ? 'bg-canvas' : tileColor(event.id)}`}>
+                        {event.cover_url
+                          ? <img src={event.cover_url} alt="" className="h-full w-full object-cover" />
+                          : parts && <div className="absolute bottom-3 left-5 flex items-end gap-3 text-white"><span className="text-6xl font-extrabold leading-[0.85] tabular-nums">{parts.day}</span><span className="pb-0.5 text-base font-bold leading-tight">{parts.month}<span className="block font-medium text-white/80">{parts.weekday}</span></span></div>}
+                        <span className={`absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-semibold ${event.cover_url ? 'bg-surface text-ink' : 'bg-white/20 text-white'}`}>{(online || physical) && <TypeIcon aria-hidden="true" strokeWidth={1.5} className="h-4 w-4" />}{online ? 'Online' : physical ? 'Physical' : 'Event'}</span>
+                      </div>
+                      <div className="flex flex-1 flex-col p-6">
+                        <h3 className="break-words text-xl font-bold leading-snug">{event.title}</h3>
+                        {event.description && <p className="mt-2 whitespace-pre-line break-words text-sm leading-6 text-muted">{event.description}</p>}
+                        <dl className="mt-5 space-y-3 border-t border-border pt-5 text-sm">
+                          <div><dt className="text-xs font-semibold text-muted">Starts</dt><dd className="mt-1"><time dateTime={event.start_at}>{formatDate(event.start_at)}</time></dd></div>
+                          <div><dt className="text-xs font-semibold text-muted">Ends</dt><dd className="mt-1"><time dateTime={event.end_at}>{formatDate(event.end_at)}</time></dd></div>
+                          {online ? <div><dt className="text-xs font-semibold text-muted">Event link</dt><dd className="mt-1 break-words">{url ? <a href={url} target="_blank" rel="noopener noreferrer" className="text-accent underline-offset-4 hover:underline">Open event website ↗</a> : 'Link unavailable'}</dd></div>
+                            : physical ? <div><dt className="text-xs font-semibold text-muted">Venue</dt><dd className="mt-1 break-words">{event.venue_name || 'Venue unavailable'}<span className="mt-1 block text-muted">{event.address}</span></dd></div> : null}
+                        </dl>
+                      </div>
                     </article>
                   })}
                 </div>}
         </section>
-      </div>
+      </main>
+      <SiteFooter compact />
       {creating && <CreateEventModal token={token} onClose={() => setCreating(false)} onCreated={created} onUnauthorized={logout} />}
-    </main>
+    </div>
   )
 }

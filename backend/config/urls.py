@@ -27,4 +27,5 @@ urlpatterns = [
     path("api/events/", event_views.events, name="events"),
     path("api/events/nearby/", discovery_views.nearby_events, name="events-nearby"),
     path("api/events/<str:event_id>/", event_views.event_detail, name="event-detail"),
+    path("api/events/<str:event_id>/cover/", event_views.event_cover, name="event-cover"),
 ]

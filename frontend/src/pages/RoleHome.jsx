@@ -1,18 +1,32 @@
+import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import SiteFooter from '../components/SiteFooter'
+import usePageTitle from '../lib/usePageTitle'
+import { pageContainer } from '../lib/layout'
 
-// Landing views until event discovery, management and audit features are built.
+// Placeholder home for roles whose tools are not built yet (currently admin logs).
 export default function RoleHome({ title, description }) {
   const { userRole, logout } = useAuth()
+  usePageTitle(title)
   return (
-    <main className="min-h-screen bg-canvas px-4 py-10">
-      <div className="mx-auto max-w-3xl rounded-2xl bg-surface p-8 shadow-lg">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <h1 className="text-2xl font-semibold text-primary">{title}</h1>
-          <button type="button" onClick={logout} className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-secondary hover:bg-canvas">Log out</button>
+    <div className="flex min-h-screen flex-col bg-canvas text-ink">
+      <header className="bg-ink text-white">
+        <div className={`${pageContainer} flex h-16 items-center justify-between gap-4`}>
+          <Link to="/" className="text-xl font-extrabold uppercase tracking-[0.2em]">Eventify</Link>
+          <button type="button" onClick={logout} className="rounded-control px-3 py-2 text-sm font-medium text-white/75 transition-colors hover:bg-white/10 hover:text-white">Log out</button>
         </div>
-        <p className="mt-4 text-sm text-secondary">You are logged in as {userRole}.</p>
-        <p className="mt-2 text-sm text-secondary">{description}</p>
-      </div>
-    </main>
+        <div className={`${pageContainer} pb-14 pt-12`}>
+          <p className="text-sm font-semibold capitalize text-white/60">{userRole}</p>
+          <h1 className="mt-3 text-5xl font-extrabold leading-[0.92] tracking-[-0.045em] sm:text-7xl">{title}</h1>
+        </div>
+      </header>
+      <main className={`${pageContainer} flex-1 py-12`}>
+        <div className="max-w-2xl rounded-card border border-dashed border-ink/25 bg-surface px-8 py-12">
+          <h2 className="text-2xl font-extrabold tracking-[-0.03em]">Coming soon</h2>
+          <p className="mt-2 text-base leading-7 text-muted">{description}</p>
+        </div>
+      </main>
+      <SiteFooter compact />
+    </div>
   )
 }

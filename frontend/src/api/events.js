@@ -2,7 +2,8 @@
 // Contract:
 //   GET /api/events/?continent=&country=&type=physical|online
 //     -> 200 [{ id, event_type, title, status, continent, country,
-//               available_tickets, venue_name?, address?, stream_url? }]
+//               available_tickets, cover_url (null without a photo),
+//               venue_name?, address?, stream_url? }]
 // Empty filters are left out of the query string so the backend only
 // applies the filters the user actually chose.
 import { ApiError } from './auth'
@@ -50,6 +51,21 @@ export async function listEvents(token, signal) {
 export async function createEvent(token, payload, signal) {
   const data = await requestOrganizerEvents('/api/events/', token, { method: 'POST', body: JSON.stringify(payload), signal })
   if (!data?.id || typeof data.title !== 'string') throw new Error('Invalid event response')
+  return data
+}
+
+// PUT /api/events/:id/cover/ with the raw image bytes (JPEG, PNG or WebP, up to 2 MB)
+// -> 200 the updated event, whose cover_url points at the stored photo.
+// 400 not an accepted image · 403 not the owner · 404 unknown event · 413 too large
+export async function uploadCover(token, eventId, file, signal) {
+  const response = await fetch(`/api/events/${encodeURIComponent(eventId)}/cover/`, {
+    method: 'PUT',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': file.type },
+    body: file,
+    signal,
+  })
+  const data = await response.json().catch(() => null)
+  if (!response.ok) throw new ApiError(response.status, data)
   return data
 }
 
