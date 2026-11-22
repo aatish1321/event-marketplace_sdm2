@@ -1,6 +1,6 @@
 """JSON event CRUD with JWT organizer ownership on mutations."""
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from bson import ObjectId
 from bson.errors import InvalidId
@@ -12,7 +12,7 @@ from mongoengine.errors import ValidationError
 
 from .auth_views import _read_json, _required_string
 from .decorators import require_role
-from .models import Event, OnlineEvent, PhysicalEvent, User
+from .models import MAX_COVER_BYTES, Event, EventCover, OnlineEvent, PhysicalEvent, User
 
 
 EVENT_TYPES = {"event": Event, "physical": PhysicalEvent, "online": OnlineEvent}
@@ -40,6 +40,14 @@ def _validate_schedule(event):
         raise ValueError("end_at must be after start_at.")
 
 
+def _cover_url(event):
+    if event.cover_updated_at is None:
+        return None
+    # The version query busts caches when the photo is replaced.
+    version = int(_as_utc(event.cover_updated_at).timestamp() * 1000)
+    return f"/api/events/{event.id}/cover/?v={version}"
+
+
 def _serialize_event(event):
     return {
         "id": str(event.id),
@@ -47,6 +55,7 @@ def _serialize_event(event):
         "event_type": next(name for name, model in EVENT_TYPES.items() if type(event) is model),
         **{field: getattr(event, field) for field in COMMON_FIELDS + TYPE_FIELDS[type(event)] + OPTIONAL_FIELDS[type(event)]},
         **{field: _iso_date(getattr(event, field)) for field in DATE_FIELDS + ("created_at",)},
+        "cover_url": _cover_url(event),
     }
 
 
@@ -121,6 +130,7 @@ def _mutate_event(request, event_id):
     if event.organizer_id != request.jwt_payload["user_id"]:
         return JsonResponse({"error": "Forbidden."}, status=403)
     if request.method == "DELETE":
+        EventCover.objects(event_id=str(event.id)).delete()
         event.delete()
         return HttpResponse(status=204)
     try:
@@ -166,3 +176,65 @@ def event_detail(request, event_id):
     if event is None:
         return JsonResponse({"error": "Event not found."}, status=404)
     return JsonResponse(_serialize_event(event))
+
+
+def _image_type(data):
+    """Identify JPEG, PNG or WebP from the file's own bytes; the client's Content-Type is never trusted."""
+    if data.startswith(b"\xff\xd8\xff"):
+        return "image/jpeg"
+    if data.startswith(b"\x89PNG\r\n\x1a\n"):
+        return "image/png"
+    if data[:4] == b"RIFF" and data[8:12] == b"WEBP":
+        return "image/webp"
+    return None
+
+
+@require_role(User.ROLE_ORGANIZER)
+def _put_cover(request, event_id):
+    event = _find_event(event_id)
+    if event is None:
+        return JsonResponse({"error": "Event not found."}, status=404)
+    if event.organizer_id != request.jwt_payload["user_id"]:
+        return JsonResponse({"error": "Forbidden."}, status=403)
+    try:
+        declared = int(request.META.get("CONTENT_LENGTH") or 0)
+    except ValueError:
+        return JsonResponse({"error": "Invalid request payload."}, status=400)
+    too_large = JsonResponse({"error": "Cover photo must be 2 MB or smaller."}, status=413)
+    if declared > MAX_COVER_BYTES:
+        return too_large
+    data = request.read(MAX_COVER_BYTES + 1)  # bounded read: never buffers more than the limit
+    if len(data) > MAX_COVER_BYTES:
+        return too_large
+    content_type = _image_type(data)
+    if content_type is None:
+        return JsonResponse({"error": "Cover photo must be a JPEG, PNG or WebP image."}, status=400)
+    EventCover.objects(event_id=str(event.id)).update_one(
+        set__content_type=content_type, set__data=data, upsert=True)
+    # Mongo keeps milliseconds, so keep the cache-busting version strictly increasing per event.
+    now = datetime.now(timezone.utc)
+    now = now.replace(microsecond=now.microsecond // 1000 * 1000)
+    if event.cover_updated_at is not None and now <= _as_utc(event.cover_updated_at):
+        now = _as_utc(event.cover_updated_at) + timedelta(milliseconds=1)
+    event.cover_updated_at = now
+    # Targeted update: a full save() could overwrite a ticket count changed by a concurrent purchase.
+    Event.objects(id=event.id).update_one(set__cover_updated_at=event.cover_updated_at)
+    return JsonResponse(_serialize_event(event))
+
+
+def _get_cover(request, event_id):
+    event = _find_event(event_id)
+    cover = EventCover.objects(event_id=str(event.id)).first() if event else None
+    if cover is None:
+        return JsonResponse({"error": "Cover not found."}, status=404)
+    response = HttpResponse(bytes(cover.data), content_type=cover.content_type)
+    response["Cache-Control"] = "public, max-age=3600"
+    response["X-Content-Type-Options"] = "nosniff"
+    response["Content-Security-Policy"] = "default-src 'none'"
+    return response
+
+
+@csrf_exempt
+@require_http_methods(["GET", "PUT"])
+def event_cover(request, event_id):
+    return _put_cover(request, event_id) if request.method == "PUT" else _get_cover(request, event_id)

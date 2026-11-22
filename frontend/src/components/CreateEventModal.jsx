@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { ApiError } from '../api/auth'
-import { createEvent } from '../api/events'
+import { createEvent, uploadCover } from '../api/events'
 
 const INITIAL_FORM = { title: '', description: '', start_at: '', end_at: '', event_type: 'physical', venue_name: '', venue_address: '', online_url: '' }
+const COVER_TYPES = ['image/jpeg', 'image/png', 'image/webp']
+const MAX_COVER_BYTES = 2 * 1024 * 1024 // matches the backend limit; the server re-checks both
 const inputClass = 'w-full rounded-control border border-border bg-surface px-3 py-2.5 text-sm text-ink placeholder:text-muted outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/15 disabled:opacity-60'
 
 function Field({ label, name, error, multiline, ...props }) {
@@ -14,6 +16,13 @@ function Field({ label, name, error, multiline, ...props }) {
       {error && <p id={`event-${name}-error`} role="alert" className="mt-1 text-xs text-danger">{error}</p>}
     </div>
   )
+}
+
+function coverProblem(file) {
+  if (!file) return ''
+  if (!COVER_TYPES.includes(file.type)) return 'Choose a JPEG, PNG or WebP image.'
+  if (file.size > MAX_COVER_BYTES) return 'Use a photo of 2 MB or less.'
+  return ''
 }
 
 function validate(form) {
@@ -48,6 +57,7 @@ export default function CreateEventModal({ token, onClose, onCreated, onUnauthor
   const pending = useRef(false)
   const requestRef = useRef(null)
   const [form, setForm] = useState(INITIAL_FORM)
+  const [cover, setCover] = useState(null)
   const [errors, setErrors] = useState({})
   const [submitting, setSubmitting] = useState(false)
 
@@ -73,6 +83,8 @@ export default function CreateEventModal({ token, onClose, onCreated, onUnauthor
     event.preventDefault()
     if (pending.current) return
     const validation = validate(form)
+    const problem = coverProblem(cover)
+    if (problem) validation.cover = problem
     setErrors(validation)
     if (Object.keys(validation).length) {
       dialogRef.current.querySelector(`[name="${Object.keys(validation)[0]}"]`)?.focus()
@@ -92,7 +104,22 @@ export default function CreateEventModal({ token, onClose, onCreated, onUnauthor
     }
     try {
       const created = await createEvent(token, payload, controller.signal)
-      if (!controller.signal.aborted) onCreated(created)
+      let result = created
+      let warning = ''
+      if (cover) {
+        // The event exists already, so a failed upload must not lose it.
+        try {
+          result = await uploadCover(token, created.id, cover, controller.signal)
+        } catch (uploadError) {
+          if (controller.signal.aborted) return
+          if (uploadError instanceof ApiError && [401, 403].includes(uploadError.status)) {
+            onUnauthorized()
+            return
+          }
+          warning = 'The photo could not be uploaded.'
+        }
+      }
+      if (!controller.signal.aborted) onCreated(result, warning)
     } catch (error) {
       if (controller.signal.aborted) return
       if (error instanceof ApiError && [401, 403].includes(error.status)) {
@@ -124,6 +151,21 @@ export default function CreateEventModal({ token, onClose, onCreated, onUnauthor
         {errors.form && <p role="alert" className="rounded-control bg-danger/10 p-3 text-sm text-danger">{errors.form}</p>}
         <Field label="Title" {...fieldProps('title')} required maxLength={200} autoFocus placeholder="Give your event a name" />
         <Field label="Description" {...fieldProps('description')} multiline rows={3} maxLength={5000} placeholder="What can guests look forward to? (optional)" />
+        <div>
+          <label htmlFor="event-cover" className="mb-1.5 block text-sm font-semibold text-ink">Cover photo <span className="font-normal text-muted">(optional)</span></label>
+          <input
+            id="event-cover" name="cover" type="file" accept={COVER_TYPES.join(',')} disabled={submitting}
+            aria-invalid={Boolean(errors.cover)} aria-describedby={errors.cover ? 'event-cover-error event-cover-hint' : 'event-cover-hint'}
+            onChange={(event) => {
+              const file = event.target.files?.[0] ?? null
+              setCover(file)
+              setErrors((previous) => ({ ...previous, cover: coverProblem(file) || undefined, form: undefined }))
+            }}
+            className="block w-full text-sm text-muted file:mr-3 file:cursor-pointer file:rounded-control file:border-0 file:bg-ink file:px-4 file:py-2.5 file:text-sm file:font-semibold file:text-white hover:file:bg-ink/85 disabled:opacity-60"
+          />
+          <p id="event-cover-hint" className="mt-1 text-xs text-muted">JPEG, PNG or WebP, up to 2 MB. Without a photo the event gets a coloured poster.</p>
+          {errors.cover && <p id="event-cover-error" role="alert" className="mt-1 text-xs text-danger">{errors.cover}</p>}
+        </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Start date and time" {...fieldProps('start_at')} type="datetime-local" required />
           <Field label="End date and time" {...fieldProps('end_at')} type="datetime-local" required />

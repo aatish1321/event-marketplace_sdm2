@@ -7,6 +7,7 @@ from django.contrib.auth.hashers import (
     make_password as django_make_password,
 )
 from mongoengine import (
+    BinaryField,
     DateTimeField,
     Document,
     EmailField,
@@ -25,6 +26,8 @@ __all__ = [
     "Event",
     "PhysicalEvent",
     "OnlineEvent",
+    "EventCover",
+    "MAX_COVER_BYTES",
     "BuyerSnapshot",
     "EventSnapshot",
     "TicketPurchase",
@@ -134,6 +137,8 @@ class Event(Document):
     start_at = DateTimeField()
     end_at = DateTimeField()
     created_at = DateTimeField(default=_mongo_utc_now)
+    # Set when a cover photo exists; the bytes live in EventCover so event lists stay small.
+    cover_updated_at = DateTimeField()
 
     meta = {
         "allow_inheritance": True,
@@ -143,6 +148,17 @@ class Event(Document):
             {"fields": ["organizer_id", "start_at"], "cls": False},
         ],
     }
+
+
+MAX_COVER_BYTES = 2 * 1024 * 1024
+
+
+class EventCover(Document):
+    """Cover photo bytes for one event, validated by content type before they are stored."""
+
+    event_id = StringField(required=True, unique=True)
+    content_type = StringField(required=True, choices=("image/jpeg", "image/png", "image/webp"))
+    data = BinaryField(required=True, max_bytes=MAX_COVER_BYTES)
 
 
 def validate_location(value):

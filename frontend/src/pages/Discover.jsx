@@ -5,6 +5,7 @@ import { buildEventsUrl, fetchEvents } from '../api/events'
 import { formatEventDate } from '../lib/dates'
 import AttendeeLayout, { focusRing } from '../components/AttendeeLayout'
 import EventCard from '../components/EventCard'
+import heroImg from '../assets/afterglow.jpg'
 
 // Stored values must match the backend exactly (case-sensitive).
 const CONTINENTS = ['Africa', 'Antarctica', 'Asia', 'Europe', 'North America', 'Oceania', 'South America']
@@ -28,6 +29,9 @@ function toCardProps(event) {
     eventType: online ? 'online' : 'physical',
     category: online ? 'Online' : 'Physical',
     title: event.title,
+    imageUrl: event.cover_url ?? undefined,
+    startAt: event.start_at,
+    eventKey: event.id,
     date: formatEventDate(event.start_at),
     href: `/events/${event.id}`,
     venue: online ? 'Online event' : place || 'Location to be announced',
@@ -70,38 +74,47 @@ export default function Discover() {
   }
   const hasFilters = Boolean(filters.continent || filters.type || countryInput.trim())
 
+  const hero = (
+    <section className="relative isolate bg-primary text-white">
+      <img src={heroImg} alt="" className="absolute inset-0 -z-10 h-full w-full object-cover object-[50%_60%]" />
+      {/* Neutral scrim so the headline sits on calm, dark space */}
+      <div aria-hidden="true" className="absolute inset-0 -z-10 bg-gradient-to-r from-primary/90 via-primary/65 to-primary/35" />
+      <div className="mx-auto max-w-6xl px-4 pb-10 pt-14 md:px-6">
+        <h1 className="max-w-2xl text-4xl font-extrabold tracking-tight md:text-6xl">Discover events</h1>
+        <p className="mt-4 max-w-xl text-lg font-medium text-white/80">Physical and online events. Filter by continent or country.</p>
+
+        <form
+          role="search"
+          onSubmit={(e) => {
+            e.preventDefault()
+            setFilter('country', countryInput) // skip the typing delay
+          }}
+          className="mt-8 flex flex-col gap-4 rounded-card bg-surface p-4 text-ink shadow-xl md:flex-row md:items-center"
+        >
+          <label className="flex-1">
+            <span className={fieldLabel}>Continent</span>
+            <select value={filters.continent} onChange={(e) => setFilter('continent', e.target.value)} className={fieldInput}>
+              <option value="">All continents</option>
+              {CONTINENTS.map((c) => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </label>
+          <div className="hidden h-10 w-px bg-border md:block" />
+          <label className="flex-1">
+            <span className={fieldLabel}>Country</span>
+            <input type="text" placeholder="e.g. Hungary" value={countryInput} onChange={(e) => setCountryInput(e.target.value)} className={fieldInput} />
+          </label>
+          <button type="submit" className={`flex h-11 items-center justify-center gap-2 rounded-control bg-accent px-6 text-sm font-semibold text-white transition-colors hover:bg-accent/90 ${focusRing}`}>
+            <Search className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
+            Explore events
+          </button>
+        </form>
+      </div>
+    </section>
+  )
+
   return (
-    <AttendeeLayout>
-      <h1 className="text-4xl font-extrabold tracking-tight text-ink md:text-5xl">Discover events</h1>
-      <p className="mt-3 text-base font-medium text-muted">Physical and online events. Filter by continent or country.</p>
-
-      <form
-        role="search"
-        onSubmit={(e) => {
-          e.preventDefault()
-          setFilter('country', countryInput) // skip the typing delay
-        }}
-        className="mt-8 flex flex-col gap-4 rounded-card border border-border bg-surface p-4 md:flex-row md:items-center"
-      >
-        <label className="flex-1">
-          <span className={fieldLabel}>Continent</span>
-          <select value={filters.continent} onChange={(e) => setFilter('continent', e.target.value)} className={fieldInput}>
-            <option value="">All continents</option>
-            {CONTINENTS.map((c) => <option key={c} value={c}>{c}</option>)}
-          </select>
-        </label>
-        <div className="hidden h-10 w-px bg-border md:block" />
-        <label className="flex-1">
-          <span className={fieldLabel}>Country</span>
-          <input type="text" placeholder="e.g. Hungary" value={countryInput} onChange={(e) => setCountryInput(e.target.value)} className={fieldInput} />
-        </label>
-        <button type="submit" className={`flex h-11 items-center justify-center gap-2 rounded-control bg-accent px-6 text-sm font-semibold text-white transition-colors hover:bg-accent/90 ${focusRing}`}>
-          <Search className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
-          Explore events
-        </button>
-      </form>
-
-      <div className="mt-8 flex flex-wrap items-center gap-2" role="group" aria-label="Event type">
+    <AttendeeLayout hero={hero}>
+      <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Event type">
         {TYPES.map((t) => {
           const active = filters.type === t.value
           return (

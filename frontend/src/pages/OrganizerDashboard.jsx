@@ -4,6 +4,7 @@ import { ApiError } from '../api/auth'
 import { listEvents } from '../api/events'
 import { useAuth } from '../context/AuthContext'
 import CreateEventModal from '../components/CreateEventModal'
+import { dateParts, tileColor } from '../lib/tiles'
 
 function formatDate(value) {
   if (!value) return 'Date unavailable'
@@ -58,30 +59,30 @@ function DashboardSession({ token, logout }) {
   }, [token, logout, attempt])
 
   const retry = () => { setError(''); setLoading(true); setAttempt((previous) => previous + 1) }
-  const created = (event) => {
+  const created = (event, warning = '') => {
     setEvents((previous) => sortEvents([event, ...previous.filter((item) => item.id !== event.id)]))
     setCreating(false)
-    setNotice(`“${event.title}” was created successfully.`)
+    setNotice(`“${event.title}” was created successfully.${warning ? ` ${warning}` : ''}`)
   }
 
   return (
     <main className="min-h-screen bg-canvas text-ink">
       <header className="bg-primary text-white">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-5 sm:px-8">
-          <span className="text-xl font-extrabold uppercase tracking-widest">Eventify<span className="ml-3 hidden text-sm font-normal text-white/60 sm:inline">Organizer</span></span>
-          <button type="button" onClick={logout} className="rounded-control px-3 py-2 text-sm text-white/75 transition-colors hover:bg-white/10 hover:text-white">Log out</button>
+          <span className="text-xl font-extrabold uppercase tracking-widest">Eventify<span className="ml-3 hidden text-sm font-normal normal-case tracking-normal text-white/60 sm:inline">Organizer</span></span>
+          <button type="button" onClick={logout} className="rounded-control px-3 py-2 text-sm font-medium text-white/75 transition-colors hover:bg-white/10 hover:text-white">Log out</button>
+        </div>
+        <div className="mx-auto flex max-w-6xl flex-col justify-between gap-6 px-5 pb-12 pt-10 sm:flex-row sm:items-end sm:px-8">
+          <div>
+            <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl">Organizer dashboard</h1>
+            <p className="mt-3 text-lg font-medium text-white/80">Events you’ve created, in start order.</p>
+          </div>
+          <button type="button" onClick={() => setCreating(true)} disabled={loading || Boolean(error)} className="h-12 shrink-0 rounded-control bg-accent px-6 text-base font-semibold text-white transition-colors hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-50">New event</button>
         </div>
       </header>
       <div className="mx-auto max-w-6xl px-5 py-10 sm:px-8 sm:py-12">
-        <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-center">
-          <div>
-            <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">Organizer dashboard</h1>
-            <p className="mt-3 text-sm text-muted">Events you’ve created, in start order.</p>
-          </div>
-          <button type="button" onClick={() => setCreating(true)} disabled={loading || Boolean(error)} className="h-11 shrink-0 rounded-control bg-accent px-5 text-sm font-semibold text-white transition-colors hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-50">New event</button>
-        </div>
-        {notice && <p role="status" className="mt-6 rounded-card bg-success/10 px-4 py-3 text-sm font-medium text-success">{notice}</p>}
-        <section aria-labelledby="your-events-heading" className="mt-10">
+        {notice && <p role="status" className="mb-8 rounded-card bg-success/10 px-4 py-3 text-sm font-medium text-success">{notice}</p>}
+        <section aria-labelledby="your-events-heading">
           <div className="mb-5 flex items-baseline gap-3">
             <h2 id="your-events-heading" className="text-2xl font-bold">Your events</h2>
             {!loading && !error && <span className="font-mono text-xs tabular-nums text-muted">{events.length}</span>}
@@ -95,16 +96,24 @@ function DashboardSession({ token, logout }) {
                     const online = event.event_type === 'online'
                     const physical = event.event_type === 'physical'
                     const TypeIcon = online ? Globe : MapPin
-                    return <article key={event.id} className="flex flex-col rounded-card border border-border bg-surface p-6">
-                      <span className="inline-flex items-center gap-1.5 self-start text-xs font-semibold text-muted">{(online || physical) && <TypeIcon aria-hidden="true" strokeWidth={1.5} className="h-4 w-4" />}{online ? 'Online' : physical ? 'Physical' : 'Event'}</span>
-                      <h3 className="mt-3 break-words text-xl font-bold leading-snug">{event.title}</h3>
-                      {event.description && <p className="mt-2 whitespace-pre-line break-words text-sm leading-6 text-muted">{event.description}</p>}
-                      <dl className="mt-5 space-y-3 border-t border-border pt-5 text-sm">
-                        <div><dt className="text-xs font-semibold text-muted">Starts</dt><dd className="mt-1"><time dateTime={event.start_at}>{formatDate(event.start_at)}</time></dd></div>
-                        <div><dt className="text-xs font-semibold text-muted">Ends</dt><dd className="mt-1"><time dateTime={event.end_at}>{formatDate(event.end_at)}</time></dd></div>
-                        {online ? <div><dt className="text-xs font-semibold text-muted">Event link</dt><dd className="mt-1 break-words">{url ? <a href={url} target="_blank" rel="noopener noreferrer" className="text-accent underline-offset-4 hover:underline">Open event website ↗</a> : 'Link unavailable'}</dd></div>
-                          : physical ? <div><dt className="text-xs font-semibold text-muted">Venue</dt><dd className="mt-1 break-words">{event.venue_name || 'Venue unavailable'}<span className="mt-1 block text-muted">{event.address}</span></dd></div> : null}
-                      </dl>
+                    const parts = dateParts(event.start_at)
+                    return <article key={event.id} className="flex flex-col overflow-hidden rounded-card border border-border bg-surface shadow-sm">
+                      <div className={`relative h-40 overflow-hidden ${event.cover_url ? 'bg-canvas' : tileColor(event.id)}`}>
+                        {event.cover_url
+                          ? <img src={event.cover_url} alt="" className="h-full w-full object-cover" />
+                          : parts && <div className="absolute bottom-3 left-5 flex items-end gap-3 text-white"><span className="text-6xl font-extrabold leading-[0.85] tabular-nums">{parts.day}</span><span className="pb-0.5 text-base font-bold leading-tight">{parts.month}<span className="block font-medium text-white/80">{parts.weekday}</span></span></div>}
+                        <span className={`absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-semibold ${event.cover_url ? 'bg-surface text-ink' : 'bg-white/20 text-white'}`}>{(online || physical) && <TypeIcon aria-hidden="true" strokeWidth={1.5} className="h-4 w-4" />}{online ? 'Online' : physical ? 'Physical' : 'Event'}</span>
+                      </div>
+                      <div className="flex flex-1 flex-col p-6">
+                        <h3 className="break-words text-xl font-bold leading-snug">{event.title}</h3>
+                        {event.description && <p className="mt-2 whitespace-pre-line break-words text-sm leading-6 text-muted">{event.description}</p>}
+                        <dl className="mt-5 space-y-3 border-t border-border pt-5 text-sm">
+                          <div><dt className="text-xs font-semibold text-muted">Starts</dt><dd className="mt-1"><time dateTime={event.start_at}>{formatDate(event.start_at)}</time></dd></div>
+                          <div><dt className="text-xs font-semibold text-muted">Ends</dt><dd className="mt-1"><time dateTime={event.end_at}>{formatDate(event.end_at)}</time></dd></div>
+                          {online ? <div><dt className="text-xs font-semibold text-muted">Event link</dt><dd className="mt-1 break-words">{url ? <a href={url} target="_blank" rel="noopener noreferrer" className="text-accent underline-offset-4 hover:underline">Open event website ↗</a> : 'Link unavailable'}</dd></div>
+                            : physical ? <div><dt className="text-xs font-semibold text-muted">Venue</dt><dd className="mt-1 break-words">{event.venue_name || 'Venue unavailable'}<span className="mt-1 block text-muted">{event.address}</span></dd></div> : null}
+                        </dl>
+                      </div>
                     </article>
                   })}
                 </div>}

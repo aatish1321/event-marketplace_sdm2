@@ -4,7 +4,8 @@ import { useAuth } from '../context/AuthContext'
 export const focusRing = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus'
 
 // Dark top bar and footer shared by the attendee pages (design: Designpages).
-export default function AttendeeLayout({ children }) {
+// `hero` is an optional full-width band shown between the bar and the page content.
+export default function AttendeeLayout({ hero, children }) {
   const { logout } = useAuth()
   return (
     <div className="flex min-h-screen flex-col bg-canvas font-sans text-ink">
@@ -19,6 +20,8 @@ export default function AttendeeLayout({ children }) {
           </div>
         </div>
       </nav>
+
+      {hero}
 
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-12 md:px-6">{children}</main>
 

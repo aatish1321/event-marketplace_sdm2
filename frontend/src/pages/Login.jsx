@@ -3,6 +3,7 @@ import { Link, Navigate } from 'react-router-dom'
 import { ApiError, loginUser } from '../api/auth'
 import { useAuth } from '../context/AuthContext'
 import { getRoleHome } from '../lib/authRoutes'
+import AuthShell from '../components/AuthShell'
 
 const EMAIL_RE = /^\S+@\S+\.\S+$/
 
@@ -48,11 +49,8 @@ export default function Login() {
   if (isAuthenticated && home) return <Navigate to={home} replace />
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-canvas px-4 py-10 selection:bg-primary selection:text-white">
-      <Link to="/" className="absolute left-8 top-8 hidden text-xl font-extrabold uppercase tracking-widest text-primary md:block">
-        Eventify
-      </Link>
-      <div className="w-full max-w-[440px] rounded-2xl border border-border bg-surface p-8 md:p-12">
+    <AuthShell>
+      <div>
         <h1 className="text-4xl font-extrabold tracking-tight text-primary">Log in</h1>
         <p className="mt-3 text-base text-secondary">Use your email and password.</p>
         <form onSubmit={handleSubmit} noValidate aria-busy={submitting} className="mt-8 space-y-5">
@@ -100,6 +98,6 @@ export default function Login() {
           New here? <Link to="/register" className="font-medium text-primary underline underline-offset-4 transition-colors hover:text-accent">Create an account</Link>
         </p>
       </div>
-    </main>
+    </AuthShell>
   )
 }

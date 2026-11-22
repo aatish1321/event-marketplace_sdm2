@@ -45,70 +45,101 @@ const forOrganizers = [
   { title: 'Run it from one place', body: 'Scan guests, monitor sales, message attendees, and receive fast payouts.' },
 ];
 
-const container = 'mx-auto w-full max-w-[1440px] px-6 lg:px-12';
 const h2 = 'text-3xl font-extrabold leading-[1.1] tracking-tight md:text-5xl';
 const button = 'inline-flex h-12 items-center justify-center gap-2 rounded-control px-6 text-base font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2';
 const buttonPrimary = `${button} bg-accent text-white hover:bg-accent/90`;
-const buttonOnDark = `${button} bg-white/10 text-white ring-1 ring-inset ring-white/15 hover:bg-white/15`;
 
 const Landing = () => {
   const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-canvas font-sans text-primary selection:bg-primary selection:text-white">
-      {/* Navigation + hero scene */}
-      <header className="relative isolate bg-primary text-white">
-        <img
-          src={afterglowImg}
-          alt=""
-          className="absolute inset-0 -z-10 h-full w-full object-cover object-[70%_62%]"
-        />
-        {/* Neutral scrim so the headline sits on calm, dark space */}
-        <div aria-hidden="true" className="absolute inset-0 -z-10 bg-gradient-to-r from-primary/90 via-primary/45 to-transparent" />
-
-        <nav className={`${container} flex h-16 items-center justify-between`}>
-          <Link to="/" className="text-xl font-extrabold uppercase tracking-widest">Eventify</Link>
-          <div className="flex items-center gap-6">
-            <Link to="/login" className="text-sm text-white/80 transition-colors hover:text-white">Log in</Link>
-            <Link to="/register" className="inline-flex h-9 items-center rounded-control bg-white/10 px-4 text-sm font-semibold ring-1 ring-inset ring-white/15 transition-colors hover:bg-white/15">
-              Sign up
+      {/* Navigation + Hero Wrapper */}
+      <div className="relative overflow-hidden bg-[#D8DAE0] lg:overflow-visible">
+        {/* Navigation */}
+        <nav className="w-full relative z-30">
+          <div className="flex h-24 items-center justify-between px-6 lg:px-12 max-w-[1600px] mx-auto">
+            <Link to="/" className="text-2xl font-black tracking-widest uppercase text-primary">
+              EVENTIFY
             </Link>
+            <div className="flex items-center gap-6 md:gap-8">
+              <Link to="/login" className="text-sm font-medium hover:text-[#243B53] text-primary">
+                Log in
+              </Link>
+              <Link to="/register" className="inline-flex h-[44px] items-center justify-center whitespace-nowrap rounded-full bg-primary px-6 text-sm font-medium text-white shadow-sm transition-colors hover:bg-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2">
+                Sign up
+              </Link>
+            </div>
           </div>
         </nav>
 
-        <div className={`${container} relative flex min-h-[600px] flex-col pb-16 pt-16 lg:min-h-[calc(100svh-4rem)] lg:pb-0 lg:pt-28`}>
-          <div className="max-w-2xl">
-            <h1 className="max-w-2xl text-balance text-[2.5rem] font-extrabold leading-[1.02] tracking-[-0.03em] sm:text-6xl lg:text-[4.5rem]">
-              Tickets for what's on this weekend
-            </h1>
-            <p className="mt-6 max-w-xl text-lg font-medium leading-7 text-white/80">
-              Concerts, comedy, sports and talks near you. Book in seconds, or publish your own event with tools built for organizers.
-            </p>
-            <div className="mt-10 flex flex-wrap items-center gap-3">
-              <Link to="/discover" className={buttonPrimary}>Browse events</Link>
-              <Link to="/register" className={buttonOnDark}>Create an event</Link>
-            </div>
-          </div>
+        {/* Hero Section */}
+        <section className="relative pt-4 pb-24 lg:pt-10 lg:pb-32">
+            <div className="max-w-[1600px] mx-auto px-6 lg:px-12">
+              <div className="grid lg:grid-cols-[52%_1fr] gap-12 lg:gap-16 items-center">
+                
+                <div className="w-full flex flex-col items-center text-center relative z-10 lg:pr-8 py-8 lg:py-16">
+                  {/* Floating Emojis */}
+                  <div className="absolute top-10 left-0 md:left-10 text-4xl animate-float motion-reduce:animate-none hover:scale-125 hover:-rotate-12 transition-transform cursor-pointer z-0 opacity-80">🎟️</div>
+                  <div className="absolute top-20 right-0 md:right-10 text-5xl animate-float-delayed motion-reduce:animate-none hover:scale-125 hover:rotate-12 transition-transform cursor-pointer z-0 opacity-80">🎪</div>
+                  <div className="absolute bottom-20 left-4 md:left-20 text-5xl animate-float-slow motion-reduce:animate-none hover:scale-125 hover:-rotate-12 transition-transform cursor-pointer z-0 opacity-80">🎸</div>
+                  <div className="absolute bottom-32 right-8 md:right-24 text-4xl animate-float motion-reduce:animate-none hover:scale-125 hover:rotate-12 transition-transform cursor-pointer z-0 opacity-80">🎭</div>
+                  <div className="absolute top-48 left-[15%] text-3xl animate-float-delayed motion-reduce:animate-none hover:scale-125 hover:-rotate-12 transition-transform cursor-pointer z-0 opacity-60 hidden md:block">🎵</div>
+                  <div className="absolute bottom-16 right-[20%] text-3xl animate-float-slow motion-reduce:animate-none hover:scale-125 hover:rotate-12 transition-transform cursor-pointer z-0 opacity-60 hidden md:block">🍻</div>
+                  
+                  {/* Additional emojis closer to the text */}
+                  <div className="absolute top-[25%] left-[30%] text-4xl animate-float motion-reduce:animate-none hover:scale-125 hover:rotate-12 transition-transform cursor-pointer z-20 opacity-90 hidden md:block">🎉</div>
+                  <div className="absolute top-[35%] right-[28%] text-5xl animate-float-slow motion-reduce:animate-none hover:scale-125 hover:-rotate-12 transition-transform cursor-pointer z-0 opacity-70 hidden md:block">🎤</div>
+                  <div className="absolute bottom-[30%] left-[28%] text-4xl animate-float-delayed motion-reduce:animate-none hover:scale-125 hover:rotate-12 transition-transform cursor-pointer z-0 opacity-80 hidden md:block">💃</div>
+                  <div className="absolute bottom-[20%] right-[35%] text-3xl animate-float motion-reduce:animate-none hover:scale-125 hover:-rotate-12 transition-transform cursor-pointer z-20 opacity-90 hidden md:block">🍕</div>
+                  <div className="absolute top-[5%] left-[45%] text-4xl animate-float-slow motion-reduce:animate-none hover:scale-125 hover:-rotate-12 transition-transform cursor-pointer z-0 opacity-70">🎇</div>
+                  <div className="absolute bottom-[5%] left-[55%] text-5xl animate-float-delayed motion-reduce:animate-none hover:scale-125 hover:rotate-12 transition-transform cursor-pointer z-0 opacity-60">🥂</div>
 
-          {/* Product view: a ticket for the featured event, rising past the hero edge */}
-          <article className="relative z-10 mt-12 w-full max-w-sm rounded-card bg-surface text-ink shadow-xl lg:absolute lg:bottom-0 lg:right-12 lg:mt-0 lg:w-[400px] lg:translate-y-8">
-            <div className="p-5">
-              <h2 className="text-xl font-bold">Afterglow Festival</h2>
-              <p className="mt-1 text-sm font-medium text-muted">Brooklyn Mirage · New York</p>
+                  <h1 className="text-[11vw] sm:text-[5.5rem] lg:text-[6.5rem] xl:text-[7.5rem] font-black leading-[0.95] tracking-tight mb-8 uppercase text-primary relative z-10">
+                    DON'T LET THE<br />
+                    <span className="whitespace-nowrap">WEEKEND</span><br />
+                    <span className="whitespace-nowrap">SLIP AWAY</span>
+                  </h1>
+                  <p className="text-[1.1rem] text-[#243B53] font-medium mb-12 max-w-lg leading-relaxed">
+                    Discover concerts, comedy, sports, talks, and one-of-a-kind experiences. Book in seconds—or bring your own event to life with tools built for organizers.
+                  </p>
+                  <div className="flex items-center justify-center gap-3 flex-wrap">
+                    <span className="text-sm font-bold text-[#243B53] mr-2">Popular:</span>
+                    <span className="text-sm font-semibold px-4 py-2 border border-[#C3C6CD]/80 bg-[#ECEEF3]/50 rounded-full cursor-pointer hover:bg-[#ECEEF3] transition-colors text-[#243B53] shadow-sm">Live music</span>
+                    <span className="text-sm font-semibold px-4 py-2 border border-[#C3C6CD]/80 bg-[#ECEEF3]/50 rounded-full cursor-pointer hover:bg-[#ECEEF3] transition-colors text-[#243B53] shadow-sm">This weekend</span>
+                    <span className="text-sm font-semibold px-4 py-2 border border-[#C3C6CD]/80 bg-[#ECEEF3]/50 rounded-full cursor-pointer hover:bg-[#ECEEF3] transition-colors text-[#243B53] shadow-sm">Comedy</span>
+                  </div>
+                </div>
+                
+              </div>
             </div>
-            <div className="mx-5 flex items-center justify-between border-t border-dashed border-ink/25 py-4">
-              <p className="font-mono text-xs font-semibold tabular-nums text-muted">Sat, Oct 17 · 7:30 PM</p>
-              <Link to="/discover" className="inline-flex items-center gap-1 text-sm font-semibold text-ink transition-colors hover:text-accent">
-                Get tickets <ArrowRight className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
-              </Link>
+            
+            <div className="lg:absolute lg:top-6 lg:bottom-24 lg:right-0 lg:w-[48%] xl:w-[48%] relative w-full h-[60vh] lg:h-auto rounded-[2rem] lg:rounded-none lg:rounded-l-[2rem] overflow-hidden group mx-6 lg:mx-0 w-[calc(100%-3rem)] lg:w-auto z-20 shadow-2xl">
+              <img 
+                src={afterglowImg} 
+                alt="Festival" 
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+              <div className="absolute top-8 right-8 flex gap-1.5 z-30">
+                 <div className="w-5 h-1.5 bg-[#ECEEF3] rounded-full"></div>
+                 <div className="w-5 h-1.5 bg-[#ECEEF3]/30 rounded-full"></div>
+              </div>
+              <div className="absolute top-8 left-8 bg-[#ECEEF3] px-3 py-1.5 rounded-full flex items-center gap-2 shadow-lg z-30">
+                 <div className="w-2 h-2 rounded-full bg-[#C85A17]"></div>
+                 <span className="text-[10px] font-black uppercase tracking-wider text-primary">Trending Now</span>
+              </div>
+              <div className="absolute bottom-0 left-0 right-0 p-8 lg:p-10 bg-gradient-to-t from-black/90 via-black/40 to-transparent text-white z-30">
+                <p className="text-xs font-bold text-[#C85A17] uppercase mb-2 tracking-widest">Sat, Oct 17 • 7:30 PM</p>
+                <h3 className="text-3xl lg:text-4xl font-medium mb-1">Afterglow Festival</h3>
+                <p className="text-white/70 text-sm font-medium">Brooklyn Mirage • New York</p>
+              </div>
             </div>
-          </article>
+          </section>
         </div>
-      </header>
 
       <main>
         {/* Event list */}
-        <section className="bg-primary px-6 pb-24 pt-24 text-white lg:px-12 lg:pt-32">
+        <section className="bg-primary px-6 py-24 text-white lg:px-12">
           <div className="mx-auto max-w-[1440px]">
             <p className="mb-3 text-sm font-semibold text-white/70">Editors' picks</p>
             <h2 className={h2}>Worth leaving the house for</h2>

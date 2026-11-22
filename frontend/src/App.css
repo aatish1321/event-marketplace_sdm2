@@ -6,6 +6,15 @@
 @theme {
   --default-transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
   --default-transition-duration: 150ms;
+
+  /* Floating emoji in the landing hero */
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-float-delayed: float 6s ease-in-out 3s infinite;
+  --animate-float-slow: float 8s ease-in-out 1s infinite;
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+  }
 }
 
 @layer base {

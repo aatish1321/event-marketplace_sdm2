@@ -5,6 +5,7 @@ import { ApiError } from '../api/auth'
 import { checkout, fetchEvent } from '../api/events'
 import { useAuth } from '../context/AuthContext'
 import { formatEventDate } from '../lib/dates'
+import { dateParts, tileColor } from '../lib/tiles'
 import AttendeeLayout, { focusRing } from '../components/AttendeeLayout'
 
 // User-facing text for each checkout error status (see backend checkout contract).
@@ -93,18 +94,40 @@ export default function EventDetails() {
     }
   }
 
+  // Cover photo behind the title, or the event's poster colour (with its big date) when there is none.
+  const parts = dateParts(event.start_at)
+  const hero = (
+    <section className={`relative isolate overflow-hidden text-white ${event.cover_url ? 'bg-primary' : tileColor(event.id)}`}>
+      {event.cover_url && (
+        <>
+          <img src={event.cover_url} alt="" className="absolute inset-0 -z-10 h-full w-full object-cover" />
+          <div aria-hidden="true" className="absolute inset-0 -z-10 bg-gradient-to-t from-primary/90 via-primary/60 to-primary/55" />
+        </>
+      )}
+      <div className="relative mx-auto max-w-6xl px-4 pb-24 pt-8 md:px-6 md:pb-28">
+        {!event.cover_url && parts && (
+          <div aria-hidden="true" className="absolute right-6 top-16 hidden items-end gap-4 md:flex">
+            <span className="text-[9rem] font-extrabold leading-[0.8] tracking-tight tabular-nums">{parts.day}</span>
+            <span className="pb-2 text-3xl font-bold leading-tight">
+              {parts.month}
+              <span className="block font-medium text-white/80">{parts.weekday}</span>
+            </span>
+          </div>
+        )}
+        <Link to="/discover" className={`inline-flex items-center gap-2 text-sm text-white/80 transition-colors hover:text-white ${focusRing}`}>
+          <ArrowLeft className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" /> Back to events
+        </Link>
+        <p className="mt-10 text-sm font-semibold text-white/85">{online ? 'Online event' : 'Physical event'}</p>
+        <h1 className="mt-2 max-w-3xl text-4xl font-extrabold tracking-tight md:text-6xl">{event.title}</h1>
+        {date && <p className="mt-4 font-mono text-sm font-semibold tabular-nums text-white/90"><time dateTime={event.start_at}>{date}</time></p>}
+      </div>
+    </section>
+  )
+
   return (
-    <AttendeeLayout>
-      <Link to="/discover" className={`inline-flex items-center gap-2 text-sm text-muted transition-colors hover:text-ink ${focusRing}`}>
-        <ArrowLeft className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" /> Back to events
-      </Link>
-
-      <p className="mt-8 text-sm font-semibold text-muted">{online ? 'Online event' : 'Physical event'}</p>
-      <h1 className="mt-2 text-4xl font-extrabold tracking-tight md:text-5xl">{event.title}</h1>
-      {date && <p className="mt-3 font-mono text-sm font-semibold tabular-nums text-muted"><time dateTime={event.start_at}>{date}</time></p>}
-
-      <div className="mt-10 grid gap-8 md:grid-cols-[1fr_320px] md:items-start">
-        <div className="space-y-8">
+    <AttendeeLayout hero={hero}>
+      <div className="grid gap-8 md:-mt-24 md:grid-cols-[1fr_320px] md:items-start">
+        <div className="space-y-8 md:pt-24">
           <section>
             <h2 className="text-2xl font-bold">About this experience</h2>
             <p className="mt-3 whitespace-pre-line text-base font-medium text-muted">{event.description || 'The organizer has not added a description yet.'}</p>
@@ -121,7 +144,7 @@ export default function EventDetails() {
           </section>
         </div>
 
-        <aside aria-label="Buy tickets" className="order-first rounded-card border border-border bg-surface p-6 md:order-none md:sticky md:top-6">
+        <aside aria-label="Buy tickets" className="order-first rounded-card border border-border bg-surface p-6 shadow-card md:order-none md:sticky md:top-6">
           <p aria-live="polite" className={`text-3xl font-bold ${soldOut ? 'text-danger' : 'text-ink'}`}>
             {soldOut ? 'Sold out' : `${ticketsLabel(available)} left`}
           </p>

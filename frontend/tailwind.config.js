@@ -8,18 +8,22 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Text roles: primary (ink), secondary, muted. Muted is about 5.8:1 on canvas, more on surface.
+        // Text roles: primary (ink), secondary, muted. Muted stays above 6:1 on the paper canvas and white surface.
         primary: '#17212B',
         secondary: '#2B3744',
         muted: '#47515E',
         ink: '#17212B',
-        // Surfaces and hairline.
-        canvas: '#D8DAE0',
-        surface: '#ECEEF3',
+        // Warm paper page, white cards, hairline borders.
+        canvas: '#F4EFE7',
+        surface: '#FFFFFF',
         'surface-dark': '#17212B',
         border: 'rgba(23, 33, 43, 0.12)',
         // The one accent. 5.5:1 with white text, 4.7:1 as text on surface.
         accent: '#B04A0B',
+        // Poster colours for events without a cover photo; all keep 6:1+ with white text.
+        'poster-teal': '#0E6B66',
+        'poster-plum': '#6A2C5E',
+        'poster-cobalt': '#1F4E8C',
         success: '#0B6B4A',
         warning: '#B45309',
         danger: '#B42318',

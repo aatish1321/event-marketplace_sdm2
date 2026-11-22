@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { ROLES, useAuth } from '../context/AuthContext'
 import { ApiError, loginUser, registerUser } from '../api/auth'
 import { getRoleHome } from '../lib/authRoutes'
+import AuthShell from '../components/AuthShell'
 
 const ROLE_OPTIONS = [
   { value: ROLES.ATTENDEE, label: 'Register as Attendee' },
@@ -182,11 +183,8 @@ export default function Register() {
 
   if (registered) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-canvas px-4 py-10 selection:bg-primary selection:text-white">
-        <Link to="/" className="absolute left-8 top-8 hidden text-xl font-extrabold uppercase tracking-widest text-primary md:block">
-          Eventify
-        </Link>
-        <div className="w-full max-w-[440px] rounded-2xl border border-border bg-surface p-8 text-center md:p-12">
+      <AuthShell>
+        <div>
           <h1 className="text-4xl font-extrabold tracking-tight text-primary">Account created</h1>
           <p className="mt-3 text-base text-secondary">
             {registered.full_name}, your account is ready.
@@ -213,16 +211,13 @@ export default function Register() {
             </Link>
           )}
         </div>
-      </main>
+      </AuthShell>
     )
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-canvas px-4 py-10 selection:bg-primary selection:text-white">
-      <Link to="/" className="absolute left-8 top-8 hidden text-xl font-extrabold uppercase tracking-widest text-primary md:block">
-        Eventify
-      </Link>
-      <div className={`w-full ${isOrganizer ? 'max-w-4xl' : 'max-w-[440px]'} rounded-2xl border border-border bg-surface p-8 md:p-12`}>
+    <AuthShell wide={isOrganizer}>
+      <div>
         <h1 className="text-4xl font-extrabold tracking-tight text-primary">Create your account</h1>
         <p className="mt-3 text-base text-secondary">Book events, or publish your own.</p>
 
@@ -258,7 +253,7 @@ export default function Register() {
             </div>
           )}
 
-          <div className={`grid grid-cols-1 gap-8 ${isOrganizer ? 'md:grid-cols-2' : ''}`}>
+          <div className={`grid grid-cols-1 gap-8 ${isOrganizer ? 'xl:grid-cols-2' : ''}`}>
             {/* Left Column */}
             <div className="space-y-5">
               <Field label="Full name" name="full_name" value={form.full_name} onChange={handleChange} error={errors.full_name} autoComplete="name" />
@@ -280,7 +275,7 @@ export default function Register() {
             )}
           </div>
 
-          <div className={`${isOrganizer ? 'md:w-1/2 md:pr-4' : ''}`}>
+          <div className={`${isOrganizer ? 'xl:w-1/2 xl:pr-4' : ''}`}>
             <button
               type="submit"
               disabled={submitting}
@@ -290,12 +285,12 @@ export default function Register() {
             </button>
           </div>
         </form>
-        <div className={`${isOrganizer ? 'md:w-1/2 md:pr-4' : ''}`}>
+        <div className={`${isOrganizer ? 'xl:w-1/2 xl:pr-4' : ''}`}>
           <p className="mt-8 text-center text-sm text-secondary">
             Already registered? <Link to="/login" className="font-medium text-primary underline underline-offset-4 transition-colors hover:text-accent">Log in</Link>
           </p>
         </div>
       </div>
-    </main>
+    </AuthShell>
   )
 }
