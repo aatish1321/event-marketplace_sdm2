@@ -4,6 +4,7 @@ import { ApiError, loginUser } from '../api/auth'
 import { useAuth } from '../context/AuthContext'
 import { getRoleHome } from '../lib/authRoutes'
 import AuthShell from '../components/AuthShell'
+import usePageTitle from '../lib/usePageTitle'
 
 const EMAIL_RE = /^\S+@\S+\.\S+$/
 
@@ -15,6 +16,7 @@ export default function Login() {
   const [submitting, setSubmitting] = useState(false)
   const pending = useRef(false)
   const home = getRoleHome(userRole)
+  usePageTitle('Log in')
 
   const handleSubmit = async (event) => {
     event.preventDefault()
@@ -51,7 +53,7 @@ export default function Login() {
   return (
     <AuthShell>
       <div>
-        <h1 className="text-4xl font-extrabold tracking-tight text-primary">Log in</h1>
+        <h1 className="text-4xl font-extrabold tracking-[-0.04em] text-primary sm:text-5xl">Log in</h1>
         <p className="mt-3 text-base text-secondary">Use your email and password.</p>
         <form onSubmit={handleSubmit} noValidate aria-busy={submitting} className="mt-8 space-y-5">
           {errors.form && (

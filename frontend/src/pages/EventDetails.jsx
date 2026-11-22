@@ -7,6 +7,8 @@ import { useAuth } from '../context/AuthContext'
 import { formatEventDate } from '../lib/dates'
 import { dateParts, tileColor } from '../lib/tiles'
 import AttendeeLayout, { focusRing } from '../components/AttendeeLayout'
+import usePageTitle from '../lib/usePageTitle'
+import { pageContainer } from '../lib/layout'
 
 // User-facing text for each checkout error status (see backend checkout contract).
 const CHECKOUT_ERRORS = {
@@ -46,6 +48,8 @@ export default function EventDetails() {
       })
     return () => controller.abort()
   }, [eventId, version])
+
+  usePageTitle(loaded.event?.id === eventId ? loaded.event.title : 'Event')
 
   // Keep showing the current event while its count refreshes in the background.
   const event = loaded.event?.id === eventId ? loaded.event : null
@@ -104,9 +108,9 @@ export default function EventDetails() {
           <div aria-hidden="true" className="absolute inset-0 -z-10 bg-gradient-to-t from-primary/90 via-primary/60 to-primary/55" />
         </>
       )}
-      <div className="relative mx-auto max-w-6xl px-4 pb-24 pt-8 md:px-6 md:pb-28">
+      <div className={`${pageContainer} relative pb-24 pt-8 md:pb-28`}>
         {!event.cover_url && parts && (
-          <div aria-hidden="true" className="absolute right-6 top-16 hidden items-end gap-4 md:flex">
+          <div aria-hidden="true" className="absolute right-6 top-16 hidden items-end gap-4 md:flex lg:right-12">
             <span className="text-[9rem] font-extrabold leading-[0.8] tracking-tight tabular-nums">{parts.day}</span>
             <span className="pb-2 text-3xl font-bold leading-tight">
               {parts.month}
@@ -118,8 +122,8 @@ export default function EventDetails() {
           <ArrowLeft className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" /> Back to events
         </Link>
         <p className="mt-10 text-sm font-semibold text-white/85">{online ? 'Online event' : 'Physical event'}</p>
-        <h1 className="mt-2 max-w-3xl text-4xl font-extrabold tracking-tight md:text-6xl">{event.title}</h1>
-        {date && <p className="mt-4 font-mono text-sm font-semibold tabular-nums text-white/90"><time dateTime={event.start_at}>{date}</time></p>}
+        <h1 className="mt-3 max-w-4xl text-balance text-5xl font-extrabold leading-[0.95] tracking-[-0.04em] md:text-7xl">{event.title}</h1>
+        {date && <p className="mt-5 text-base font-semibold tabular-nums text-white/90"><time dateTime={event.start_at}>{date}</time></p>}
       </div>
     </section>
   )
@@ -129,17 +133,17 @@ export default function EventDetails() {
       <div className="grid gap-8 md:-mt-24 md:grid-cols-[1fr_320px] md:items-start">
         <div className="space-y-8 md:pt-24">
           <section>
-            <h2 className="text-2xl font-bold">About this experience</h2>
+            <h2 className="text-2xl font-extrabold tracking-[-0.03em]">About this experience</h2>
             <p className="mt-3 whitespace-pre-line text-base font-medium text-muted">{event.description || 'The organizer has not added a description yet.'}</p>
           </section>
           <section>
-            <h2 className="text-2xl font-bold">Where you'll be</h2>
+            <h2 className="text-2xl font-extrabold tracking-[-0.03em]">Where you’ll be</h2>
             <p className="mt-3 flex items-center gap-2 text-base text-muted">
               <PlaceIcon className="h-4 w-4 shrink-0" strokeWidth={1.5} aria-hidden="true" /> {place || 'Location to be announced'}
             </p>
           </section>
           <section>
-            <h2 className="text-2xl font-bold">Before you go</h2>
+            <h2 className="text-2xl font-extrabold tracking-[-0.03em]">Before you go</h2>
             <p className="mt-3 text-base font-medium text-muted">Bring your ticket confirmation. Organizer cancellation policies apply.</p>
           </section>
         </div>

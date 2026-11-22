@@ -30,7 +30,8 @@ export default {
         focus: '#2563EB',
       },
       fontFamily: {
-        sans: ['Manrope', 'Inter', 'system-ui', 'sans-serif'],
+        // Self-hosted via @fontsource-variable/geist (imported in main.jsx).
+        sans: ['"Geist Variable"', 'Inter', 'system-ui', 'sans-serif'],
       },
       borderRadius: {
         card: "12px",

@@ -76,7 +76,7 @@ export default function EventCard({
         {/* Tear-off stub: the ticket signature. Date and price sit under a dashed perforation. */}
         <div className="mt-auto pt-5">
           <div className="border-t border-dashed border-ink/25 pt-4">
-            {date && <p className="font-mono text-xs font-semibold tabular-nums text-muted">{date}</p>}
+            {date && <p className="text-xs font-semibold tabular-nums text-muted">{date}</p>}
             <div className="mt-3 flex items-center justify-between gap-3">
               <span className="text-sm font-semibold text-ink">{price}</span>
               <button

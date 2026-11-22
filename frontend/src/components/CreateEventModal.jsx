@@ -144,7 +144,7 @@ export default function CreateEventModal({ token, onClose, onCreated, onUnauthor
   return (
     <dialog ref={dialogRef} aria-labelledby="create-event-title" aria-describedby="create-event-description" onCancel={(event) => { event.preventDefault(); if (!pending.current) onClose() }} className="m-auto max-h-[90dvh] w-[calc(100%_-_2rem)] max-w-xl overflow-y-auto rounded-2xl bg-surface p-0 text-ink shadow-2xl backdrop:bg-primary/60">
       <div className="border-b border-border px-6 py-5">
-        <h2 id="create-event-title" className="text-xl font-bold text-ink">Create an event</h2>
+        <h2 id="create-event-title" className="text-2xl font-extrabold tracking-[-0.03em] text-ink">Create an event</h2>
         <p id="create-event-description" className="mt-1 text-sm text-muted">Start with the essentials.</p>
       </div>
       <form onSubmit={submit} noValidate aria-busy={submitting} className="space-y-5 p-6">

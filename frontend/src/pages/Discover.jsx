@@ -6,6 +6,8 @@ import { formatEventDate } from '../lib/dates'
 import AttendeeLayout, { focusRing } from '../components/AttendeeLayout'
 import EventCard from '../components/EventCard'
 import heroImg from '../assets/afterglow.jpg'
+import usePageTitle from '../lib/usePageTitle'
+import { pageContainer } from '../lib/layout'
 
 // Stored values must match the backend exactly (case-sensitive).
 const CONTINENTS = ['Africa', 'Antarctica', 'Asia', 'Europe', 'North America', 'Oceania', 'South America']
@@ -41,6 +43,7 @@ function toCardProps(event) {
 
 export default function Discover() {
   const navigate = useNavigate()
+  usePageTitle('Discover events')
   const [filters, setFilters] = useState(EMPTY_FILTERS)
   const [countryInput, setCountryInput] = useState('')
   // The URL a result belongs to tells us whether it is still current.
@@ -79,9 +82,9 @@ export default function Discover() {
       <img src={heroImg} alt="" className="absolute inset-0 -z-10 h-full w-full object-cover object-[50%_60%]" />
       {/* Neutral scrim so the headline sits on calm, dark space */}
       <div aria-hidden="true" className="absolute inset-0 -z-10 bg-gradient-to-r from-primary/90 via-primary/65 to-primary/35" />
-      <div className="mx-auto max-w-6xl px-4 pb-10 pt-14 md:px-6">
-        <h1 className="max-w-2xl text-4xl font-extrabold tracking-tight md:text-6xl">Discover events</h1>
-        <p className="mt-4 max-w-xl text-lg font-medium text-white/80">Physical and online events. Filter by continent or country.</p>
+      <div className={`${pageContainer} pb-12 pt-16`}>
+        <h1 className="max-w-3xl text-5xl font-extrabold leading-[0.92] tracking-[-0.045em] md:text-7xl">Discover events</h1>
+        <p className="mt-6 max-w-xl text-lg leading-8 text-white/80 sm:text-xl">Physical and online events. Filter by continent or country.</p>
 
         <form
           role="search"
@@ -89,7 +92,7 @@ export default function Discover() {
             e.preventDefault()
             setFilter('country', countryInput) // skip the typing delay
           }}
-          className="mt-8 flex flex-col gap-4 rounded-card bg-surface p-4 text-ink shadow-xl md:flex-row md:items-center"
+          className="mt-10 flex flex-col gap-4 rounded-card bg-surface p-4 text-ink shadow-2xl md:flex-row md:items-center md:pl-6"
         >
           <label className="flex-1">
             <span className={fieldLabel}>Continent</span>
@@ -140,13 +143,29 @@ export default function Discover() {
 
       <section className="mt-8" aria-live="polite" aria-busy={status === 'loading'}>
         <div className="mb-4 flex items-baseline justify-between gap-4">
-          <h2 className="text-2xl font-bold">Events</h2>
+          <h2 className="text-3xl font-extrabold tracking-[-0.03em]">Events</h2>
           {status === 'ready' && (
-            <span className="font-mono text-xs tabular-nums text-muted">{result.events.length} {result.events.length === 1 ? 'event' : 'events'}</span>
+            <span className="text-sm font-semibold tabular-nums text-muted">{result.events.length} {result.events.length === 1 ? 'event' : 'events'}</span>
           )}
         </div>
 
-        {status === 'loading' && <p className="text-sm text-muted">Loading events…</p>}
+        {status === 'loading' && (
+          <>
+            <p className="sr-only">Loading events…</p>
+            <ul aria-hidden="true" className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {[0, 1, 2, 3].map((item) => (
+                <li key={item} className="overflow-hidden rounded-card border border-border bg-surface">
+                  <div className="aspect-[4/3] animate-pulse bg-ink/5 motion-reduce:animate-none" />
+                  <div className="space-y-3 p-5">
+                    <div className="h-5 w-3/4 rounded bg-ink/5" />
+                    <div className="h-4 w-1/2 rounded bg-ink/5" />
+                    <div className="h-10 w-full rounded-control bg-ink/5" />
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
         {status === 'error' && (
           <p role="alert" className="rounded-card bg-danger/10 px-4 py-3 text-sm font-medium text-danger">
             Could not load events. Please try again.

@@ -4,6 +4,7 @@ import { ROLES, useAuth } from '../context/AuthContext'
 import { ApiError, loginUser, registerUser } from '../api/auth'
 import { getRoleHome } from '../lib/authRoutes'
 import AuthShell from '../components/AuthShell'
+import usePageTitle from '../lib/usePageTitle'
 
 const ROLE_OPTIONS = [
   { value: ROLES.ATTENDEE, label: 'Register as Attendee' },
@@ -108,6 +109,7 @@ export default function Register() {
   const [registered, setRegistered] = useState(null) // backend response on success
 
   const isOrganizer = role === ROLES.ORGANIZER
+  usePageTitle(registered ? 'Account created' : 'Create your account')
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -185,7 +187,7 @@ export default function Register() {
     return (
       <AuthShell>
         <div>
-          <h1 className="text-4xl font-extrabold tracking-tight text-primary">Account created</h1>
+          <h1 className="text-4xl font-extrabold tracking-[-0.04em] text-primary sm:text-5xl">Account created</h1>
           <p className="mt-3 text-base text-secondary">
             {registered.full_name}, your account is ready.
           </p>
@@ -218,7 +220,7 @@ export default function Register() {
   return (
     <AuthShell wide={isOrganizer}>
       <div>
-        <h1 className="text-4xl font-extrabold tracking-tight text-primary">Create your account</h1>
+        <h1 className="text-4xl font-extrabold tracking-[-0.04em] text-primary sm:text-5xl">Create your account</h1>
         <p className="mt-3 text-base text-secondary">Book events, or publish your own.</p>
 
         {/* Role toggle */}

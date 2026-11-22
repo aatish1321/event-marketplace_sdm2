@@ -5,6 +5,9 @@ import { listEvents } from '../api/events'
 import { useAuth } from '../context/AuthContext'
 import CreateEventModal from '../components/CreateEventModal'
 import { dateParts, tileColor } from '../lib/tiles'
+import SiteFooter from '../components/SiteFooter'
+import usePageTitle from '../lib/usePageTitle'
+import { pageContainer } from '../lib/layout'
 
 function formatDate(value) {
   if (!value) return 'Date unavailable'
@@ -31,6 +34,7 @@ function safeUrl(value) {
 
 export default function OrganizerDashboard() {
   const { token, logout } = useAuth()
+  usePageTitle('Organizer dashboard')
   // A new account/session must never inherit another organizer's visible data,
   // pending dialog or requests, including sessions changed in another tab.
   return <DashboardSession key={token} token={token} logout={logout} />
@@ -66,26 +70,26 @@ function DashboardSession({ token, logout }) {
   }
 
   return (
-    <main className="min-h-screen bg-canvas text-ink">
+    <div className="flex min-h-screen flex-col bg-canvas text-ink">
       <header className="bg-primary text-white">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-5 sm:px-8">
-          <span className="text-xl font-extrabold uppercase tracking-widest">Eventify<span className="ml-3 hidden text-sm font-normal normal-case tracking-normal text-white/60 sm:inline">Organizer</span></span>
+        <div className={`${pageContainer} flex h-16 items-center justify-between gap-4`}>
+          <span className="text-xl font-extrabold uppercase tracking-[0.2em]">Eventify<span className="ml-3 hidden text-sm font-normal normal-case tracking-normal text-white/60 sm:inline">Organizer</span></span>
           <button type="button" onClick={logout} className="rounded-control px-3 py-2 text-sm font-medium text-white/75 transition-colors hover:bg-white/10 hover:text-white">Log out</button>
         </div>
-        <div className="mx-auto flex max-w-6xl flex-col justify-between gap-6 px-5 pb-12 pt-10 sm:flex-row sm:items-end sm:px-8">
+        <div className={`${pageContainer} flex flex-col justify-between gap-6 pb-14 pt-12 sm:flex-row sm:items-end`}>
           <div>
-            <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl">Organizer dashboard</h1>
-            <p className="mt-3 text-lg font-medium text-white/80">Events you’ve created, in start order.</p>
+            <h1 className="text-5xl font-extrabold leading-[0.92] tracking-[-0.045em] sm:text-7xl">Organizer dashboard</h1>
+            <p className="mt-5 text-lg text-white/80 sm:text-xl">Events you’ve created, in start order.</p>
           </div>
-          <button type="button" onClick={() => setCreating(true)} disabled={loading || Boolean(error)} className="h-12 shrink-0 rounded-control bg-accent px-6 text-base font-semibold text-white transition-colors hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-50">New event</button>
+          <button type="button" onClick={() => setCreating(true)} disabled={loading || Boolean(error)} className="h-14 shrink-0 rounded-control bg-accent px-7 text-base font-semibold text-white transition-colors hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-50">New event</button>
         </div>
       </header>
-      <div className="mx-auto max-w-6xl px-5 py-10 sm:px-8 sm:py-12">
+      <main className={`${pageContainer} flex-1 py-12`}>
         {notice && <p role="status" className="mb-8 rounded-card bg-success/10 px-4 py-3 text-sm font-medium text-success">{notice}</p>}
         <section aria-labelledby="your-events-heading">
           <div className="mb-5 flex items-baseline gap-3">
-            <h2 id="your-events-heading" className="text-2xl font-bold">Your events</h2>
-            {!loading && !error && <span className="font-mono text-xs tabular-nums text-muted">{events.length}</span>}
+            <h2 id="your-events-heading" className="text-3xl font-extrabold tracking-[-0.03em]">Your events</h2>
+            {!loading && !error && <span className="text-sm font-semibold tabular-nums text-muted">{events.length}</span>}
           </div>
           {loading ? <p role="status" className="rounded-card border border-border bg-surface p-12 text-center text-sm text-muted">Loading your events…</p>
             : error ? <div role="alert" className="rounded-card bg-danger/10 p-8 text-center"><p className="text-sm text-danger">{error}</p><button type="button" onClick={retry} className="mt-4 h-10 rounded-control border border-danger/30 bg-surface px-4 text-sm font-medium text-danger transition-colors hover:border-danger">Try again</button></div>
@@ -118,8 +122,9 @@ function DashboardSession({ token, logout }) {
                   })}
                 </div>}
         </section>
-      </div>
+      </main>
+      <SiteFooter compact />
       {creating && <CreateEventModal token={token} onClose={() => setCreating(false)} onCreated={created} onUnauthorized={logout} />}
-    </main>
+    </div>
   )
 }
