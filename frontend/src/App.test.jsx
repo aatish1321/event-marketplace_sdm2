@@ -6,7 +6,7 @@ import { AuthProvider } from './context/AuthContext'
 import { makeToken } from './test/authFixtures'
 
 describe('application auth routes', () => {
-  it.each(['/discover', '/dashboard', '/admin-logs'])('guards direct navigation to %s', (path) => {
+  it.each(['/discover', '/dashboard', '/admin-logs', '/my-tickets'])('guards direct navigation to %s', (path) => {
     window.history.replaceState({}, '', path)
     render(<AuthProvider><App /></AuthProvider>)
     expect(screen.getByRole('heading', { name: 'Log in' })).toBeInTheDocument()
@@ -21,7 +21,10 @@ describe('application auth routes', () => {
     window.history.replaceState({}, '', '/login')
     vi.stubGlobal('fetch', vi.fn().mockImplementation(async (url) => ({
       ok: true,
-      json: async () => url.startsWith('/api/events/') ? [] : { token: makeToken({ role }) },
+      json: async () => url.startsWith('/api/events/') ? []
+        : url.startsWith('/api/admin/logs/') ? { count: 0, limit: 20, offset: 0, results: [] }
+          : url.startsWith('/api/organizer/analytics/') ? { purchase_count: 0, tickets_sold: 0, events_with_sales: 0, unpriced_purchase_count: 0, revenue_by_currency: [] }
+            : { token: makeToken({ role }) },
     })))
     render(<AuthProvider><App /></AuthProvider>)
     const user = userEvent.setup()

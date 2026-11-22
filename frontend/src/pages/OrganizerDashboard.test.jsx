@@ -7,6 +7,8 @@ import ProtectedRoute from '../components/ProtectedRoute'
 import { makeToken } from '../test/authFixtures'
 import OrganizerDashboard from './OrganizerDashboard'
 
+vi.mock('../components/AnalyticsWidget', () => ({ default: () => null }))
+
 beforeAll(() => {
   HTMLDialogElement.prototype.showModal = function () { this.open = true }
   HTMLDialogElement.prototype.close = function () { this.open = false }
@@ -71,6 +73,35 @@ describe('Organizer dashboard and creation', () => {
     await user.type(screen.getByLabelText('Venue address'), '1 Main Street')
   }
   const png = () => new File([new Uint8Array([137, 80, 78, 71])], 'cover.png', { type: 'image/png' })
+
+  it('creates an event with an exact decimal price, currency and stock', async () => {
+    const fetch = vi.fn().mockResolvedValueOnce(response([]))
+      .mockResolvedValueOnce(response({ ...physical, title: 'New community event' }, 201))
+    renderDashboard(fetch)
+    const user = await openModal()
+    await fillPhysical(user)
+    await user.clear(screen.getByLabelText('Ticket price'))
+    await user.type(screen.getByLabelText('Ticket price'), '0.29')
+    await user.selectOptions(screen.getByLabelText('Currency'), 'USD')
+    await user.clear(screen.getByLabelText('Tickets available'))
+    await user.type(screen.getByLabelText('Tickets available'), '25')
+    await user.click(screen.getByRole('button', { name: 'Create event', exact: true }))
+    await screen.findByText('New community event')
+    expect(JSON.parse(fetch.mock.calls[1][1].body)).toMatchObject({ ticket_price_minor: 29, currency: 'USD', available_tickets: 25 })
+  })
+
+  it('rejects fractional inventory and prices with excess decimal places before posting', async () => {
+    const fetch = vi.fn().mockResolvedValue(response([]))
+    renderDashboard(fetch)
+    const user = await openModal()
+    await fillPhysical(user)
+    fireEvent.change(screen.getByLabelText('Ticket price'), { target: { value: '1.005' } })
+    fireEvent.change(screen.getByLabelText('Tickets available'), { target: { value: '1.5' } })
+    await user.click(screen.getByRole('button', { name: 'Create event', exact: true }))
+    expect(await screen.findByText(/Enter a non-negative price/)).toBeInTheDocument()
+    expect(screen.getByText(/Enter a non-negative whole number/)).toBeInTheDocument()
+    expect(fetch).toHaveBeenCalledTimes(1)
+  })
 
   it('uploads the chosen cover photo after creating the event and shows it', async () => {
     const created = { ...physical, id: 'created', title: 'New community event', cover_url: null }
