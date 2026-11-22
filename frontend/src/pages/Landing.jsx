@@ -1,6 +1,6 @@
-import { Link } from 'react-router-dom';
-import { ArrowRight, MapPin, Heart, ArrowUpRight, CheckCircle2 } from 'lucide-react';
-import { Button } from '../components/ui/button';
+import { Link, useNavigate } from 'react-router-dom';
+import { ArrowRight, ArrowUpRight } from 'lucide-react';
+import EventCard from '../components/EventCard';
 import afterglowImg from '../assets/afterglow.jpg';
 import foodFestivalImg from '../assets/food_festival.jpg';
 import designingTmrwImg from '../assets/desgining-tmrw.jpg';
@@ -8,326 +8,240 @@ import createEventImg from '../assets/create_the_event.jpg';
 
 const events = [
   {
-    category: 'CONCERT',
-    date: 'FRI, OCT 9 • 8:00 PM',
+    category: 'Concert',
+    date: 'Fri, Oct 9 · 8:00 PM',
     title: 'Solange: Notes From the Deep',
-    location: 'Radio City Music Hall • New York, NY',
-    price: '$74',
-    image: 'https://picsum.photos/seed/event1/800/600'
+    venue: 'Radio City Music Hall · New York, NY',
+    price: 'From $74',
+    imageUrl: afterglowImg,
   },
   {
-    category: 'FOOD & DRINK',
-    date: 'SAT, OCT 10 • 12:00 PM',
+    category: 'Food & drink',
+    date: 'Sat, Oct 10 · 12:00 PM',
     title: 'The New City Food Festival',
-    location: 'Industry City Courtyard • Brooklyn, NY',
-    price: '$32',
-    image: foodFestivalImg
+    venue: 'Industry City Courtyard · Brooklyn, NY',
+    price: 'From $32',
+    imageUrl: foodFestivalImg,
   },
   {
-    category: 'TALKS',
-    date: 'THU, OCT 15 • 6:30 PM',
+    category: 'Talks',
+    date: 'Thu, Oct 15 · 6:30 PM',
     title: 'Designing Tomorrow: Live',
-    location: 'The Shed • New York, NY',
-    price: '$45',
-    image: designingTmrwImg
-  }
+    venue: 'The Shed · New York, NY',
+    price: 'From $45',
+    imageUrl: designingTmrwImg,
+  },
 ];
 
+const forAttendees = [
+  { title: 'Search your way', body: 'Browse by date, neighborhood, category, or the artists you already love.' },
+  { title: 'Book with confidence', body: 'See clear pricing, choose your ticket, and check out securely in seconds.' },
+  { title: 'Show up and enjoy', body: 'Your mobile ticket is ready when you are, with reminders before doors open.' },
+];
+
+const forOrganizers = [
+  { title: 'Build your page', body: 'Create ticket types, add your story, and publish a beautiful event page.' },
+  { title: 'Reach the right crowd', body: 'Share anywhere or tap into Eventify discovery and promotion tools.' },
+  { title: 'Run it from one place', body: 'Scan guests, monitor sales, message attendees, and receive fast payouts.' },
+];
+
+const container = 'mx-auto w-full max-w-[1440px] px-6 lg:px-12';
+const h2 = 'text-3xl font-medium leading-[1.1] tracking-[-0.02em] md:text-5xl';
+const button = 'inline-flex h-12 items-center justify-center gap-2 rounded-control px-6 text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2';
+const buttonPrimary = `${button} bg-accent text-white hover:bg-accent/90`;
+const buttonOnDark = `${button} bg-white/10 text-white ring-1 ring-inset ring-white/15 hover:bg-white/15`;
+
 const Landing = () => {
+  const navigate = useNavigate();
+
   return (
-    <div className="min-h-screen bg-surface text-primary font-sans selection:bg-primary selection:text-white">
-      {/* Navigation + Hero Wrapper */}
-      <div className="bg-canvas relative overflow-hidden lg:overflow-visible">
-        {/* Navigation */}
-        <nav className="w-full relative z-30">
-          <div className="flex h-24 items-center justify-between px-6 lg:px-12 max-w-[1600px] mx-auto">
-            <Link to="/" className="text-2xl font-black tracking-widest uppercase text-primary">
-              EVENTIFY
+    <div className="min-h-screen bg-canvas font-sans text-primary selection:bg-primary selection:text-white">
+      {/* Navigation + hero scene */}
+      <header className="relative isolate bg-primary text-white">
+        <img
+          src={afterglowImg}
+          alt=""
+          className="absolute inset-0 -z-10 h-full w-full object-cover object-[70%_62%]"
+        />
+        {/* Neutral scrim so the headline sits on calm, dark space */}
+        <div aria-hidden="true" className="absolute inset-0 -z-10 bg-gradient-to-r from-primary/90 via-primary/45 to-transparent" />
+
+        <nav className={`${container} flex h-16 items-center justify-between`}>
+          <Link to="/" className="text-lg font-semibold tracking-tight">Eventify</Link>
+          <div className="flex items-center gap-6">
+            <Link to="/login" className="text-sm text-white/80 transition-colors hover:text-white">Log in</Link>
+            <Link to="/register" className="inline-flex h-9 items-center rounded-control bg-white/10 px-4 text-sm font-medium ring-1 ring-inset ring-white/15 transition-colors hover:bg-white/15">
+              Sign up
             </Link>
-            <div className="flex items-center gap-6 md:gap-8">
-              <Link to="/login" className="text-sm font-medium hover:text-secondary text-primary">
-                Log in
-              </Link>
-              <Link to="/register">
-                <Button className="rounded-full px-6 py-5 bg-primary hover:bg-black text-white font-medium shadow-sm">
-                  Sign up
-                </Button>
-              </Link>
-            </div>
           </div>
         </nav>
 
-        {/* Hero Section */}
-        <section className="relative pt-4 pb-24 lg:pt-10 lg:pb-32">
-            <div className="max-w-[1600px] mx-auto px-6 lg:px-12">
-              <div className="grid lg:grid-cols-[52%_1fr] gap-12 lg:gap-16 items-center">
-                
-                <div className="w-full flex flex-col items-center text-center relative z-10 lg:pr-8 py-8 lg:py-16">
-                  {/* Floating Emojis */}
-                  <div className="absolute top-10 left-0 md:left-10 text-4xl animate-float hover:scale-125 hover:-rotate-12 transition-transform cursor-pointer z-0 opacity-80">🎟️</div>
-                  <div className="absolute top-20 right-0 md:right-10 text-5xl animate-float-delayed hover:scale-125 hover:rotate-12 transition-transform cursor-pointer z-0 opacity-80">🎪</div>
-                  <div className="absolute bottom-20 left-4 md:left-20 text-5xl animate-float-slow hover:scale-125 hover:-rotate-12 transition-transform cursor-pointer z-0 opacity-80">🎸</div>
-                  <div className="absolute bottom-32 right-8 md:right-24 text-4xl animate-float hover:scale-125 hover:rotate-12 transition-transform cursor-pointer z-0 opacity-80">🎭</div>
-                  <div className="absolute top-48 left-[15%] text-3xl animate-float-delayed hover:scale-125 hover:-rotate-12 transition-transform cursor-pointer z-0 opacity-60 hidden md:block">🎵</div>
-                  <div className="absolute bottom-16 right-[20%] text-3xl animate-float-slow hover:scale-125 hover:rotate-12 transition-transform cursor-pointer z-0 opacity-60 hidden md:block">🍻</div>
-                  
-                  {/* Additional emojis closer to the text */}
-                  <div className="absolute top-[25%] left-[30%] text-4xl animate-float hover:scale-125 hover:rotate-12 transition-transform cursor-pointer z-20 opacity-90 hidden md:block">🎉</div>
-                  <div className="absolute top-[35%] right-[28%] text-5xl animate-float-slow hover:scale-125 hover:-rotate-12 transition-transform cursor-pointer z-0 opacity-70 hidden md:block">🎤</div>
-                  <div className="absolute bottom-[30%] left-[28%] text-4xl animate-float-delayed hover:scale-125 hover:rotate-12 transition-transform cursor-pointer z-0 opacity-80 hidden md:block">💃</div>
-                  <div className="absolute bottom-[20%] right-[35%] text-3xl animate-float hover:scale-125 hover:-rotate-12 transition-transform cursor-pointer z-20 opacity-90 hidden md:block">🍕</div>
-                  <div className="absolute top-[5%] left-[45%] text-4xl animate-float-slow hover:scale-125 hover:-rotate-12 transition-transform cursor-pointer z-0 opacity-70">🎇</div>
-                  <div className="absolute bottom-[5%] left-[55%] text-5xl animate-float-delayed hover:scale-125 hover:rotate-12 transition-transform cursor-pointer z-0 opacity-60">🥂</div>
+        <div className={`${container} relative flex min-h-[600px] flex-col pb-16 pt-16 lg:min-h-[calc(100svh-4rem)] lg:pb-0 lg:pt-28`}>
+          <div className="max-w-2xl">
+            <h1 className="max-w-xl text-balance text-[2.5rem] font-medium leading-[1.05] tracking-[-0.03em] sm:text-6xl lg:text-[4rem]">
+              Tickets for what's on this weekend
+            </h1>
+            <p className="mt-6 max-w-xl text-lg leading-7 text-white/75">
+              Concerts, comedy, sports and talks near you. Book in seconds, or publish your own event with tools built for organizers.
+            </p>
+            <div className="mt-10 flex flex-wrap items-center gap-3">
+              <Link to="/discover" className={buttonPrimary}>Browse events</Link>
+              <Link to="/register" className={buttonOnDark}>Create an event</Link>
+            </div>
+          </div>
 
-                  <h1 className="text-[11vw] sm:text-[5.5rem] lg:text-[6.5rem] xl:text-[7.5rem] font-black leading-[0.95] tracking-tight mb-8 uppercase text-primary relative z-10">
-                    DON'T LET THE<br />
-                    <span className="whitespace-nowrap">WEEKEND</span><br />
-                    <span className="whitespace-nowrap">SLIP AWAY</span>
-                  </h1>
-                  <p className="text-[1.1rem] text-secondary font-medium mb-12 max-w-lg leading-relaxed">
-                    Discover concerts, comedy, sports, talks, and one-of-a-kind experiences. Book in seconds—or bring your own event to life with tools built for organizers.
-                  </p>
-                  <div className="flex items-center justify-center gap-3 flex-wrap">
-                    <span className="text-sm font-bold text-secondary mr-2">Popular:</span>
-                    <span className="text-sm font-semibold px-4 py-2 border border-border/80 bg-surface/50 rounded-full cursor-pointer hover:bg-surface transition-colors text-secondary shadow-sm">Live music</span>
-                    <span className="text-sm font-semibold px-4 py-2 border border-border/80 bg-surface/50 rounded-full cursor-pointer hover:bg-surface transition-colors text-secondary shadow-sm">This weekend</span>
-                    <span className="text-sm font-semibold px-4 py-2 border border-border/80 bg-surface/50 rounded-full cursor-pointer hover:bg-surface transition-colors text-secondary shadow-sm">Comedy</span>
-                  </div>
-                </div>
-                
-              </div>
+          {/* Product view: a ticket for the featured event, rising past the hero edge */}
+          <article className="relative z-10 mt-12 w-full max-w-sm rounded-card bg-surface text-ink shadow-xl lg:absolute lg:bottom-0 lg:right-12 lg:mt-0 lg:w-[400px] lg:translate-y-8">
+            <div className="p-5">
+              <h2 className="text-xl font-medium">Afterglow Festival</h2>
+              <p className="mt-1 text-sm text-muted">Brooklyn Mirage · New York</p>
             </div>
-            
-            <div className="lg:absolute lg:top-6 lg:bottom-24 lg:right-0 lg:w-[48%] xl:w-[48%] relative w-full h-[60vh] lg:h-auto rounded-[2rem] lg:rounded-none lg:rounded-l-[2rem] overflow-hidden group mx-6 lg:mx-0 w-[calc(100%-3rem)] lg:w-auto z-20 shadow-2xl">
-              <img 
-                src={afterglowImg} 
-                alt="Festival" 
-                className="absolute inset-0 w-full h-full object-cover"
-              />
-              <div className="absolute top-8 right-8 flex gap-1.5 z-30">
-                 <div className="w-5 h-1.5 bg-surface rounded-full"></div>
-                 <div className="w-5 h-1.5 bg-surface/30 rounded-full"></div>
-              </div>
-              <div className="absolute top-8 left-8 bg-surface px-3 py-1.5 rounded-full flex items-center gap-2 shadow-lg z-30">
-                 <div className="w-2 h-2 rounded-full bg-tertiary"></div>
-                 <span className="text-[10px] font-black uppercase tracking-wider text-primary">Trending Now</span>
-              </div>
-              <div className="absolute bottom-0 left-0 right-0 p-8 lg:p-10 bg-gradient-to-t from-black/90 via-black/40 to-transparent text-white z-30">
-                <p className="text-xs font-bold text-tertiary-light uppercase mb-2 tracking-widest">Sat, Oct 17 • 7:30 PM</p>
-                <h3 className="text-3xl lg:text-4xl font-medium mb-1">Afterglow Festival</h3>
-                <p className="text-white/70 text-sm font-medium">Brooklyn Mirage • New York</p>
-              </div>
+            <div className="mx-5 flex items-center justify-between border-t border-dashed border-ink/25 py-4">
+              <p className="font-mono text-xs tabular-nums text-muted">Sat, Oct 17 · 7:30 PM</p>
+              <Link to="/discover" className="inline-flex items-center gap-1 text-sm font-medium text-ink transition-colors hover:text-accent">
+                Get tickets <ArrowRight className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
+              </Link>
             </div>
-          </section>
+          </article>
         </div>
+      </header>
 
-        <main>
-        {/* Event List Section */}
-        <section className="bg-primary text-white py-24 px-6 lg:px-12">
-          <div className="max-w-[1600px] mx-auto">
-            <p className="text-tertiary-light text-xs font-bold tracking-widest uppercase mb-4">Editors' Picks</p>
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-medium tracking-tight mb-4">Worth leaving the house for.</h2>
-            <p className="text-white/70 text-lg mb-12">Standout events selected by local tastemakers, updated every week.</p>
+      <main>
+        {/* Event list */}
+        <section className="bg-primary px-6 pb-24 pt-24 text-white lg:px-12 lg:pt-32">
+          <div className="mx-auto max-w-[1440px]">
+            <p className="mb-3 text-sm text-white/60">Editors' picks</p>
+            <h2 className={h2}>Worth leaving the house for</h2>
+            <p className="mb-12 mt-4 max-w-xl text-lg text-white/70">Standout events selected by local tastemakers, updated every week.</p>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {events.map((event, idx) => (
-                <div key={idx} className="bg-surface rounded-2xl overflow-hidden text-primary flex flex-col group cursor-pointer hover:shadow-xl transition-shadow">
-                  <div className="relative h-64 lg:h-56 overflow-hidden">
-                    <img src={event.image} alt={event.title} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-                    <div className="absolute top-4 left-4 bg-primary/80 backdrop-blur-sm text-white text-xs font-bold px-3 py-1 rounded-md uppercase tracking-wider">
-                      {event.category}
-                    </div>
-                    <button className="absolute top-4 right-4 p-2 bg-surface rounded-full hover:scale-110 transition-transform shadow-sm text-secondary hover:text-red-500">
-                      <Heart className="w-5 h-5" />
-                    </button>
-                  </div>
-                  <div className="p-6 flex-1 flex flex-col">
-                    <p className="text-tertiary-strong text-xs font-bold uppercase tracking-wider mb-2">{event.date}</p>
-                    <h3 className="text-xl font-medium mb-1 line-clamp-1 group-hover:text-tertiary-strong transition-colors">{event.title}</h3>
-                    <div className="flex items-start gap-1 text-secondary text-sm mb-6">
-                      <MapPin className="w-4 h-4 mt-0.5 shrink-0" />
-                      <span className="line-clamp-1">{event.location}</span>
-                    </div>
-                    <div className="mt-auto pt-4 border-t border-border flex items-center justify-between">
-                      <p className="text-secondary text-sm">From <span className="text-primary font-semibold">{event.price}</span></p>
-                      <button className="text-tertiary-strong font-semibold text-sm flex items-center gap-1 hover:gap-2 transition-all">
-                        Get tickets <ArrowRight className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {events.map((event) => (
+                <EventCard key={event.title} {...event} href="/discover" onTicketsClick={() => navigate('/discover')} />
               ))}
             </div>
           </div>
         </section>
 
-        {/* Organizers Section */}
-        <section className="py-24 px-6 lg:px-12 bg-canvas">
-          <div className="max-w-[1600px] mx-auto grid lg:grid-cols-2 gap-16 items-center">
-            <div className="rounded-2xl overflow-hidden aspect-[4/3] lg:aspect-[4/3] w-full">
-               <img 
-                 src={createEventImg} 
-                 alt="Organizer" 
-                 className="w-full h-full object-cover grayscale opacity-90 hover:grayscale-0 transition-all duration-700"
-               />
-            </div>
+        {/* Organizers */}
+        <section className="px-6 py-24 lg:px-12">
+          <div className="mx-auto grid max-w-[1440px] items-center gap-16 lg:grid-cols-2">
+            <img src={createEventImg} alt="A venue set for an evening event" className="aspect-[4/3] w-full rounded-2xl object-cover" />
             <div className="max-w-xl">
-              <p className="text-tertiary-strong text-xs font-bold tracking-widest uppercase mb-4">For Organizers</p>
-              <h2 className="text-5xl md:text-6xl font-medium tracking-tight leading-[1.1] mb-6 text-primary">
-                Create the event. We'll help fill the room.
-              </h2>
-              <p className="text-lg text-secondary mb-10 leading-relaxed">
-                Everything you need to publish, promote, sell, scan, and understand your event—without stitching together five different tools.
+              <p className="mb-3 text-sm text-muted">For organizers</p>
+              <h2 className={`${h2} mb-6`}>Create the event and we'll help fill the room</h2>
+              <p className="mb-10 text-lg leading-7 text-secondary">
+                Everything you need to publish, promote, sell, scan, and understand your event, without stitching together five different tools.
               </p>
-              
-              <div className="space-y-8 mb-10 text-primary">
-                <div>
-                  <h4 className="font-medium mb-1">Launch a polished event page</h4>
-                  <p className="text-secondary text-sm">Add tickets, schedules, media, and custom checkout questions in minutes.</p>
-                </div>
-                <div>
-                  <h4 className="font-medium mb-1">Know what's working</h4>
-                  <p className="text-secondary text-sm">Track sales, conversion, payouts, and channel performance in real time.</p>
-                </div>
-                <div>
-                  <h4 className="font-medium mb-1">Grow your audience</h4>
-                  <p className="text-secondary text-sm">Reach relevant local buyers with built-in discovery and targeted promotion.</p>
-                </div>
-              </div>
 
-              <div className="flex flex-wrap items-center gap-4">
-                <Button className="rounded-full px-8 py-6 bg-tertiary-strong hover:bg-tertiary-strong/90 text-white font-semibold text-base flex items-center gap-2">
-                  Create an event <ArrowUpRight className="w-4 h-4" />
-                </Button>
-                <Button className="rounded-full px-8 py-6 bg-zinc-200 text-primary hover:bg-zinc-300 font-semibold text-base">
-                  Explore organizer tools
-                </Button>
-                <span className="text-sm text-secondary ml-2">Free to publish</span>
+              <ul className="mb-10 space-y-6">
+                <li>
+                  <h3 className="mb-1 font-medium">Launch a polished event page</h3>
+                  <p className="text-sm text-secondary">Add tickets, schedules, media, and custom checkout questions in minutes.</p>
+                </li>
+                <li>
+                  <h3 className="mb-1 font-medium">Know what's working</h3>
+                  <p className="text-sm text-secondary">Track sales, conversion, payouts, and channel performance in real time.</p>
+                </li>
+                <li>
+                  <h3 className="mb-1 font-medium">Grow your audience</h3>
+                  <p className="text-sm text-secondary">Reach relevant local buyers with built-in discovery and targeted promotion.</p>
+                </li>
+              </ul>
+
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-4">
+                <Link to="/register" className={buttonPrimary}>
+                  Create an event <ArrowUpRight className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
+                </Link>
+                <Link to="/register" className="text-sm font-medium underline underline-offset-4 transition-colors hover:text-accent">Explore organizer tools</Link>
+                <span className="text-sm text-muted">Free to publish</span>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Features Section */}
-        <section className="py-24 px-6 lg:px-12 bg-canvas">
-          <div className="max-w-[1600px] mx-auto">
-            <p className="text-tertiary-strong text-xs font-bold tracking-widest uppercase mb-4">Simple by design</p>
-            <h2 className="text-5xl md:text-6xl font-medium tracking-tight leading-[1.1] mb-6 max-w-2xl text-primary">
-              One marketplace. Two easy journeys.
-            </h2>
-            <p className="text-lg text-secondary mb-16 max-w-xl">
+        {/* Two journeys */}
+        <section className="px-6 pb-24 lg:px-12">
+          <div className="mx-auto max-w-[1440px]">
+            <p className="mb-3 text-sm text-muted">Simple by design</p>
+            <h2 className={`${h2} mb-6 max-w-2xl`}>One marketplace, two ways in</h2>
+            <p className="mb-12 max-w-xl text-lg text-secondary">
               Whether you're finding Friday night plans or producing them, Eventify keeps the path clear.
             </p>
 
-            <div className="grid lg:grid-cols-2 gap-8">
-              {/* Card 1 */}
-              <div className="bg-surface rounded-3xl p-10 md:p-12 border border-border shadow-sm">
-                <p className="text-tertiary-strong text-xs font-bold tracking-widest uppercase mb-4">Find your next favorite night</p>
-                <h3 className="text-3xl font-medium mb-12">For event-goers</h3>
-                
-                <div className="space-y-10">
-                  <div className="flex gap-6 pb-10 border-b border-border last:border-0 last:pb-0">
-                    <div className="flex-1">
-                      <h4 className="text-lg font-medium mb-2">Search your way</h4>
-                      <p className="text-secondary text-sm">Browse by date, neighborhood, category, or the artists you already love.</p>
-                    </div>
-                    <span className="text-xs font-medium text-secondary pt-1">01</span>
-                  </div>
-                  <div className="flex gap-6 pb-10 border-b border-border last:border-0 last:pb-0">
-                    <div className="flex-1">
-                      <h4 className="text-lg font-medium mb-2">Book with confidence</h4>
-                      <p className="text-secondary text-sm">See clear pricing, choose your ticket, and check out securely in seconds.</p>
-                    </div>
-                    <span className="text-xs font-medium text-secondary pt-1">02</span>
-                  </div>
-                  <div className="flex gap-6 pb-10 border-b border-border last:border-0 last:pb-0">
-                    <div className="flex-1">
-                      <h4 className="text-lg font-medium mb-2">Show up and enjoy</h4>
-                      <p className="text-secondary text-sm">Your mobile ticket is ready when you are, with reminders before doors open.</p>
-                    </div>
-                    <span className="text-xs font-medium text-secondary pt-1">03</span>
-                  </div>
-                </div>
+            <div className="grid gap-6 lg:grid-cols-2">
+              <div className="rounded-2xl border border-border bg-surface p-8 lg:p-10">
+                <p className="mb-2 text-sm text-muted">Find your next favorite night</p>
+                <h3 className="mb-8 text-2xl font-medium">For event-goers</h3>
+                <ol className="divide-y divide-border">
+                  {forAttendees.map((item, index) => (
+                    <li key={item.title} className="flex gap-6 py-6 first:pt-0 last:pb-0">
+                      <span className="w-6 pt-1 font-mono text-xs tabular-nums text-muted">{String(index + 1).padStart(2, '0')}</span>
+                      <div className="flex-1">
+                        <h4 className="mb-1 text-lg font-medium">{item.title}</h4>
+                        <p className="text-sm text-secondary">{item.body}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
               </div>
 
-              {/* Card 2 */}
-              <div className="bg-primary text-white rounded-3xl p-10 md:p-12">
-                <p className="text-tertiary-light text-xs font-bold tracking-widest uppercase mb-4">Turn an idea into a full room</p>
-                <h3 className="text-3xl font-medium mb-12">For organizers</h3>
-                
-                <div className="space-y-10">
-                  <div className="flex gap-6 pb-10 border-b border-white/10 last:border-0 last:pb-0">
-                    <div className="flex-1">
-                      <h4 className="text-lg font-medium mb-2">Build your page</h4>
-                      <p className="text-white/70 text-sm">Create ticket types, add your story, and publish a beautiful event page.</p>
-                    </div>
-                    <span className="text-xs font-medium text-white/50 pt-1">01</span>
-                  </div>
-                  <div className="flex gap-6 pb-10 border-b border-white/10 last:border-0 last:pb-0">
-                    <div className="flex-1">
-                      <h4 className="text-lg font-medium mb-2">Reach the right crowd</h4>
-                      <p className="text-white/70 text-sm">Share anywhere or tap into Eventify discovery and promotion tools.</p>
-                    </div>
-                    <span className="text-xs font-medium text-white/50 pt-1">02</span>
-                  </div>
-                  <div className="flex gap-6 pb-10 border-b border-white/10 last:border-0 last:pb-0">
-                    <div className="flex-1">
-                      <h4 className="text-lg font-medium mb-2">Run it from one place</h4>
-                      <p className="text-white/70 text-sm">Scan guests, monitor sales, message attendees, and receive fast payouts.</p>
-                    </div>
-                    <span className="text-xs font-medium text-white/50 pt-1">03</span>
-                  </div>
-                </div>
+              <div className="rounded-2xl bg-primary p-8 text-white lg:p-10">
+                <p className="mb-2 text-sm text-white/60">Turn an idea into a full room</p>
+                <h3 className="mb-8 text-2xl font-medium">For organizers</h3>
+                <ol className="divide-y divide-white/10">
+                  {forOrganizers.map((item, index) => (
+                    <li key={item.title} className="flex gap-6 py-6 first:pt-0 last:pb-0">
+                      <span className="w-6 pt-1 font-mono text-xs tabular-nums text-white/60">{String(index + 1).padStart(2, '0')}</span>
+                      <div className="flex-1">
+                        <h4 className="mb-1 text-lg font-medium">{item.title}</h4>
+                        <p className="text-sm text-white/70">{item.body}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Call to action section */}
-        <section className="py-24 px-6 lg:px-12 bg-canvas">
-          <div className="max-w-[1600px] mx-auto bg-tertiary-strong rounded-[2.5rem] p-12 md:p-20 text-white flex flex-col lg:flex-row justify-between items-start lg:items-center gap-12">
+        {/* Call to action */}
+        <section className="px-6 pb-24 lg:px-12">
+          <div className="mx-auto flex max-w-[1440px] flex-col justify-between gap-12 rounded-2xl bg-primary p-8 text-white md:p-16 lg:flex-row lg:items-center">
             <div className="max-w-2xl">
-              <p className="text-white/80 text-xs font-bold tracking-widest uppercase mb-4">Make a night of it</p>
-              <h2 className="text-5xl md:text-6xl font-medium tracking-tight leading-[1.1] mb-6">
-                Something unforgettable is happening nearby.
-              </h2>
-              <p className="text-white/90 text-lg">
-                Find your seat, your people, and your next favorite story—or create the event everyone talks about tomorrow.
+              <h2 className={`${h2} mb-6`}>Find a night out, or run one</h2>
+              <p className="text-lg text-white/75">
+                Find your seat, your people, and your next favorite story, or create the event everyone talks about tomorrow.
               </p>
             </div>
-            <div className="flex flex-col gap-4 shrink-0 w-full lg:w-auto">
-              <Button className="rounded-full px-8 py-7 bg-surface text-primary hover:bg-surface font-semibold text-lg flex items-center justify-between gap-4 w-full">
-                Find an event <ArrowUpRight className="w-5 h-5" />
-              </Button>
-              <Button className="rounded-full px-8 py-7 bg-primary text-white hover:bg-zinc-800 font-semibold text-lg flex items-center justify-between gap-4 w-full">
-                Create your event <ArrowUpRight className="w-5 h-5" />
-              </Button>
-              <div className="flex items-center gap-2 mt-2 text-xs font-medium text-white/90 justify-center">
-                <CheckCircle2 className="w-4 h-4" />
-                Free to join. Free to publish.
-              </div>
+            <div className="flex w-full shrink-0 flex-col gap-3 lg:w-72">
+              <Link to="/discover" className={`${buttonPrimary} justify-between`}>
+                Find an event <ArrowUpRight className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
+              </Link>
+              <Link to="/register" className={`${buttonOnDark} justify-between`}>
+                Create your event <ArrowUpRight className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
+              </Link>
+              <p className="mt-1 text-center text-sm text-white/60">Free to join. Free to publish.</p>
             </div>
           </div>
         </section>
       </main>
 
-      <footer className="bg-primary text-white py-16 px-6 lg:px-12">
-        <div className="max-w-[1600px] mx-auto flex flex-col lg:flex-row justify-between items-start lg:items-end gap-12">
-          <div className="text-2xl font-black tracking-widest uppercase">
-            Eventify
-          </div>
-          
-          <div className="max-w-md w-full">
-            <p className="text-sm font-medium mb-1">The good stuff, once a week.</p>
-            <p className="text-xs text-white/70 mb-4">New events, local favorites, and smart ideas for organizers. No noise.</p>
+      <footer className="bg-primary px-6 py-16 text-white lg:px-12">
+        <div className="mx-auto flex max-w-[1440px] flex-col items-start justify-between gap-12 lg:flex-row lg:items-end">
+          <div className="text-lg font-semibold tracking-tight">Eventify</div>
+
+          <div className="w-full max-w-md">
+            <p className="mb-1 text-sm font-medium">The good stuff, once a week</p>
+            <p className="mb-4 text-sm text-white/70">New events, local favorites, and smart ideas for organizers. No noise.</p>
             <div className="relative">
-              <input 
-                type="email" 
-                placeholder="Email address" 
-                className="w-full h-12 bg-zinc-800/50 border border-zinc-700 rounded-full pl-6 pr-32 focus:outline-none focus:border-zinc-500 text-sm"
+              <input
+                type="email"
+                aria-label="Email address"
+                placeholder="Email address"
+                className="h-12 w-full rounded-control border border-white/15 bg-white/5 pl-4 pr-32 text-sm placeholder:text-white/50 focus:border-white/40 focus:outline-none"
               />
-              <button className="absolute right-1 top-1 bottom-1 px-6 bg-tertiary-strong hover:bg-tertiary-strong/90 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1 transition-colors">
-                Subscribe <ArrowRight className="w-4 h-4" />
+              <button className="absolute bottom-1 right-1 top-1 flex items-center gap-1 rounded-md bg-white px-4 text-sm font-medium text-primary transition-colors hover:bg-white/90">
+                Subscribe <ArrowRight className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
               </button>
             </div>
           </div>

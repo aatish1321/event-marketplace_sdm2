@@ -8,21 +8,19 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Text roles: primary (ink), secondary, muted. Muted stays above 4.5:1 on canvas and surface.
         primary: '#17212B',
-        secondary: '#243B53',
-        tertiary: '#C85A17',
-        neutral: '#74777C',
+        secondary: '#34404E',
+        muted: '#525C68',
+        ink: '#17212B',
+        // Surfaces and hairline.
         canvas: '#D8DAE0',
         surface: '#ECEEF3',
         'surface-dark': '#17212B',
-        ink: '#17212B',
-        muted: '#243B53',
-        border: '#C3C6CD',
-        coral: '#C85A17',
-        'coral-strong': '#C85A17',
-        'tertiary-strong': '#C85A17',
-        'tertiary-light': '#C85A17',
-        success: '#0F8A5F',
+        border: 'rgba(23, 33, 43, 0.12)',
+        // The one accent. 5.5:1 with white text, 4.7:1 as text on surface.
+        accent: '#B04A0B',
+        success: '#0B6B4A',
         warning: '#B45309',
         danger: '#B42318',
         focus: '#2563EB',
@@ -32,21 +30,10 @@ export default {
       },
       borderRadius: {
         card: "12px",
-        pill: "9999px",
+        control: "10px",
       },
       boxShadow: {
         card: "0 8px 24px rgba(23, 22, 28, 0.08)",
-      },
-      keyframes: {
-        float: {
-          '0%, 100%': { transform: 'translateY(0)' },
-          '50%': { transform: 'translateY(-20px)' },
-        }
-      },
-      animation: {
-        float: 'float 6s ease-in-out infinite',
-        'float-delayed': 'float 6s ease-in-out 3s infinite',
-        'float-slow': 'float 8s ease-in-out 1s infinite',
       },
     },
   },

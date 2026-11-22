@@ -3,15 +3,15 @@ import { ApiError } from '../api/auth'
 import { createEvent } from '../api/events'
 
 const INITIAL_FORM = { title: '', description: '', start_at: '', end_at: '', event_type: 'physical', venue_name: '', venue_address: '', online_url: '' }
-const inputClass = 'w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 disabled:opacity-60'
+const inputClass = 'w-full rounded-control border border-border bg-surface px-3 py-2.5 text-sm text-ink placeholder:text-muted outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/15 disabled:opacity-60'
 
 function Field({ label, name, error, multiline, ...props }) {
   const Input = multiline ? 'textarea' : 'input'
   return (
     <div>
-      <label htmlFor={`event-${name}`} className="mb-1.5 block text-sm font-medium text-slate-700">{label}</label>
+      <label htmlFor={`event-${name}`} className="mb-1.5 block text-sm font-medium text-ink">{label}</label>
       <Input id={`event-${name}`} name={name} aria-invalid={Boolean(error)} aria-describedby={error ? `event-${name}-error` : undefined} className={inputClass} {...props} />
-      {error && <p id={`event-${name}-error`} role="alert" className="mt-1 text-xs text-red-600">{error}</p>}
+      {error && <p id={`event-${name}-error`} role="alert" className="mt-1 text-xs text-danger">{error}</p>}
     </div>
   )
 }
@@ -115,40 +115,40 @@ export default function CreateEventModal({ token, onClose, onCreated, onUnauthor
   }
 
   return (
-    <dialog ref={dialogRef} aria-labelledby="create-event-title" aria-describedby="create-event-description" onCancel={(event) => { event.preventDefault(); if (!pending.current) onClose() }} className="m-auto max-h-[90dvh] w-[calc(100%_-_2rem)] max-w-xl overflow-y-auto rounded-2xl bg-white p-0 text-slate-900 shadow-2xl backdrop:bg-slate-900/50">
-      <div className="border-b border-slate-100 px-6 py-5">
-        <h2 id="create-event-title" className="text-xl font-semibold text-slate-900">Create an event</h2>
-        <p id="create-event-description" className="mt-1 text-sm text-slate-500">Bring people together. Start with the essentials.</p>
+    <dialog ref={dialogRef} aria-labelledby="create-event-title" aria-describedby="create-event-description" onCancel={(event) => { event.preventDefault(); if (!pending.current) onClose() }} className="m-auto max-h-[90dvh] w-[calc(100%_-_2rem)] max-w-xl overflow-y-auto rounded-2xl bg-surface p-0 text-ink shadow-2xl backdrop:bg-primary/60">
+      <div className="border-b border-border px-6 py-5">
+        <h2 id="create-event-title" className="text-xl font-medium text-ink">Create an event</h2>
+        <p id="create-event-description" className="mt-1 text-sm text-muted">Start with the essentials.</p>
       </div>
       <form onSubmit={submit} noValidate aria-busy={submitting} className="space-y-5 p-6">
-        {errors.form && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{errors.form}</p>}
+        {errors.form && <p role="alert" className="rounded-control bg-danger/10 p-3 text-sm text-danger">{errors.form}</p>}
         <Field label="Title" {...fieldProps('title')} required maxLength={200} autoFocus placeholder="Give your event a name" />
         <Field label="Description" {...fieldProps('description')} multiline rows={3} maxLength={5000} placeholder="What can guests look forward to? (optional)" />
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Start date and time" {...fieldProps('start_at')} type="datetime-local" required />
           <Field label="End date and time" {...fieldProps('end_at')} type="datetime-local" required />
         </div>
-        <p className="-mt-2 text-xs text-slate-500">Dates and times use your local time zone.</p>
+        <p className="-mt-2 text-xs text-muted">Dates and times use your local time zone.</p>
         <fieldset disabled={submitting}>
-          <legend className="mb-2 text-sm font-medium text-slate-700">Event type</legend>
+          <legend className="mb-2 text-sm font-medium text-ink">Event type</legend>
           <div className="grid grid-cols-2 gap-3">
             {['physical', 'online'].map((type) => (
-              <label key={type} className={`flex cursor-pointer items-center gap-2 rounded-lg border px-4 py-3 text-sm ${form.event_type === type ? 'border-indigo-400 bg-indigo-50 text-indigo-700' : 'border-slate-200 text-slate-600'}`}>
-                <input type="radio" name="event_type" value={type} checked={form.event_type === type} onChange={(event) => { change(event); setErrors({}) }} className="accent-indigo-600" />
+              <label key={type} className={`flex cursor-pointer items-center gap-2 rounded-control border px-4 py-3 text-sm transition-colors ${form.event_type === type ? 'border-primary bg-canvas text-ink' : 'border-border text-muted'}`}>
+                <input type="radio" name="event_type" value={type} checked={form.event_type === type} onChange={(event) => { change(event); setErrors({}) }} className="accent-accent" />
                 {type === 'physical' ? 'Physical' : 'Online'}
               </label>
             ))}
           </div>
         </fieldset>
         {form.event_type === 'physical' ? (
-          <div className="space-y-4 rounded-xl bg-slate-50 p-4">
+          <div className="space-y-4 rounded-card bg-canvas p-4">
             <Field label="Venue name" {...fieldProps('venue_name')} required maxLength={200} />
             <Field label="Venue address" {...fieldProps('venue_address')} required maxLength={500} />
           </div>
         ) : <Field label="Event URL" {...fieldProps('online_url')} type="url" required maxLength={2048} placeholder="https://" />}
-        <div className="flex justify-end gap-3 border-t border-slate-100 pt-5">
-          <button type="button" onClick={onClose} disabled={submitting} className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50">Cancel</button>
-          <button type="submit" disabled={submitting} className="rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50">{submitting ? 'Creating…' : 'Create event'}</button>
+        <div className="flex justify-end gap-3 border-t border-border pt-5">
+          <button type="button" onClick={onClose} disabled={submitting} className="rounded-control border border-border px-4 py-2.5 text-sm font-medium text-ink transition-colors hover:border-ink/30 disabled:opacity-50">Cancel</button>
+          <button type="submit" disabled={submitting} className="rounded-control bg-accent px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent/90 disabled:opacity-50">{submitting ? 'Creating…' : 'Create event'}</button>
         </div>
       </form>
     </dialog>

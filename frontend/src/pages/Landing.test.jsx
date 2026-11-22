@@ -26,8 +26,7 @@ describe('Landing Page', () => {
         <Landing />
       </BrowserRouter>
     );
-    expect(screen.getByText(/Don't let/i)).toBeInTheDocument();
-    expect(screen.getByText(/slip away/i)).toBeInTheDocument();
+    expect(screen.getByText(/tickets for what's on this weekend/i)).toBeInTheDocument();
   });
 
   it('renders call to action elements', () => {
@@ -48,7 +47,7 @@ describe('Landing Page', () => {
       </BrowserRouter>
     );
     
-    expect(screen.getByText('Worth leaving the house for.')).toBeInTheDocument();
+    expect(screen.getByText('Worth leaving the house for')).toBeInTheDocument();
     expect(screen.getByText('Solange: Notes From the Deep')).toBeInTheDocument();
     expect(screen.getByText('The New City Food Festival')).toBeInTheDocument();
     expect(screen.getByText('Designing Tomorrow: Live')).toBeInTheDocument();

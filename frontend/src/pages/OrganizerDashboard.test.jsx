@@ -32,8 +32,8 @@ function renderDashboard(fetch) {
 
 async function openModal() {
   const user = userEvent.setup()
-  await waitFor(() => expect(screen.getByRole('button', { name: 'Create New Event' })).toBeEnabled())
-  await user.click(screen.getByRole('button', { name: 'Create New Event' }))
+  await waitFor(() => expect(screen.getByRole('button', { name: 'New event' })).toBeEnabled())
+  await user.click(screen.getByRole('button', { name: 'New event' }))
   return user
 }
 
@@ -187,7 +187,7 @@ describe('Organizer dashboard and creation', () => {
     })
     expect(screen.queryByText('Community gathering')).not.toBeInTheDocument()
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Create New Event' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'New event' })).toBeDisabled()
     await act(async () => resolveSecond(response([])))
     expect(await screen.findByText('Your next event starts here')).toBeInTheDocument()
   })
