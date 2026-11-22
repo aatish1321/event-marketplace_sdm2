@@ -49,11 +49,11 @@ export default function Login() {
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-canvas px-4 py-10 selection:bg-primary selection:text-white">
-      <Link to="/" className="absolute left-8 top-8 hidden text-lg font-semibold tracking-tight text-primary md:block">
+      <Link to="/" className="absolute left-8 top-8 hidden text-xl font-extrabold uppercase tracking-widest text-primary md:block">
         Eventify
       </Link>
       <div className="w-full max-w-[440px] rounded-2xl border border-border bg-surface p-8 md:p-12">
-        <h1 className="text-3xl font-medium tracking-[-0.02em] text-primary">Log in</h1>
+        <h1 className="text-4xl font-extrabold tracking-tight text-primary">Log in</h1>
         <p className="mt-3 text-base text-secondary">Use your email and password.</p>
         <form onSubmit={handleSubmit} noValidate aria-busy={submitting} className="mt-8 space-y-5">
           {errors.form && (
@@ -66,7 +66,7 @@ export default function Login() {
             { name: 'password', label: 'Password', type: 'password', autoComplete: 'current-password', value: password, setter: setPassword },
           ].map(({ name, label, setter, ...input }) => (
             <div key={name}>
-              <label htmlFor={name} className="mb-2 block text-sm font-medium text-primary">{label}</label>
+              <label htmlFor={name} className="mb-2 block text-sm font-semibold text-primary">{label}</label>
               <input
                 {...input}
                 id={name}
@@ -91,7 +91,7 @@ export default function Login() {
           <button
             type="submit"
             disabled={submitting}
-            className="mt-4 h-11 w-full rounded-control bg-accent px-4 text-base font-medium text-white transition-colors hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-60"
+            className="mt-4 h-11 w-full rounded-control bg-accent px-4 text-base font-semibold text-white transition-colors hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {submitting ? 'Logging in…' : 'Log in'}
           </button>

@@ -17,7 +17,7 @@ const EMPTY_FILTERS = { continent: '', country: '', type: '' }
 // Wait for typing to pause before querying, so each keystroke is not a request.
 const DEBOUNCE_MS = 300
 
-const fieldLabel = 'block text-xs font-medium text-muted'
+const fieldLabel = 'block text-xs font-semibold text-muted'
 const fieldInput = 'mt-1 w-full bg-transparent text-sm text-ink placeholder:text-muted focus:outline-none'
 
 function toCardProps(event) {
@@ -72,8 +72,8 @@ export default function Discover() {
 
   return (
     <AttendeeLayout>
-      <h1 className="text-3xl font-medium tracking-[-0.02em] text-ink md:text-4xl">Discover events</h1>
-      <p className="mt-3 text-base text-muted">Physical and online events. Filter by continent or country.</p>
+      <h1 className="text-4xl font-extrabold tracking-tight text-ink md:text-5xl">Discover events</h1>
+      <p className="mt-3 text-base font-medium text-muted">Physical and online events. Filter by continent or country.</p>
 
       <form
         role="search"
@@ -95,7 +95,7 @@ export default function Discover() {
           <span className={fieldLabel}>Country</span>
           <input type="text" placeholder="e.g. Hungary" value={countryInput} onChange={(e) => setCountryInput(e.target.value)} className={fieldInput} />
         </label>
-        <button type="submit" className={`flex h-11 items-center justify-center gap-2 rounded-control bg-accent px-6 text-sm font-medium text-white transition-colors hover:bg-accent/90 ${focusRing}`}>
+        <button type="submit" className={`flex h-11 items-center justify-center gap-2 rounded-control bg-accent px-6 text-sm font-semibold text-white transition-colors hover:bg-accent/90 ${focusRing}`}>
           <Search className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
           Explore events
         </button>
@@ -110,7 +110,7 @@ export default function Discover() {
               type="button"
               aria-pressed={active}
               onClick={() => setFilter('type', t.value)}
-              className={`h-10 rounded-control px-4 text-sm font-medium transition-colors ${focusRing} ${
+              className={`h-10 rounded-control px-4 text-sm font-semibold transition-colors ${focusRing} ${
                 active ? 'bg-surface-dark text-white' : 'border border-border bg-surface text-ink hover:border-ink/25'
               }`}
             >
@@ -127,7 +127,7 @@ export default function Discover() {
 
       <section className="mt-8" aria-live="polite" aria-busy={status === 'loading'}>
         <div className="mb-4 flex items-baseline justify-between gap-4">
-          <h2 className="text-xl font-medium">Events</h2>
+          <h2 className="text-2xl font-bold">Events</h2>
           {status === 'ready' && (
             <span className="font-mono text-xs tabular-nums text-muted">{result.events.length} {result.events.length === 1 ? 'event' : 'events'}</span>
           )}

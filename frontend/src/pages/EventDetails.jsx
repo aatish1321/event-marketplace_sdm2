@@ -56,7 +56,7 @@ export default function EventDetails() {
           <ArrowLeft className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" /> Back to events
         </Link>
         {!settled && <p className="mt-8 text-sm text-muted">Loading event…</p>}
-        {settled && loaded.error === 'notfound' && <h1 className="mt-8 text-2xl font-medium">Event not found</h1>}
+        {settled && loaded.error === 'notfound' && <h1 className="mt-8 text-2xl font-bold">Event not found</h1>}
         {settled && loaded.error === 'failed' && (
           <p role="alert" className="mt-8 rounded-card bg-danger/10 px-4 py-3 text-sm font-medium text-danger">
             Could not load this event. Please try again.
@@ -99,47 +99,43 @@ export default function EventDetails() {
         <ArrowLeft className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" /> Back to events
       </Link>
 
-      <p className="mt-8 text-sm text-muted">{online ? 'Online event' : 'Physical event'}</p>
-      <h1 className="mt-2 text-3xl font-medium tracking-[-0.02em] md:text-5xl">{event.title}</h1>
-      {date && <p className="mt-3 font-mono text-sm tabular-nums text-muted"><time dateTime={event.start_at}>{date}</time></p>}
+      <p className="mt-8 text-sm font-semibold text-muted">{online ? 'Online event' : 'Physical event'}</p>
+      <h1 className="mt-2 text-4xl font-extrabold tracking-tight md:text-5xl">{event.title}</h1>
+      {date && <p className="mt-3 font-mono text-sm font-semibold tabular-nums text-muted"><time dateTime={event.start_at}>{date}</time></p>}
 
-      <div className="mt-8 flex aspect-[3/1] w-full items-center justify-center rounded-card bg-surface-dark">
-        <PlaceIcon className="h-12 w-12 text-white/60" strokeWidth={1.5} aria-hidden="true" />
-      </div>
-
-      <div className="mt-8 grid gap-8 md:grid-cols-[1fr_320px] md:items-start">
+      <div className="mt-10 grid gap-8 md:grid-cols-[1fr_320px] md:items-start">
         <div className="space-y-8">
           <section>
-            <h2 className="text-xl font-medium">About this experience</h2>
-            <p className="mt-3 whitespace-pre-line text-base text-muted">{event.description || 'The organizer has not added a description yet.'}</p>
+            <h2 className="text-2xl font-bold">About this experience</h2>
+            <p className="mt-3 whitespace-pre-line text-base font-medium text-muted">{event.description || 'The organizer has not added a description yet.'}</p>
           </section>
           <section>
-            <h2 className="text-xl font-medium">Where you'll be</h2>
+            <h2 className="text-2xl font-bold">Where you'll be</h2>
             <p className="mt-3 flex items-center gap-2 text-base text-muted">
               <PlaceIcon className="h-4 w-4 shrink-0" strokeWidth={1.5} aria-hidden="true" /> {place || 'Location to be announced'}
             </p>
           </section>
           <section>
-            <h2 className="text-xl font-medium">Before you go</h2>
-            <p className="mt-3 text-base text-muted">Bring your ticket confirmation. Organizer cancellation policies apply.</p>
+            <h2 className="text-2xl font-bold">Before you go</h2>
+            <p className="mt-3 text-base font-medium text-muted">Bring your ticket confirmation. Organizer cancellation policies apply.</p>
           </section>
         </div>
 
         <aside aria-label="Buy tickets" className="order-first rounded-card border border-border bg-surface p-6 md:order-none md:sticky md:top-6">
-          <p aria-live="polite" className={`text-2xl font-medium ${soldOut ? 'text-danger' : 'text-ink'}`}>
+          <p aria-live="polite" className={`text-3xl font-bold ${soldOut ? 'text-danger' : 'text-ink'}`}>
             {soldOut ? 'Sold out' : `${ticketsLabel(available)} left`}
           </p>
-          <p className="mt-1 text-sm text-muted">General admission · Digital ticket</p>
+          <p className="mt-1 text-sm font-medium text-muted">General admission · Digital ticket</p>
 
           {!soldOut && (
             <>
               <div className="mt-6 flex items-center justify-between">
-                <span id="quantity-label" className="text-sm">Quantity</span>
+                <span id="quantity-label" className="text-sm font-semibold">Quantity</span>
                 <div className="flex items-center gap-3" role="group" aria-labelledby="quantity-label">
                   <button type="button" className={stepButton} aria-label="Fewer tickets" disabled={qty <= 1 || buying} onClick={() => setQuantity(qty - 1)}>
                     <Minus className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
                   </button>
-                  <span aria-live="polite" className="w-8 text-center text-lg font-medium tabular-nums">{qty}</span>
+                  <span aria-live="polite" className="w-8 text-center text-lg font-bold tabular-nums">{qty}</span>
                   <button type="button" className={stepButton} aria-label="More tickets" disabled={qty >= available || buying} onClick={() => setQuantity(qty + 1)}>
                     <Plus className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
                   </button>
@@ -147,7 +143,7 @@ export default function EventDetails() {
               </div>
               <p className="mt-4 flex justify-between border-t border-border pt-4 text-sm">
                 <span className="text-muted">Total</span>
-                <span className="font-medium">{ticketsLabel(qty)}</span>
+                <span className="font-bold">{ticketsLabel(qty)}</span>
               </p>
             </>
           )}
@@ -156,7 +152,7 @@ export default function EventDetails() {
             type="button"
             onClick={buy}
             disabled={soldOut || buying}
-            className={`mt-6 flex h-11 w-full items-center justify-center rounded-control bg-accent px-6 text-sm font-medium text-white transition-colors hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-50 ${focusRing}`}
+            className={`mt-6 flex h-11 w-full items-center justify-center rounded-control bg-accent px-6 text-sm font-semibold text-white transition-colors hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-50 ${focusRing}`}
           >
             {soldOut ? 'Sold out' : buying ? 'Buying…' : `Buy ${ticketsLabel(qty)}`}
           </button>

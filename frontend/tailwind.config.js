@@ -8,10 +8,10 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Text roles: primary (ink), secondary, muted. Muted stays above 4.5:1 on canvas and surface.
+        // Text roles: primary (ink), secondary, muted. Muted is about 5.8:1 on canvas, more on surface.
         primary: '#17212B',
-        secondary: '#34404E',
-        muted: '#525C68',
+        secondary: '#2B3744',
+        muted: '#47515E',
         ink: '#17212B',
         // Surfaces and hairline.
         canvas: '#D8DAE0',
