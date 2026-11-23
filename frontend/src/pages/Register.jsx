@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom'
 import { ROLES, useAuth } from '../context/AuthContext'
 import { ApiError, loginUser, registerUser } from '../api/auth'
 import { getRoleHome } from '../lib/authRoutes'
+import AuthShell from '../components/AuthShell'
+import usePageTitle from '../lib/usePageTitle'
 
 const ROLE_OPTIONS = [
   { value: ROLES.ATTENDEE, label: 'Register as Attendee' },
@@ -43,20 +45,20 @@ function Field({ label, name, type = 'text', value, onChange, error, hint, ...re
         onChange={onChange}
         aria-invalid={Boolean(error)}
         aria-describedby={describedBy || undefined}
-        className={`w-full rounded-xl border bg-surface px-4 py-3.5 text-sm outline-none transition focus:ring-4 ${
+        className={`h-11 w-full rounded-control border bg-surface px-3 text-sm outline-none transition-colors focus:ring-2 ${
           error
-            ? 'border-red-300 focus:border-red-500 focus:ring-red-100'
+            ? 'border-danger/50 focus:border-danger focus:ring-danger/15'
             : 'border-border focus:border-focus focus:ring-focus/20'
         }`}
         {...rest}
       />
       {hint && !error && (
-        <p id={`${name}-hint`} className="mt-2 text-xs font-medium text-secondary">
+        <p id={`${name}-hint`} className="mt-2 text-xs text-muted">
           {hint}
         </p>
       )}
       {error && (
-        <p id={`${name}-error`} className="mt-2 text-xs font-medium text-red-600">
+        <p id={`${name}-error`} className="mt-2 text-xs font-medium text-danger">
           {error}
         </p>
       )}
@@ -107,6 +109,7 @@ export default function Register() {
   const [registered, setRegistered] = useState(null) // backend response on success
 
   const isOrganizer = role === ROLES.ORGANIZER
+  usePageTitle(registered ? 'Account created' : 'Create your account')
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -182,24 +185,21 @@ export default function Register() {
 
   if (registered) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-canvas px-4 py-10 selection:bg-primary selection:text-white">
-        <Link to="/" className="absolute top-8 left-8 text-xl font-black tracking-widest uppercase text-primary hidden md:block">
-          Eventify
-        </Link>
-        <div className="w-full max-w-[440px] rounded-[2.5rem] bg-surface p-10 md:p-12 text-center shadow-xl shadow-primary/5">
-          <h1 className="text-4xl font-medium tracking-tight text-primary">You're in!</h1>
-          <p className="mt-3 text-base text-secondary font-medium">
-            Welcome, {registered.full_name}. Your account has been created.
+      <AuthShell>
+        <div>
+          <h1 className="text-4xl font-extrabold tracking-[-0.04em] text-primary sm:text-5xl">Account created</h1>
+          <p className="mt-3 text-base text-secondary">
+            {registered.full_name}, your account is ready.
           </p>
           {isAuthenticated ? (
             <>
-              <Link to={getRoleHome(userRole) ?? '/login'} className="mt-8 flex h-14 w-full items-center justify-center rounded-full bg-tertiary-strong hover:bg-tertiary-strong/90 px-4 text-base font-semibold text-white transition-transform hover:scale-[1.02] shadow-sm">
-                Start Exploring
+              <Link to={getRoleHome(userRole) ?? '/login'} className="mt-8 flex h-11 w-full items-center justify-center rounded-control bg-accent px-4 text-base font-semibold text-white transition-colors hover:bg-accent/90">
+                Continue
               </Link>
               <button
                 type="button"
                 onClick={logout}
-                className="mt-4 w-full h-14 rounded-full border-2 border-border bg-surface px-4 text-sm font-semibold text-primary transition-colors hover:bg-surface"
+                className="mt-4 h-11 w-full rounded-control border border-border bg-surface px-4 text-sm font-medium text-primary transition-colors hover:border-primary/30"
               >
                 Log out
               </button>
@@ -207,30 +207,27 @@ export default function Register() {
           ) : (
             <Link
               to="/login"
-              className="mt-8 flex h-14 w-full items-center justify-center rounded-full bg-tertiary-strong hover:bg-tertiary-strong/90 px-4 text-base font-semibold text-white transition-transform hover:scale-[1.02] shadow-sm"
+              className="mt-8 flex h-11 w-full items-center justify-center rounded-control bg-accent px-4 text-base font-semibold text-white transition-colors hover:bg-accent/90"
             >
               Go to login
             </Link>
           )}
         </div>
-      </main>
+      </AuthShell>
     )
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-canvas px-4 py-10 selection:bg-primary selection:text-white">
-      <Link to="/" className="absolute top-8 left-8 text-xl font-black tracking-widest uppercase text-primary hidden md:block">
-        Eventify
-      </Link>
-      <div className={`w-full transition-all duration-300 ${isOrganizer ? 'max-w-4xl' : 'max-w-[440px]'} rounded-[2.5rem] bg-surface p-10 md:p-12 shadow-xl shadow-primary/5`}>
-        <h1 className="text-4xl font-medium tracking-tight text-primary">Join the club</h1>
-        <p className="mt-3 text-base text-secondary font-medium">Sign up to discover the best local events.</p>
+    <AuthShell wide={isOrganizer}>
+      <div>
+        <h1 className="text-4xl font-extrabold tracking-[-0.04em] text-primary sm:text-5xl">Create your account</h1>
+        <p className="mt-3 text-base text-secondary">Book events, or publish your own.</p>
 
         {/* Role toggle */}
         <div
           role="radiogroup"
           aria-label="Account type"
-          className="mt-8 grid grid-cols-2 gap-1 rounded-full bg-surface p-1"
+          className="mt-8 grid grid-cols-2 gap-1 rounded-xl bg-canvas p-1"
         >
           {ROLE_OPTIONS.map((r) => {
             const active = role === r.value
@@ -241,7 +238,7 @@ export default function Register() {
                 role="radio"
                 aria-checked={active}
                 onClick={() => handleRoleChange(r.value)}
-                className={`rounded-full px-4 py-2.5 text-sm font-semibold transition-all ${
+                className={`rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors ${
                   active ? 'bg-surface text-primary shadow-sm' : 'text-secondary hover:text-primary'
                 }`}
               >
@@ -253,12 +250,12 @@ export default function Register() {
 
         <form onSubmit={handleSubmit} noValidate className="mt-8 space-y-6">
           {errors.form && (
-            <div role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
+            <div role="alert" className="rounded-control bg-danger/10 px-4 py-3 text-sm font-medium text-danger">
               {errors.form}
             </div>
           )}
 
-          <div className={`grid grid-cols-1 gap-8 ${isOrganizer ? 'md:grid-cols-2' : ''}`}>
+          <div className={`grid grid-cols-1 gap-8 ${isOrganizer ? 'xl:grid-cols-2' : ''}`}>
             {/* Left Column */}
             <div className="space-y-5">
               <Field label="Full name" name="full_name" value={form.full_name} onChange={handleChange} error={errors.full_name} autoComplete="name" />
@@ -270,7 +267,7 @@ export default function Register() {
             {/* Right Column */}
             {isOrganizer && (
               <div className="space-y-5 h-full">
-                <fieldset className="space-y-5 rounded-3xl border border-border bg-surface p-6 h-full min-h-[320px]">
+                <fieldset className="space-y-5 rounded-card border border-border bg-surface p-6 h-full min-h-[320px]">
                   <legend className="px-2 text-sm font-semibold text-primary">Organization details</legend>
                   <Field label="Organization name" name="organization_name" value={form.organization_name} onChange={handleChange} error={errors.organization_name} autoComplete="organization" />
                   <Field label="Organization email" name="organization_email" type="email" value={form.organization_email} onChange={handleChange} error={errors.organization_email} />
@@ -280,22 +277,22 @@ export default function Register() {
             )}
           </div>
 
-          <div className={`${isOrganizer ? 'md:w-1/2 md:pr-4' : ''}`}>
+          <div className={`${isOrganizer ? 'xl:w-1/2 xl:pr-4' : ''}`}>
             <button
               type="submit"
               disabled={submitting}
-              className="w-full h-14 mt-2 rounded-full bg-tertiary-strong hover:bg-tertiary-strong/90 px-4 text-base font-semibold text-white transition-transform hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100 shadow-sm"
+              className="mt-2 h-11 w-full rounded-control bg-accent px-4 text-base font-semibold text-white transition-colors hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {submitting ? 'Creating account…' : isOrganizer ? 'Register as Organizer' : 'Create profile'}
             </button>
           </div>
         </form>
-        <div className={`${isOrganizer ? 'md:w-1/2 md:pr-4' : ''}`}>
-          <p className="mt-8 text-center text-sm font-medium text-secondary">
-            Already registered? <Link to="/login" className="text-primary font-semibold hover:text-tertiary transition-colors">Log in</Link>
+        <div className={`${isOrganizer ? 'xl:w-1/2 xl:pr-4' : ''}`}>
+          <p className="mt-8 text-center text-sm text-secondary">
+            Already registered? <Link to="/login" className="font-medium text-primary underline underline-offset-4 transition-colors hover:text-accent">Log in</Link>
           </p>
         </div>
       </div>
-    </main>
+    </AuthShell>
   )
 }

@@ -3,6 +3,8 @@ import { Link, Navigate } from 'react-router-dom'
 import { ApiError, loginUser } from '../api/auth'
 import { useAuth } from '../context/AuthContext'
 import { getRoleHome } from '../lib/authRoutes'
+import AuthShell from '../components/AuthShell'
+import usePageTitle from '../lib/usePageTitle'
 
 const EMAIL_RE = /^\S+@\S+\.\S+$/
 
@@ -14,6 +16,7 @@ export default function Login() {
   const [submitting, setSubmitting] = useState(false)
   const pending = useRef(false)
   const home = getRoleHome(userRole)
+  usePageTitle('Log in')
 
   const handleSubmit = async (event) => {
     event.preventDefault()
@@ -48,16 +51,13 @@ export default function Login() {
   if (isAuthenticated && home) return <Navigate to={home} replace />
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-canvas px-4 py-10 selection:bg-primary selection:text-white">
-      <Link to="/" className="absolute top-8 left-8 text-xl font-black tracking-widest uppercase text-primary hidden md:block">
-        Eventify
-      </Link>
-      <div className="w-full max-w-[440px] rounded-[2.5rem] bg-surface p-10 md:p-12 shadow-xl shadow-primary/5">
-        <h1 className="text-4xl font-medium tracking-tight text-primary">Welcome back</h1>
-        <p className="mt-3 text-base text-secondary font-medium">Pick up right where you left off.</p>
+    <AuthShell>
+      <div>
+        <h1 className="text-4xl font-extrabold tracking-[-0.04em] text-primary sm:text-5xl">Log in</h1>
+        <p className="mt-3 text-base text-secondary">Use your email and password.</p>
         <form onSubmit={handleSubmit} noValidate aria-busy={submitting} className="mt-8 space-y-5">
           {errors.form && (
-            <div role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
+            <div role="alert" className="rounded-control bg-danger/10 px-4 py-3 text-sm font-medium text-danger">
               {errors.form}
             </div>
           )}
@@ -79,27 +79,27 @@ export default function Login() {
                 }}
                 aria-invalid={Boolean(errors[name])}
                 aria-describedby={errors[name] ? `${name}-error` : undefined}
-                className={`w-full rounded-xl border bg-surface px-4 py-3.5 text-sm outline-none transition focus:ring-4 ${
+                className={`h-11 w-full rounded-control border bg-surface px-3 text-sm outline-none transition-colors focus:ring-2 ${
                   errors[name]
-                    ? 'border-red-300 focus:border-red-500 focus:ring-red-100'
-                    : 'border-border focus:border-primary focus:ring-primary/10'
+                    ? 'border-danger/50 focus:border-danger focus:ring-danger/15'
+                    : 'border-border focus:border-primary focus:ring-primary/15'
                 }`}
               />
-              {errors[name] && <p id={`${name}-error`} role="alert" className="mt-2 text-xs font-medium text-red-600">{errors[name]}</p>}
+              {errors[name] && <p id={`${name}-error`} role="alert" className="mt-2 text-xs font-medium text-danger">{errors[name]}</p>}
             </div>
           ))}
           <button
             type="submit"
             disabled={submitting}
-            className="w-full h-14 mt-4 rounded-full bg-tertiary-strong hover:bg-tertiary-strong/90 px-4 text-base font-semibold text-white transition-transform hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100 shadow-sm"
+            className="mt-4 h-11 w-full rounded-control bg-accent px-4 text-base font-semibold text-white transition-colors hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {submitting ? 'Logging in…' : 'Log in'}
           </button>
         </form>
-        <p className="mt-8 text-center text-sm font-medium text-secondary">
-          New here? <Link to="/register" className="text-primary font-semibold hover:text-tertiary transition-colors">Create an account</Link>
+        <p className="mt-8 text-center text-sm text-secondary">
+          New here? <Link to="/register" className="font-medium text-primary underline underline-offset-4 transition-colors hover:text-accent">Create an account</Link>
         </p>
       </div>
-    </main>
+    </AuthShell>
   )
 }

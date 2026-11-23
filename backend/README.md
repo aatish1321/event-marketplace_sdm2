@@ -102,6 +102,42 @@ Unknown fields, invalid JSON, and invalid field values return 400. Invalid or
 missing event IDs return 404; unsupported methods return 405. Unexpected
 database errors use the existing exception logging middleware.
 
+### Organizer dashboard
+
+`GET /api/events/?mine=1` requires an organizer bearer token and returns a JSON
+array containing only events whose `organizer_id` matches the verified JWT.
+Responses prevent caching. A supplied organizer ID cannot select another user's
+events. The public list, public detail, mutation, and nearby-discovery endpoints
+retain their existing contracts.
+
+The dashboard creates physical or online events through `POST /api/events/`:
+
+```json
+{
+  "event_type": "physical",
+  "title": "Community meetup",
+  "description": "An evening of talks and networking.",
+  "start_at": "2026-12-01T17:00:00Z",
+  "end_at": "2026-12-01T19:00:00Z",
+  "venue_name": "Community Hall",
+  "address": "10 Main Street, Budapest"
+}
+```
+
+For online events, replace the venue fields with `stream_url`. The dashboard
+accepts HTTP(S) links and submits only fields relevant to the selected event type.
+Description and dates are additive optional model fields, preserving older event
+documents and clients. If scheduling dates are supplied, they must include a
+timezone and form a valid pair with end after start. Updates validate the final
+stored date pair. Responses serialize dates in UTC; unscheduled events have null
+dates. `created_at` is assigned by the server. Description is limited to 5000
+characters. An organizer/start-time index supports the dashboard query.
+
+The dashboard requires dates for new events and converts local input to UTC.
+API authentication remains stateless as described above: issued JWTs stay valid
+until expiry. No separate event collection or migration of existing events is
+required.
+
 ## Geographic discovery (Task 2.3)
 
 `GET /api/events/nearby/?latitude=47.4979&longitude=19.0402&radius_km=10`
@@ -273,6 +309,46 @@ uv run python manage.py shell -c "from config.models import Event, Ticket; Event
 ```
 
 ## Verification
+
+### Ticket pricing and role reports
+
+Event create/update accepts `ticket_price_minor` and `currency` as a pair.
+Supported currencies are EUR, USD, and HUF; amounts use integer hundredths of the
+currency (for example, `1250` means EUR 12.50). Prices must be nonnegative safe
+integers, at most 9007199254740991. Zero is an explicitly free ticket. Older events
+without prices remain unpriced; they are not silently assigned a zero price.
+
+`POST /api/checkout/` still accepts `event_id` and `quantity`. Clients may also
+send the pair `expected_unit_price_minor` / `expected_currency` to confirm the
+price they displayed. A changed price returns 409 with `code: "price_changed"`,
+without reserving tickets. The server calculates `unit_price_minor`,
+`total_amount_minor`, and `currency` from the event and stores them on the
+purchase; client-supplied totals are not accepted. Amount overflow is rejected
+before inventory is changed. Historical purchases without amounts retain null
+amounts. These are recorded order values, not proof of payment collection; no
+payment gateway is integrated.
+
+Role-specific authenticated reads:
+
+| Route | Role | Response |
+| --- | --- | --- |
+| `GET /api/tickets/?limit=20&offset=0` | Attendee | `{count, limit, offset, results}` with that buyer's purchase snapshots, newest first |
+| `GET /api/organizer/analytics/` | Organizer | Purchase count, tickets sold, events with sales, unpriced purchase count, and revenue grouped by currency |
+| `GET /api/admin/logs/?limit=20&offset=0` | Admin | `{count, limit, offset, results}` with persisted errors, newest first |
+
+Ticket history and logs accept `limit` from 1 to 100 and nonnegative `offset`.
+Each endpoint verifies the bearer token and role; query/body organizer or buyer
+IDs cannot select another account's data. Responses prevent caching. Saved event
+snapshots keep receipts and analytics available after event edits or deletion.
+
+Analytics returns `purchase_count`, `tickets_sold`, `events_with_sales`,
+`unpriced_purchase_count`, and `revenue_by_currency`. Each revenue entry contains
+`currency` and `total_amount_minor` as an exact decimal integer **string** to avoid
+rounding large totals in JavaScript. Currencies are never combined. Old unpriced
+purchases contribute to counts but not recorded revenue. Existing purchase
+documents need no backfill; new buyer/date and organizer indexes support reads.
+
+### Running checks
 
 From `backend/`, with the project's environment configured:
 

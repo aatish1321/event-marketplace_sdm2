@@ -6,10 +6,10 @@ import { AuthProvider } from './context/AuthContext'
 import { makeToken } from './test/authFixtures'
 
 describe('application auth routes', () => {
-  it.each(['/discover', '/dashboard', '/admin-logs'])('guards direct navigation to %s', (path) => {
+  it.each(['/discover', '/dashboard', '/admin-logs', '/my-tickets'])('guards direct navigation to %s', (path) => {
     window.history.replaceState({}, '', path)
     render(<AuthProvider><App /></AuthProvider>)
-    expect(screen.getByRole('heading', { name: 'Welcome back' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Log in' })).toBeInTheDocument()
     expect(window.location.pathname).toBe('/login')
   })
 
@@ -19,7 +19,13 @@ describe('application auth routes', () => {
     ['admin', '/admin-logs', 'Admin logs'],
   ])('logs in a %s, displays its real destination, and logs out', async (role, path, heading) => {
     window.history.replaceState({}, '', '/login')
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({ token: makeToken({ role }) }) }))
+    vi.stubGlobal('fetch', vi.fn().mockImplementation(async (url) => ({
+      ok: true,
+      json: async () => url.startsWith('/api/events/') ? []
+        : url.startsWith('/api/admin/logs/') ? { count: 0, limit: 20, offset: 0, results: [] }
+          : url.startsWith('/api/organizer/analytics/') ? { purchase_count: 0, tickets_sold: 0, events_with_sales: 0, unpriced_purchase_count: 0, revenue_by_currency: [] }
+            : { token: makeToken({ role }) },
+    })))
     render(<AuthProvider><App /></AuthProvider>)
     const user = userEvent.setup()
     await user.type(screen.getByLabelText(/^email$/i), 'user@example.com')
@@ -28,7 +34,7 @@ describe('application auth routes', () => {
     expect(await screen.findByRole('heading', { name: heading })).toBeInTheDocument()
     expect(window.location.pathname).toBe(path)
     await user.click(screen.getByRole('button', { name: /log out/i }))
-    expect(await screen.findByRole('heading', { name: 'Welcome back' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Log in' })).toBeInTheDocument()
     expect(window.location.pathname).toBe('/login')
     expect(localStorage.getItem('access_token')).toBeNull()
   })

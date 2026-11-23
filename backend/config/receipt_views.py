@@ -51,8 +51,8 @@ def _serialize_ticket(ticket):
 def user_tickets(request):
     try:
         limit, offset = _pagination(request.GET)
-    except ValueError as exc:
-        return _private_json({"error": str(exc)}, status=400)
+    except ValueError:
+        return _private_json({"error": "Invalid request parameters."}, status=400)
     tickets = list(
         Ticket.objects(user_id=request.jwt_payload["user_id"])
         .order_by("-created_at", "-id").skip(offset).limit(limit + 1)

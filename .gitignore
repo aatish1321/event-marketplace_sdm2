@@ -33,6 +33,9 @@ GEMINI.md
 .windsurf/
 .windsurfrules
 .continue/
+.roo/
+.roorules
+.kilocode/
 
 # Backup files
 *.backup
@@ -46,3 +49,8 @@ UI_DESIGN_SYSTEM.md
 .graphify*
 graphify-out/
 GRAPH_REPORT.md
+
+# Generated test coverage reports
+.coverage
+.coverage.*
+coverage/

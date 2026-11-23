@@ -3,3 +3,13 @@ __pycache__/
 *.pyc
 .venv/
 db.sqlite3
+
+# Local AI agent configuration, prompts, and logs
+.cursorrules
+.ai/
+.codex/
+.agents/
+.github/copilot/
+*.ai.log
+*.ai.prompt
+*.ai.transcript

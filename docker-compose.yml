@@ -11,8 +11,9 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./backend:/app
-      - /app/.venv
+      - ./backend/config:/app/config
+      - ./backend/src:/app/src
+      - ./backend/manage.py:/app/manage.py
     depends_on:
       - db
     env_file:
@@ -24,8 +25,12 @@ services:
     ports:
       - "5173:5173"
     volumes:
-      - ./frontend:/app
-      - /app/node_modules
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+      - ./frontend/index.html:/app/index.html
+      - ./frontend/vite.config.js:/app/vite.config.js
+      - ./frontend/postcss.config.js:/app/postcss.config.js
+      - ./frontend/tailwind.config.js:/app/tailwind.config.js
     depends_on:
       - backend
     env_file:
