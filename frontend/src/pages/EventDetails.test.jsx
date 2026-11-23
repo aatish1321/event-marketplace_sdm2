@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { act, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { describe, expect, it, vi } from 'vitest'
@@ -41,6 +41,34 @@ function renderDetails(path = '/events/e1') {
 const checkoutCalls = (fetch) => fetch.mock.calls.filter(([url]) => url === '/api/checkout/')
 
 describe('EventDetails', () => {
+  it('submits the displayed price and refreshes it after a price conflict', async () => {
+    const fetch = mockApi({ events: [{ ...EVENT, ticket_price_minor: 1250, currency: 'EUR' },
+      { ...EVENT, ticket_price_minor: 1300, currency: 'EUR' }],
+      checkoutResponse: json(409, { code: 'price_changed' }) })
+    renderDetails()
+    await userEvent.click(await screen.findByRole('button', { name: 'Buy 1 ticket' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent('ticket price changed')
+    expect(JSON.parse(checkoutCalls(fetch)[0][1].body)).toMatchObject({ expected_unit_price_minor: 1250, expected_currency: 'EUR' })
+    expect(await screen.findByText(/Unit price:.*13\.00/)).toBeInTheDocument()
+  })
+
+  it('ignores a previous account purchase that completes after switching accounts', async () => {
+    let resolvePurchase
+    const pending = new Promise((resolve) => { resolvePurchase = resolve })
+    const fetch = mockApi({ checkoutResponse: pending })
+    renderDetails()
+    await userEvent.click(await screen.findByRole('button', { name: 'Buy 1 ticket' }))
+    act(() => {
+      const token = makeToken({ role: 'attendee', user_id: 'new-user' })
+      localStorage.setItem('access_token', token)
+      window.dispatchEvent(new StorageEvent('storage', { key: 'access_token', newValue: token }))
+    })
+    await screen.findByRole('button', { name: 'Buy 1 ticket' })
+    expect(checkoutCalls(fetch)[0][1].signal.aborted).toBe(true)
+    await act(async () => resolvePurchase(json(201, { id: 'old-private-purchase', quantity: 1, event_snapshot: { title: 'Private old event' } })))
+    expect(screen.queryByText(/Private old event/)).not.toBeInTheDocument()
+  })
+
   it('shows the event with its live ticket count and buys the chosen quantity', async () => {
     const purchase = { id: 'p1', quantity: 2, event_snapshot: { title: 'Danube After Dark' } }
     const fetch = mockApi({ events: [EVENT, { ...EVENT, available_tickets: 1 }], checkoutResponse: json(201, purchase) })
@@ -57,7 +85,7 @@ describe('EventDetails', () => {
 
     expect(await screen.findByRole('status')).toHaveTextContent('You bought 2 tickets for Danube After Dark')
     const [[, request]] = checkoutCalls(fetch)
-    expect(JSON.parse(request.body)).toEqual({ event_id: 'e1', quantity: 2 })
+    expect(JSON.parse(request.body)).toEqual({ event_id: 'e1', quantity: 2, expected_unit_price_minor: null, expected_currency: null })
     expect(request.headers.Authorization).toMatch(/^Bearer /)
     // The count is re-read after buying.
     expect(await screen.findByText('1 ticket left')).toBeInTheDocument()

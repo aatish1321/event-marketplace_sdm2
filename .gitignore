@@ -30,6 +30,9 @@ GEMINI.md
 .windsurf/
 .windsurfrules
 .continue/
+.roo/
+.roorules
+.kilocode/
 
 # Backup files
 *.backup

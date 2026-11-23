@@ -4,6 +4,7 @@ import { ApiError } from '../api/auth'
 import { listEvents } from '../api/events'
 import { useAuth } from '../context/AuthContext'
 import CreateEventModal from '../components/CreateEventModal'
+import AnalyticsWidget from '../components/AnalyticsWidget'
 import { dateParts, tileColor } from '../lib/tiles'
 import SiteFooter from '../components/SiteFooter'
 import usePageTitle from '../lib/usePageTitle'
@@ -85,6 +86,7 @@ function DashboardSession({ token, logout }) {
         </div>
       </header>
       <main className={`${pageContainer} flex-1 py-12`}>
+        <AnalyticsWidget />
         {notice && <p role="status" className="mb-8 rounded-card bg-success/10 px-4 py-3 text-sm font-medium text-success">{notice}</p>}
         <section aria-labelledby="your-events-heading">
           <div className="mb-5 flex items-baseline gap-3">

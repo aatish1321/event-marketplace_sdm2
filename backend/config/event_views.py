@@ -12,11 +12,11 @@ from mongoengine.errors import ValidationError
 
 from .auth_views import _read_json, _required_string
 from .decorators import require_role
-from .models import MAX_COVER_BYTES, Event, EventCover, OnlineEvent, PhysicalEvent, User
+from .models import CURRENCIES, MAX_SAFE_AMOUNT, MAX_COVER_BYTES, Event, EventCover, OnlineEvent, PhysicalEvent, User
 
 
 EVENT_TYPES = {"event": Event, "physical": PhysicalEvent, "online": OnlineEvent}
-COMMON_FIELDS = ("title", "status", "continent", "country", "available_tickets", "description")
+COMMON_FIELDS = ("title", "status", "continent", "country", "available_tickets", "description", "ticket_price_minor", "currency")
 DATE_FIELDS = ("start_at", "end_at")
 TYPE_FIELDS = {Event: (), PhysicalEvent: ("venue_name", "address"), OnlineEvent: ("stream_url",)}
 OPTIONAL_FIELDS = {Event: (), PhysicalEvent: ("location",), OnlineEvent: ()}
@@ -79,6 +79,14 @@ def _event_fields(data, model, creating=False):
                 values[field] = date.astimezone(timezone.utc)
             except (ValueError, OverflowError) as exc:
                 raise ValueError("Invalid date.") from exc
+        elif field == "ticket_price_minor":
+            value = values[field]
+            if value is not None and (type(value) is not int or not 0 <= value <= MAX_SAFE_AMOUNT):
+                raise ValueError("ticket_price_minor must be a non-negative safe integer.")
+        elif field == "currency":
+            value = values[field]
+            if value is not None and (not isinstance(value, str) or value not in CURRENCIES):
+                raise ValueError("Unsupported currency.")
         elif field == "location":
             # PointField validates the GeoJSON shape, numeric types and ranges.
             continue

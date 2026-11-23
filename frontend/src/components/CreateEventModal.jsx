@@ -2,7 +2,9 @@ import { useEffect, useRef, useState } from 'react'
 import { ApiError } from '../api/auth'
 import { createEvent, uploadCover } from '../api/events'
 
-const INITIAL_FORM = { title: '', description: '', start_at: '', end_at: '', event_type: 'physical', venue_name: '', venue_address: '', online_url: '' }
+import { CURRENCIES, parsePriceMinor } from '../lib/money'
+
+const INITIAL_FORM = { title: '', description: '', start_at: '', end_at: '', event_type: 'physical', venue_name: '', venue_address: '', online_url: '', ticket_price: '0.00', currency: 'EUR', available_tickets: '0' }
 const COVER_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 const MAX_COVER_BYTES = 2 * 1024 * 1024 // matches the backend limit; the server re-checks both
 const inputClass = 'w-full rounded-control border border-border bg-surface px-3 py-2.5 text-sm text-ink placeholder:text-muted outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/15 disabled:opacity-60'
@@ -27,6 +29,9 @@ function coverProblem(file) {
 
 function validate(form) {
   const errors = {}
+  if (parsePriceMinor(form.ticket_price) === null) errors.ticket_price = 'Enter a non-negative price with up to two decimal places within the supported limit.'
+  if (!CURRENCIES.includes(form.currency)) errors.currency = 'Choose a supported currency.'
+  if (!/^\d+$/.test(form.available_tickets) || !Number.isSafeInteger(Number(form.available_tickets))) errors.available_tickets = 'Enter a non-negative whole number within the supported limit.'
   if (!form.title.trim()) errors.title = 'Enter an event title.'
   else if (form.title.trim().length > 200) errors.title = 'Use no more than 200 characters.'
   if (form.description.length > 5000) errors.description = 'Use no more than 5000 characters.'
@@ -95,6 +100,7 @@ export default function CreateEventModal({ token, onClose, onCreated, onUnauthor
     const controller = new AbortController()
     requestRef.current = controller
     const payload = {
+      ticket_price_minor: parsePriceMinor(form.ticket_price), currency: form.currency, available_tickets: Number(form.available_tickets),
       title: form.title.trim(), description: form.description.trim(),
       start_at: new Date(form.start_at).toISOString(), end_at: new Date(form.end_at).toISOString(),
       event_type: form.event_type,
@@ -130,7 +136,7 @@ export default function CreateEventModal({ token, onClose, onCreated, onUnauthor
         ? error.data.error : 'Could not create your event. Check your connection and try again.' }
       if (error instanceof ApiError && error.data?.fields) {
         for (const [key, value] of Object.entries(error.data.fields)) {
-          const field = { address: 'venue_address', stream_url: 'online_url' }[key] ?? key
+          const field = { address: 'venue_address', stream_url: 'online_url', ticket_price_minor: 'ticket_price' }[key] ?? key
           if (field in INITIAL_FORM && typeof value === 'string') nextErrors[field] = value
         }
       }
@@ -151,6 +157,11 @@ export default function CreateEventModal({ token, onClose, onCreated, onUnauthor
         {errors.form && <p role="alert" className="rounded-control bg-danger/10 p-3 text-sm text-danger">{errors.form}</p>}
         <Field label="Title" {...fieldProps('title')} required maxLength={200} autoFocus placeholder="Give your event a name" />
         <Field label="Description" {...fieldProps('description')} multiline rows={3} maxLength={5000} placeholder="What can guests look forward to? (optional)" />
+        <div className="grid gap-4 sm:grid-cols-3">
+          <Field label="Ticket price" {...fieldProps('ticket_price')} inputMode="decimal" required />
+          <div><label htmlFor="event-currency" className="mb-1.5 block text-sm font-medium">Currency</label><select id="event-currency" name="currency" value={form.currency} onChange={change} disabled={submitting} className={inputClass}>{CURRENCIES.map((currency) => <option key={currency}>{currency}</option>)}</select></div>
+          <Field label="Tickets available" {...fieldProps('available_tickets')} inputMode="numeric" required />
+        </div>
         <div>
           <label htmlFor="event-cover" className="mb-1.5 block text-sm font-semibold text-ink">Cover photo <span className="font-normal text-muted">(optional)</span></label>
           <input
