@@ -1,5 +1,6 @@
 import datetime
 import os
+from decimal import Decimal, InvalidOperation
 from django.conf import settings
 from django.contrib.auth.hashers import (
     check_password as django_check_password,
@@ -8,11 +9,13 @@ from django.contrib.auth.hashers import (
 )
 from mongoengine import (
     DateTimeField,
+    Decimal128Field,
     Document,
     EmailField,
     EmbeddedDocument,
     EmbeddedDocumentField,
     IntField,
+    ObjectIdField,
     PointField,
     StringField,
     URLField,
@@ -25,6 +28,7 @@ __all__ = [
     "Event",
     "PhysicalEvent",
     "OnlineEvent",
+    "Ticket",
     "SystemLog",
 ]
 
@@ -122,6 +126,7 @@ class Event(Document):
         "indexes": [
             # Keep geography first for queries across all event types.
             {"fields": ["continent", "country"], "cls": False},
+            {"fields": ["organizer_id"], "cls": False},
         ],
     }
 
@@ -151,6 +156,52 @@ class OnlineEvent(Event):
     """An event hosted through an online stream."""
 
     stream_url = URLField(required=True)
+
+
+def _validate_nonblank(value):
+    if not isinstance(value, str) or not value.strip():
+        raise ValidationError("Value must not be blank.")
+
+
+def _validate_receipt_amount(value):
+    try:
+        amount = Decimal(str(value))
+    except InvalidOperation as exc:
+        raise ValidationError("total_paid must be a decimal amount.") from exc
+    if not amount.is_finite() or amount < 0:
+        raise ValidationError("total_paid must be finite and non-negative.")
+
+
+class Ticket(Document):
+    """A purchase receipt with a historical title and full transaction amount."""
+
+    STATUS_PENDING = "pending"
+    STATUS_PAID = "paid"
+    STATUS_REFUNDED = "refunded"
+    STATUS_CANCELLED = "cancelled"
+    STATUS_CHOICES = (STATUS_PENDING, STATUS_PAID, STATUS_REFUNDED, STATUS_CANCELLED)
+
+    user_id = StringField(required=True, validation=_validate_nonblank)
+    event_id = ObjectIdField(required=True)
+    event_title = StringField(required=True, validation=_validate_nonblank)
+    quantity = IntField(required=True, null=True, default=1, min_value=1, max_value=2**63 - 1)
+    total_paid = Decimal128Field(required=True, validation=_validate_receipt_amount)
+    currency = StringField(required=True, regex=r"^[A-Z]{3}$", min_length=3, max_length=3)
+    status = StringField(required=True, choices=STATUS_CHOICES, default=STATUS_PENDING)
+    created_at = DateTimeField(required=True, default=lambda: datetime.datetime.now(datetime.timezone.utc))
+
+    meta = {
+        "indexes": [
+            {"fields": ["user_id", "-created_at", "-id"]},
+            {"fields": ["event_id", "status"]},
+        ],
+    }
+
+    def __init__(self, *args, **values):
+        # null=True preserves explicit None for required-field validation, but
+        # MongoEngine also suppresses the field default. Default only omissions.
+        values.setdefault("quantity", 1)
+        super().__init__(*args, **values)
 
 
 class SystemLog(Document):

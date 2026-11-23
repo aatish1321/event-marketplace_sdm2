@@ -157,6 +157,121 @@ uv run python manage.py shell -c "from config.models import PhysicalEvent; Physi
 Discovery uses MongoDB's `$geoNear` aggregation with a bounded radius and result
 limit. See the [MongoDB reference](https://www.mongodb.com/docs/manual/reference/operator/aggregation/geonear/).
 
+## User receipts and organizer analytics
+
+Both endpoints require an `Authorization: Bearer <token>` header. Identity comes
+only from the verified JWT; callers cannot select another user or organizer.
+Successful responses use `Cache-Control: private, no-store`. Invalid credentials
+or a disallowed role return 403. Only GET is supported; other methods return 405.
+
+### Personal tickets: `GET /api/user/tickets/`
+
+Any authenticated model role can read their own receipts. Results are ordered
+by `created_at` descending, then receipt ID descending for stable ties. Optional
+`limit` defaults to 20 (range 1 through 100); `offset` defaults to 0 (range 0
+through 100000). Unknown, repeated, or invalid parameters return 400, including
+attempts to pass a `user_id`. The endpoint fetches one extra row to determine
+`has_more` without counting all purchases.
+
+Example response:
+
+```json
+{
+  "tickets": [{
+    "id": "507f1f77bcf86cd799439011",
+    "event_id": "507f1f77bcf86cd799439012",
+    "event_title": "Budapest Meetup",
+    "quantity": 2,
+    "total_paid": "30.00",
+    "currency": "EUR",
+    "status": "paid",
+    "created_at": "2026-11-22T12:00:00+00:00"
+  }],
+  "limit": 20,
+  "offset": 0,
+  "has_more": false
+}
+```
+
+An account with no receipts gets an empty `tickets` array. All receipt statuses
+are returned, so callers can distinguish pending, paid, refunded, and cancelled
+transactions. Titles are purchase-time snapshots; receipts remain readable even
+if the corresponding event is later renamed or deleted. The endpoint never
+returns another buyer's ID, account details, or payment credentials.
+
+### Organizer revenue: `GET /api/organizer/analytics/`
+
+Only the `organizer` role is allowed. This endpoint accepts no query parameters;
+any provided parameter returns 400. It joins the organizer's currently owned
+events to their paid receipts and aggregates in MongoDB:
+
+```json
+{
+  "revenue": [{
+    "currency": "EUR",
+    "total_revenue": "30.00",
+    "tickets_sold": 2,
+    "receipt_count": 1
+  }]
+}
+```
+
+Each currency is returned separately, sorted by its three-letter code. Amounts
+are decimal strings; consumers should not convert them to binary floats for
+money calculations. `total_paid` is the full receipt amount and is summed once,
+not multiplied by quantity. `tickets_sold` sums quantities, while `receipt_count`
+counts paid receipts. Free paid receipts count toward those counts with zero
+revenue. With no qualifying sales, the response is `{"revenue": []}`.
+
+Pending, cancelled, and fully refunded receipts do not contribute. This is a
+summary of receipts currently marked paid, not a financial ledger: it does not
+calculate fees, taxes, exchange rates, or partial refunds. Ownership is evaluated
+at request time. Receipts for deleted events are excluded, and a change of event
+owner changes whose analytics include those receipts. Buyer identities are not
+included in the analytics response.
+
+### Receipt storage and integration
+
+The new `Ticket` MongoEngine document supplies the persisted data for both
+reads. This task adds no purchase, payment callback, or receipt-writing endpoint.
+Until a trusted purchase/payment flow writes receipts, responses will be empty.
+
+Fields: `user_id` (string), `event_id` (BSON ObjectId), `event_title` (snapshot),
+`quantity` (positive integer, default 1), `total_paid` (nonnegative finite
+Decimal128), `currency` (three uppercase letters), `status` (default `pending`),
+and `created_at` (UTC, set when created). A three-letter currency format is
+validated, but membership in a currency registry is not checked.
+
+Trusted producer example, after verifying a successful payment:
+
+```python
+from decimal import Decimal
+from config.models import Ticket
+
+Ticket(
+    user_id=str(buyer.id),
+    event_id=event.id,
+    event_title=event.title,
+    quantity=2,
+    total_paid=Decimal("30.00"),
+    currency="EUR",
+    status=Ticket.STATUS_PAID,
+).save()
+```
+
+Provide money as decimal strings or `Decimal` values rather than floats. Payment
+handling must ensure retries do not create duplicate receipts; these read APIs
+do not provide payment idempotency or validate event existence when writing a
+receipt. There is no cascade deletion of receipts when an event is removed.
+
+MongoEngine automatically creates indexes for personal receipt ordering,
+event/status lookup, and organizer ownership. No SQL migration or new dependency
+is needed. Indexes can also be prepared explicitly during deployment:
+
+```sh
+uv run python manage.py shell -c "from config.models import Event, Ticket; Event.ensure_indexes(); Ticket.ensure_indexes()"
+```
+
 ## Verification
 
 From `backend/`, with the project's environment configured:
@@ -187,3 +302,16 @@ Remove-Item Env:GEODISCOVERY_TEST_MONGO_URI
 The real MongoDB tests create and remove their own randomly named test database.
 Without the opt-in variable, those tests are skipped.
 The backend CI job supplies a MongoDB service and enables these integration tests.
+
+Receipt API/model tests run in the default suite. Set `RECEIPTS_TEST_MONGO_URI`
+to a disposable MongoDB instance to also exercise revenue aggregation against a
+real database:
+
+```powershell
+$env:RECEIPTS_TEST_MONGO_URI = "mongodb://127.0.0.1:27028"
+uv run manage.py test config.test_receipts config.test_receipts_mongo
+Remove-Item Env:RECEIPTS_TEST_MONGO_URI
+```
+
+The real receipt tests use a randomly named database and remove it afterward.
+CI enables them using its MongoDB service. Without the variable, they are skipped.
