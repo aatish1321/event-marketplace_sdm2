@@ -36,6 +36,7 @@ jobs:
       DEBUG: 'False'
       MONGO_URI: mongodb://127.0.0.1:27017/marketplace_ci
       GEODISCOVERY_TEST_MONGO_URI: mongodb://127.0.0.1:27017
+      RECEIPTS_TEST_MONGO_URI: mongodb://127.0.0.1:27017
     steps:
       - uses: actions/checkout@v7.0.1
         with:

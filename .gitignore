@@ -14,6 +14,7 @@
 .github/prompts/
 .github/instructions/
 .github/agents/
+.github/chatmodes/
 AGENTS.md
 CLAUDE.md
 ORIGINAL_REQUEST.md
@@ -23,6 +24,8 @@ ORIGINAL_REQUEST.md
 *.ai.prompt.md
 *.ai.log.json
 *.ai.transcript.json
+*.ai.log.jsonl
+*.ai.transcript.jsonl
 .copilot/
 .aider*
 .gemini/
