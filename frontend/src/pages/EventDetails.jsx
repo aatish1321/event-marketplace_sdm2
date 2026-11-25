@@ -41,6 +41,14 @@ function EventSession({ eventId, token }) {
   const [quantity, setQuantity] = useState(1)
   const [order, setOrder] = useState({ status: 'idle', purchase: null, message: '' })
   const [booking, setBooking] = useState('loading')
+  const [now, setNow] = useState(null)
+
+  useEffect(() => {
+    const updateNow = () => setNow(Date.now())
+    updateNow()
+    const timer = window.setInterval(updateNow, 60_000)
+    return () => window.clearInterval(timer)
+  }, [])
 
   const key = `${eventId}:${version}`
   const refresh = () => setVersion((v) => v + 1)
@@ -92,7 +100,7 @@ function EventSession({ eventId, token }) {
   const PlaceIcon = online ? Globe : MapPin
   const available = Math.max(0, event.available_tickets ?? 0)
   const soldOut = available === 0
-  const unavailable = event.moderation_blocked || ['draft', 'cancelled'].includes(event.status) || event.end_at && new Date(event.end_at).getTime() <= Date.now()
+  const unavailable = event.moderation_blocked || ['draft', 'cancelled'].includes(event.status) || event.end_at && (now === null || new Date(event.end_at).getTime() <= now)
   const buying = order.status === 'buying'
   const hasTicket = booking === 'owned' || order.status === 'done'
   // Clamp so a refreshed, lower count can never leave an impossible quantity selected.
