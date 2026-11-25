@@ -116,6 +116,7 @@ class EventCoverTests(BaseMongoTestCase):
 
     def test_deleting_the_event_deletes_its_cover(self):
         self.put(PNG)
+        self.event.update(set__status="draft")
         response = self.client.delete(f"/api/events/{self.event.id}/", **self.auth())
         self.assertEqual(response.status_code, 204)
         self.assertEqual(EventCover.objects.count(), 0)

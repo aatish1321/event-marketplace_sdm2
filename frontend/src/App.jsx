@@ -7,6 +7,9 @@ import EventDetails from './pages/EventDetails'
 import MyTickets from './pages/MyTickets'
 import AdminLogs from './pages/AdminLogs'
 import OrganizerDashboard from './pages/OrganizerDashboard'
+import AccountSettings from './pages/AccountSettings'
+import CheckIn from './pages/CheckIn'
+import AdminManagement from './pages/AdminManagement'
 import ProtectedRoute from './components/ProtectedRoute'
 import NotFound from './pages/NotFound'
 import { ROLES } from './lib/authRoutes'
@@ -18,6 +21,7 @@ function App() {
         <Route path="/" element={<Landing />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
+        <Route element={<ProtectedRoute />}><Route path="/account" element={<AccountSettings />} /></Route>
         <Route element={<ProtectedRoute allowedRoles={[ROLES.ATTENDEE]} />}>
           <Route path="/discover" element={<Discover />} />
           <Route path="/my-tickets" element={<MyTickets />} />
@@ -25,9 +29,11 @@ function App() {
         </Route>
         <Route element={<ProtectedRoute allowedRoles={[ROLES.ORGANIZER]} />}>
           <Route path="/dashboard" element={<OrganizerDashboard />} />
+          <Route path="/check-in" element={<CheckIn />} />
         </Route>
         <Route element={<ProtectedRoute allowedRoles={[ROLES.ADMIN]} />}>
           <Route path="/admin-logs" element={<AdminLogs />} />
+          <Route path="/admin" element={<AdminManagement />} />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>

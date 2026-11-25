@@ -1,5 +1,6 @@
 """Attendee checkout with an atomic inventory reservation."""
 
+from django.core import signing
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
@@ -7,7 +8,7 @@ from mongoengine.errors import ValidationError
 
 from .auth_views import _read_json, _required_string
 from .decorators import require_role
-from .event_views import EVENT_TYPES, _find_event, _iso_date
+from .event_views import EVENT_TYPES, _bookable, _find_event, _iso_date
 from .models import CURRENCIES, MAX_SAFE_AMOUNT, BuyerSnapshot, Event, EventSnapshot, TicketPurchase, User
 
 
@@ -53,6 +54,8 @@ def checkout(request):
     event = _find_event(event_id)
     if event is None:
         return JsonResponse({"error": "Event not found."}, status=404)
+    if not _bookable(event):
+        return JsonResponse({"error": "This event is no longer available for booking.", "code": "event_unavailable"}, status=409)
     if "expected_unit_price_minor" in data and (
         data["expected_unit_price_minor"] != event.ticket_price_minor
         or data["expected_currency"] != event.currency
@@ -81,6 +84,7 @@ def checkout(request):
     if not Event.objects(
         id=event.id, available_tickets__gte=safe_qty,
         ticket_price_minor=event.ticket_price_minor, currency=event.currency,
+        status=event.status, moderation_blocked__ne=True, end_at=event.end_at,
     ).update_one(dec__available_tickets=safe_qty):
         current = _find_event(event_id)
         if current is not None and (current.ticket_price_minor != event.ticket_price_minor or current.currency != event.currency):
@@ -93,11 +97,15 @@ def checkout(request):
     return JsonResponse(serialize_purchase(purchase), status=201)
 
 
-def serialize_purchase(purchase):
+def serialize_purchase(purchase, event_status=None):
     """Serialize immutable receipt snapshots for checkout and ticket history."""
     return {
         "id": str(purchase.id),
         "quantity": purchase.quantity,
+        "checked_in": purchase.checked_in,
+        "admission_code": signing.Signer(salt="event-admission").sign(str(purchase.id)),
+        "event_status": event_status,
+        "booking_mode": "simulation",
         "created_at": _iso_date(purchase.created_at),
         "unit_price_minor": purchase.unit_price_minor,
         "total_amount_minor": purchase.total_amount_minor,

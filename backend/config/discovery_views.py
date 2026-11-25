@@ -7,7 +7,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET
 
 from .event_views import _serialize_event
-from .models import PhysicalEvent
+from .models import AccountAccess, PhysicalEvent
 
 
 def _search_parameters(query):
@@ -27,7 +27,9 @@ def _search_parameters(query):
     if not raw_limit.isascii() or not raw_limit.isdecimal() or not 1 <= int(raw_limit) <= 100:
         raise ValueError("limit must be an integer from 1 to 100.")
     values["limit"] = int(raw_limit)
-    filters = {"_cls": PhysicalEvent._class_name}
+    filters = {"_cls": PhysicalEvent._class_name,
+               "status": {"$in": [None, "", "published"]}, "moderation_blocked": {"$ne": True},
+               "organizer_id": {"$nin": list(AccountAccess.objects(active=False).scalar("user_id"))}}
     for name in ("country", "continent"):
         if name in query:
             value = query[name].strip()

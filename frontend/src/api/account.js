@@ -7,6 +7,21 @@ async function readAccount(url, token, signal) {
   return data
 }
 
+export async function writeAccount(url, token, payload, method = 'PUT', signal) {
+  const response = await fetch(url, { method, signal, headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+  const data = await response.json().catch(() => null)
+  if (!response.ok) throw new ApiError(response.status, data)
+  return data
+}
+
+export async function fetchProfile(token, { signal } = {}) {
+  const data = await readAccount('/api/account/', token, signal)
+  if (!data || typeof data.email !== 'string' || typeof data.role !== 'string') throw new Error('Invalid profile response')
+  return data
+}
+export function fetchAdminUsers(token, options) { return readPage('/api/admin/users/', token, options) }
+export function fetchAdminEvents(token, options) { return readPage('/api/admin/events/', token, options) }
+
 async function readPage(path, token, { limit = 20, offset = 0, signal } = {}) {
   const data = await readAccount(`${path}?${new URLSearchParams({ limit, offset })}`, token, signal)
   if (!data || !Number.isInteger(data.count) || data.count < 0 || !Number.isInteger(data.limit)

@@ -39,6 +39,8 @@ class RequireRoleTests(unittest.TestCase):
             SECRET_KEY="security-tests-signing-secret-at-least-32-bytes",
         ))
         self.factory = RequestFactory()
+        access = self.enterContext(patch("config.decorators.AccountAccess.objects"))
+        access.return_value.first.return_value = None
         self.payload = {
             "user_id": "stateless-user-id", "role": "admin",
             "iat": int(time.time()) - 10, "exp": int(time.time()) + 3600,

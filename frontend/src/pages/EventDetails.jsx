@@ -82,6 +82,7 @@ function EventSession({ eventId, token }) {
   const PlaceIcon = online ? Globe : MapPin
   const available = Math.max(0, event.available_tickets ?? 0)
   const soldOut = available === 0
+  const unavailable = event.moderation_blocked || ['draft', 'cancelled'].includes(event.status) || event.end_at && new Date(event.end_at).getTime() <= Date.now()
   const buying = order.status === 'buying'
   // Clamp so a refreshed, lower count can never leave an impossible quantity selected.
   const qty = Math.min(Math.max(quantity, 1), Math.max(available, 1))
@@ -90,7 +91,7 @@ function EventSession({ eventId, token }) {
   const date = formatEventDate(event.start_at)
 
   const buy = async () => {
-    if (buying || soldOut || purchaseRequest.current) return
+    if (buying || soldOut || unavailable || purchaseRequest.current) return
     const controller = new AbortController()
     purchaseRequest.current = controller
     setOrder({ status: 'buying', purchase: null, message: '' })
@@ -104,7 +105,9 @@ function EventSession({ eventId, token }) {
       setQuantity(1)
     } catch (error) {
       if (controller.signal.aborted) return
-      const message = error instanceof ApiError && error.data?.code === 'price_changed'
+      const message = error instanceof ApiError && error.data?.code === 'event_unavailable'
+        ? 'This event is no longer available for booking.'
+        : error instanceof ApiError && error.data?.code === 'price_changed'
         ? 'The ticket price changed. Review the updated price and try again.'
         : error instanceof ApiError
         ? CHECKOUT_ERRORS[error.status] ?? CHECKOUT_ERRORS[400]
@@ -162,18 +165,20 @@ function EventSession({ eventId, token }) {
           </section>
           <section>
             <h2 className="text-2xl font-extrabold tracking-[-0.03em]">Before you go</h2>
-            <p className="mt-3 text-base font-medium text-muted">Bring your ticket confirmation. Organizer cancellation policies apply.</p>
+            <p className="mt-3 text-base font-medium text-muted">Show the admission code in My tickets when you arrive. This is a booking demo; no payment is collected.</p>
           </section>
         </div>
 
-        <aside aria-label="Buy tickets" className="order-first rounded-card border border-border bg-surface p-6 shadow-card md:order-none md:sticky md:top-6">
+        <aside aria-label="Book tickets" className="order-first rounded-card border border-border bg-surface p-6 shadow-card md:order-none md:sticky md:top-6">
           <p aria-live="polite" className={`text-3xl font-bold ${soldOut ? 'text-danger' : 'text-ink'}`}>
             {soldOut ? 'Sold out' : `${ticketsLabel(available)} left`}
           </p>
           <p className="mt-1 text-sm font-medium text-muted">General admission · Digital ticket</p>
           <p className="mt-3 text-sm font-semibold">Unit price: {formatMoney(event.ticket_price_minor, event.currency)}</p>
 
-          {!soldOut && (
+          {unavailable && <p role="status" className="mt-4 font-semibold text-danger">{event.status === 'cancelled' ? 'Event cancelled' : 'Booking closed'}</p>}
+          <p className="mt-3 text-sm text-muted">Simulated booking. No payment will be collected.</p>
+          {!soldOut && !unavailable && (
             <>
               <div className="mt-6 flex items-center justify-between">
                 <span id="quantity-label" className="text-sm font-semibold">Quantity</span>
@@ -197,16 +202,16 @@ function EventSession({ eventId, token }) {
           <button
             type="button"
             onClick={buy}
-            disabled={soldOut || buying}
+            disabled={soldOut || buying || Boolean(unavailable)}
             className={`mt-6 flex h-11 w-full items-center justify-center rounded-control bg-accent px-6 text-sm font-semibold text-white transition-colors hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-50 ${focusRing}`}
           >
-            {soldOut ? 'Sold out' : buying ? 'Buying…' : `Buy ${ticketsLabel(qty)}`}
+            {unavailable ? 'Booking closed' : soldOut ? 'Sold out' : buying ? 'Booking…' : `Book ${ticketsLabel(qty)}`}
           </button>
 
           {order.status === 'done' && (
             <p role="status" className="mt-4 flex gap-2 rounded-card bg-success/10 px-4 py-3 text-sm font-medium text-success">
               <CheckCircle2 className="h-5 w-5 shrink-0" strokeWidth={1.5} aria-hidden="true" />
-              You bought {ticketsLabel(order.purchase.quantity)} for {order.purchase.event_snapshot?.title ?? event.title}.
+              You booked {ticketsLabel(order.purchase.quantity)} for {order.purchase.event_snapshot?.title ?? event.title}. No payment was collected.
             </p>
           )}
           {order.status === 'error' && (

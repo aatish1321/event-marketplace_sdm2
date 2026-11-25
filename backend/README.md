@@ -1,5 +1,43 @@
 # Backend authentication API
 
+## Current API additions
+
+Checkout is a simulated booking flow; it never collects payment. Published,
+unblocked events can be booked until their end time. Draft/cancelled events and
+events belonging to suspended organizers cannot be booked. Legacy events without
+dates remain supported. Public discovery accepts `continent`, `country`, `type`,
+`limit` (1–100, default 100), and `offset` (0–100000). Geography matching is
+case-insensitive; unknown/repeated query parameters return 400.
+
+Event updates accept `expected_available_tickets` alongside a changed
+`available_tickets` value. A stale count returns 409 instead of restoring sold
+stock. Only drafts with no bookings can be deleted. Cancellation is permanent.
+
+| Endpoint | Role | Behavior |
+| --- | --- | --- |
+| `GET/PUT /api/account/` | Any signed-in role | Read profile; edit full name and organizer profile, without changing identity or role |
+| `POST /api/account/password/` | Any signed-in role | `{current_password,new_password}`; 8–128 characters, revokes existing sessions |
+| `POST /api/check-in/` | Organizer | `{admission_code,quantity,request_id}`; UUID request ID makes retries safe; verifies event ownership and atomically consumes unused admissions |
+| `GET /api/admin/users/` | Admin | Paginated non-secret user details and suspension state |
+| `PUT /api/admin/users/:id/` | Admin | `{active:boolean}`; suspends/restores non-admin users and revokes prior sessions |
+| `GET /api/admin/events/` | Admin | Paginated events, including drafts and hidden events |
+| `PUT /api/admin/events/:id/` | Admin | `{moderation_blocked:boolean}`; hides/restores an event without deleting receipts |
+
+Registration also enforces the 8–128 character password bound server-side.
+Suspension/session version state is held in `AccountAccess`; tokens issued before
+the first state change have version zero. Old sessions stay invalid after an
+account is restored.
+
+`GET /api/organizer/analytics/` uses `TicketPurchase` and returns the dashboard
+contract documented under “Ticket pricing and role reports” below. The separate
+legacy `Ticket` analytics contract described later has moved to
+`GET /api/legacy/organizer/analytics/`. Existing legacy receipt reads remain available.
+New booking history includes `admission_code`, `checked_in`, `event_status`, and
+`booking_mode: "simulation"`; never publish admission codes or place them in URLs.
+
+Production settings: `DJANGO_SETTINGS_MODULE=config.production`; see the root
+README for runtime, HTTPS proxy, storage, and deployment requirements.
+
 Both endpoints accept JSON and allow POST only (other methods return 405).
 They do not create sessions or set authentication cookies.
 
@@ -64,9 +102,11 @@ Send `Authorization: Bearer <token>` using a token from login. The guard verifie
 HS256 signatures, required claims, and token lifetime. Missing, malformed,
 expired, or disallowed credentials return JSON `{"error": "Forbidden."}` with
 status 403. A single role string is also accepted; an empty role list denies all.
-Verified claims are available as `request.jwt_payload`. Authorization is
-stateless: role changes or account deletion do not invalidate already issued
-tokens before expiry. Registration and login remain public.
+Verified claims are available as `request.jwt_payload`. Authorization also checks
+`AccountAccess` for suspension and session version revocation. Suspension and
+password changes invalidate issued tokens. Direct database role changes or account
+deletion still require explicit revocation; no such actions are exposed by the app.
+Registration and login remain public.
 
 `MongoExceptionLoggingMiddleware` records unhandled view exceptions in
 `SystemLog`, including the traceback, path (without query parameters), method,
@@ -134,9 +174,8 @@ dates. `created_at` is assigned by the server. Description is limited to 5000
 characters. An organizer/start-time index supports the dashboard query.
 
 The dashboard requires dates for new events and converts local input to UTC.
-API authentication remains stateless as described above: issued JWTs stay valid
-until expiry. No separate event collection or migration of existing events is
-required.
+API authentication checks suspension and session revocation as described above.
+No separate event collection or migration of existing events is required.
 
 ## Geographic discovery (Task 2.3)
 
@@ -157,8 +196,8 @@ numeric distance in kilometres). No matches returns `[]` with status 200.
 Missing, invalid, unknown, or repeated query parameters return status 400 with
 an `error` message. Unsupported HTTP methods return 405. Equal-distance result
 order is unspecified. The response is a limited nearest-results list, without
-pagination or a total count. Event status and ticket availability are not
-implicitly filtered, matching the existing public event reads.
+pagination or a total count. Drafts, cancelled events, moderated events, and events
+belonging to suspended organizers are excluded. Sold-out events remain visible.
 
 Organizers can provide coordinates through the existing create/update routes:
 
@@ -235,7 +274,7 @@ transactions. Titles are purchase-time snapshots; receipts remain readable even
 if the corresponding event is later renamed or deleted. The endpoint never
 returns another buyer's ID, account details, or payment credentials.
 
-### Organizer revenue: `GET /api/organizer/analytics/`
+### Legacy organizer revenue: `GET /api/legacy/organizer/analytics/`
 
 Only the `organizer` role is allowed. This endpoint accepts no query parameters;
 any provided parameter returns 400. It joins the organizer's currently owned

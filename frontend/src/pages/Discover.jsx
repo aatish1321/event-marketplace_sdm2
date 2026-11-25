@@ -9,7 +9,7 @@ import heroImg from '../assets/afterglow.jpg'
 import usePageTitle from '../lib/usePageTitle'
 import { pageContainer } from '../lib/layout'
 
-// Stored values must match the backend exactly (case-sensitive).
+// Use canonical display names when sending geography filters.
 const CONTINENTS = ['Africa', 'Antarctica', 'Asia', 'Europe', 'North America', 'Oceania', 'South America']
 const TYPES = [
   { value: '', label: 'All events' },
@@ -54,7 +54,7 @@ export default function Discover() {
 
   // Apply the typed country once the user pauses.
   useEffect(() => {
-    const timer = setTimeout(() => setFilters((f) => ({ ...f, country: countryInput })), DEBOUNCE_MS)
+    const timer = setTimeout(() => setFilters((f) => ({ ...f, country: countryInput, offset: 0 })), DEBOUNCE_MS)
     return () => clearTimeout(timer)
   }, [countryInput])
 
@@ -70,12 +70,18 @@ export default function Discover() {
     return () => controller.abort()
   }, [filters])
 
-  const setFilter = (key, value) => setFilters((f) => ({ ...f, [key]: value }))
+  const setFilter = (key, value) => setFilters((f) => ({ ...f, [key]: value, offset: 0, ...(key === 'type' ? { nearby: false } : {}) }))
   const clearFilters = () => {
     setCountryInput('')
     setFilters(EMPTY_FILTERS)
   }
-  const hasFilters = Boolean(filters.continent || filters.type || countryInput.trim())
+  const hasFilters = Boolean(filters.continent || filters.type || countryInput.trim() || filters.nearby)
+
+  const searchNearby = (event) => {
+    event.preventDefault()
+    const values = Object.fromEntries(new FormData(event.currentTarget))
+    setFilters((previous) => ({ ...previous, ...values, nearby: true, type: '', offset: 0 }))
+  }
 
   const hero = (
     <section className="relative isolate bg-primary text-white">
@@ -112,6 +118,8 @@ export default function Discover() {
           </button>
         </form>
       </div>
+
+
     </section>
   )
 
@@ -140,6 +148,17 @@ export default function Discover() {
           </button>
         )}
       </div>
+
+      <details className="mt-6 text-ink rounded-card border border-border bg-surface p-5">
+        <summary className="cursor-pointer font-semibold">Find physical events nearby</summary>
+        <form onSubmit={searchNearby} className="mt-4 grid gap-4 sm:grid-cols-4">
+          <label className={fieldLabel}>Latitude<input name="latitude" type="number" min={-90} max={90} step="any" required className="mt-2 w-full rounded-control border border-border p-3 text-sm" /></label>
+          <label className={fieldLabel}>Longitude<input name="longitude" type="number" min={-180} max={180} step="any" required className="mt-2 w-full rounded-control border border-border p-3 text-sm" /></label>
+          <label className={fieldLabel}>Radius (km)<input name="radius_km" type="number" min={0.1} max={1000} step="any" defaultValue={10} required className="mt-2 w-full rounded-control border border-border p-3 text-sm" /></label>
+          <button className={`self-end rounded-control bg-accent px-4 py-3 text-sm font-semibold text-white ${focusRing}`}>Search nearby</button>
+        </form>
+        {filters.nearby && <p role="status" className="mt-3 text-sm">Showing up to 20 nearby events, nearest first. Only events with coordinates appear.</p>}
+      </details>
 
       <section className="mt-8" aria-live="polite" aria-busy={status === 'loading'}>
         <div className="mb-4 flex items-baseline justify-between gap-4">
@@ -183,6 +202,7 @@ export default function Discover() {
             ))}
           </ul>
         )}
+        {status === 'ready' && !filters.nearby && <nav aria-label="Event pages" className="mt-8 flex justify-between gap-4"><button disabled={!filters.offset} onClick={() => setFilters((previous) => ({ ...previous, offset: Math.max(0, (previous.offset || 0) - 100) }))} className="rounded-control border border-border px-4 py-2 disabled:opacity-40">Previous events</button><button disabled={result.events.length < 100} onClick={() => setFilters((previous) => ({ ...previous, offset: (previous.offset || 0) + 100 }))} className="rounded-control border border-border px-4 py-2 disabled:opacity-40">Next events</button></nav>}
       </section>
     </AttendeeLayout>
   )

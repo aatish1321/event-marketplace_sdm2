@@ -111,7 +111,8 @@ class DiscoveryTests(BaseMongoTestCase):
         self.assertEqual(pipeline[0], {"$geoNear": {
             "near": point(), "key": "location", "distanceField": "distance_m",
             "maxDistance": 10000, "spherical": True,
-            "query": {"_cls": PhysicalEvent._class_name, "continent": "Europe", "country": "Hungary"},
+            "query": {"_cls": PhysicalEvent._class_name, "continent": "Europe", "country": "Hungary",
+                      "status": {"$in": [None, "", "published"]}, "moderation_blocked": {"$ne": True}, "organizer_id": {"$nin": []}},
         }})
         self.assertEqual(pipeline[1], {"$limit": 3})
 

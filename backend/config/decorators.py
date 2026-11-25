@@ -1,4 +1,4 @@
-"""Role guards for the application's stateless bearer tokens."""
+"""Role guards and revocation checks for the application's bearer tokens."""
 
 from functools import wraps
 import math
@@ -7,7 +7,7 @@ import jwt
 from django.conf import settings
 from django.http import JsonResponse
 
-from .models import User
+from .models import AccountAccess, User
 
 
 def require_role(allowed_roles):
@@ -48,6 +48,12 @@ def require_role(allowed_roles):
                 ):
                     return JsonResponse({"error": "Forbidden."}, status=403)
             except (jwt.InvalidTokenError, TypeError, ValueError, OverflowError):
+                return JsonResponse({"error": "Forbidden."}, status=403)
+            access = AccountAccess.objects(user_id=payload["user_id"]).first()
+            version = payload.get("version", 0)
+            if type(version) is not int or version < 0 or (
+                access is not None and (not access.active or version != access.version)
+            ):
                 return JsonResponse({"error": "Forbidden."}, status=403)
             request.jwt_payload = payload
             return view(request, *args, **kwargs)

@@ -7,6 +7,10 @@ const base = { title: 'Danube After Dark', category: 'Physical', venue: 'A38 Shi
 const renderCard = (props) => render(<MemoryRouter><EventCard {...base} {...props} /></MemoryRouter>)
 
 describe('EventCard visual', () => {
+  it('does not show a save button without a working save action', () => {
+    renderCard({})
+    expect(screen.queryByRole('button', { name: 'Save event' })).not.toBeInTheDocument()
+  })
   it('shows the cover photo when the organizer added one', () => {
     renderCard({ imageUrl: '/api/events/e1/cover/?v=1', startAt: '2030-11-13T12:00:00Z', eventKey: 'e1' })
     expect(screen.getByRole('img', { name: 'Danube After Dark' })).toHaveAttribute('src', '/api/events/e1/cover/?v=1')

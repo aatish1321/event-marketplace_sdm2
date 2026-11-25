@@ -116,6 +116,8 @@ class EventViewsTests(BaseMongoTestCase):
         self.assertEqual(event.available_tickets, 0)
         self.assertEqual(event.country, "Hungary")
         self.assertEqual(event.organizer_id, self.owner)
+        self.assertEqual(self.write("delete", event_id=str(event.id)).status_code, 409)
+        self.write("put", {"status": "draft"}, str(event.id))
         deleted = self.write("delete", event_id=str(event.id))
         self.assertEqual(deleted.status_code, 204)
         self.assertEqual(deleted.content, b"")
@@ -274,6 +276,7 @@ class EventViewsTests(BaseMongoTestCase):
         self.assertEqual(created.json()["organizer_id"], str(user.id))
         event_id = created.json()["id"]
         self.assertEqual(self.write("put", {"title": "Updated"}, event_id, authorization).status_code, 200)
+        self.write("put", {"status": "draft"}, event_id, authorization=authorization)
         self.assertEqual(self.write("delete", event_id=event_id, authorization=authorization).status_code, 204)
         self.assertEqual(self.client.get(f"/api/events/{event_id}/").status_code, 404)
 

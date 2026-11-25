@@ -38,6 +38,17 @@ describe('buildEventsUrl', () => {
 })
 
 describe('Discover', () => {
+  it('connects nearby search to the geospatial API', async () => {
+    const fetch = mockFetch()
+    renderDiscover()
+    await screen.findByRole('heading', { name: 'Debrecen Jazz Night' })
+    const user = userEvent.setup()
+    await user.click(screen.getByText('Find physical events nearby'))
+    await user.type(screen.getByLabelText('Latitude'), '47.5')
+    await user.type(screen.getByLabelText('Longitude'), '19')
+    await user.click(screen.getByRole('button', { name: 'Search nearby' }))
+    await waitFor(() => expect(requestedUrls(fetch).at(-1)).toBe('/api/events/nearby/?latitude=47.5&longitude=19&radius_km=10'))
+  })
   it('loads all events into cards with a map pin for physical and a globe for online events', async () => {
     const fetch = mockFetch()
     renderDiscover()

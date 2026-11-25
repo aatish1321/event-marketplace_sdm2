@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
-import { describe, it, expect } from 'vitest';
+import { beforeEach, describe, it, expect, vi } from 'vitest';
 import Landing from './Landing';
 
 // Mock IntersectionObserver for framer-motion
@@ -11,6 +11,11 @@ window.IntersectionObserver = class IntersectionObserver {
 };
 
 describe('Landing Page', () => {
+  beforeEach(() => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => [
+      { id: 'live-event', title: 'Published community meetup', event_type: 'physical', venue_name: 'Town Hall', country: 'Hungary', ticket_price_minor: 0, currency: 'EUR' },
+    ] }));
+  });
   it('renders the brand name', () => {
     render(
       <BrowserRouter>
@@ -37,10 +42,10 @@ describe('Landing Page', () => {
     );
     
     expect(screen.getByText(/Sign up/i)).toBeInTheDocument();
-    expect(screen.getByText(/Find an event/i)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Find an event/i })).toBeInTheDocument();
   });
 
-  it('renders events section', () => {
+  it('renders published events instead of fictional listings', async () => {
     render(
       <BrowserRouter>
         <Landing />
@@ -48,8 +53,8 @@ describe('Landing Page', () => {
     );
     
     expect(screen.getByText('Worth leaving the house for')).toBeInTheDocument();
-    expect(screen.getByText('Solange: Notes From the Deep')).toBeInTheDocument();
-    expect(screen.getByText('The New City Food Festival')).toBeInTheDocument();
-    expect(screen.getByText('Designing Tomorrow: Live')).toBeInTheDocument();
+    expect(await screen.findByText('Published community meetup')).toBeInTheDocument();
+    expect(screen.queryByText('Solange: Notes From the Deep')).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Published community meetup/ })).toHaveAttribute('href', '/events/live-event');
   });
 });

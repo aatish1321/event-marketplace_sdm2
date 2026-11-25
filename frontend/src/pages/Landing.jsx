@@ -1,4 +1,8 @@
 import { Link, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { fetchEvents } from '../api/events';
+import { formatEventDate } from '../lib/dates';
+import { formatMoney } from '../lib/money';
 import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import EventCard from '../components/EventCard';
 import SiteFooter from '../components/SiteFooter';
@@ -6,54 +10,24 @@ import usePageTitle from '../lib/usePageTitle';
 import { pageContainer } from '../lib/layout';
 import { buttonLg, buttonMd, onDark, onPaper } from '../lib/buttons';
 import afterglowImg from '../assets/afterglow.jpg';
-import foodFestivalImg from '../assets/food_festival.jpg';
-import designingTmrwImg from '../assets/desgining-tmrw.jpg';
 import createEventImg from '../assets/create_the_event.jpg';
 
-// Dates use the same format as the app (see lib/dates.js).
-const events = [
-  {
-    category: 'Concert',
-    date: 'Fri 9 Oct · 20:00',
-    title: 'Solange: Notes From the Deep',
-    venue: 'Radio City Music Hall · New York, NY',
-    price: 'From $74',
-    imageUrl: afterglowImg,
-  },
-  {
-    category: 'Food & drink',
-    date: 'Sat 10 Oct · 12:00',
-    title: 'The New City Food Festival',
-    venue: 'Industry City Courtyard · Brooklyn, NY',
-    price: 'From $32',
-    imageUrl: foodFestivalImg,
-  },
-  {
-    category: 'Talks',
-    date: 'Thu 15 Oct · 18:30',
-    title: 'Designing Tomorrow: Live',
-    venue: 'The Shed · New York, NY',
-    price: 'From $45',
-    imageUrl: designingTmrwImg,
-  },
-];
-
 const organizerPoints = [
-  { title: 'Launch a polished event page', body: 'Add tickets, schedules, media, and custom checkout questions in minutes.' },
-  { title: 'Know what’s working', body: 'Track sales, conversion, payouts, and channel performance in real time.' },
-  { title: 'Grow your audience', body: 'Reach relevant local buyers with built-in discovery and targeted promotion.' },
+  { title: 'Create your event page', body: 'Add dates, a venue or online link, a cover photo, and ticket availability.' },
+  { title: 'See your bookings', body: 'View booked quantities and recorded order values for your events.' },
+  { title: 'Help people find you', body: 'Publish your event with country and continent details for discovery.' },
 ];
 
 const forAttendees = [
-  { title: 'Search your way', body: 'Browse by date, neighborhood, category, or the artists you already love.' },
-  { title: 'Book with confidence', body: 'See clear pricing, choose your ticket, and check out securely in seconds.' },
-  { title: 'Show up and enjoy', body: 'Your mobile ticket is ready when you are, with reminders before doors open.' },
+  { title: 'Find an event', body: 'Browse physical and online events by country or continent.' },
+  { title: 'Try a booking', body: 'Choose a quantity and save a simulated booking. No payment is collected.' },
+  { title: 'Keep your receipt', body: 'Find event details and your admission code in My tickets.' },
 ];
 
 const forOrganizers = [
-  { title: 'Build your page', body: 'Create ticket types, add your story, and publish a beautiful event page.' },
-  { title: 'Reach the right crowd', body: 'Share anywhere or tap into Eventify discovery and promotion tools.' },
-  { title: 'Run it from one place', body: 'Scan guests, monitor sales, message attendees, and receive fast payouts.' },
+  { title: 'Build your page', body: 'Describe your event, set its schedule, and choose your ticket price.' },
+  { title: 'Publish when ready', body: 'Keep a draft or publish your event in Eventify discovery.' },
+  { title: 'Manage your event', body: 'Edit event details, view bookings, and check in arriving guests.' },
 ];
 
 const display = 'font-extrabold leading-[0.92] tracking-[-0.045em]';
@@ -82,6 +56,16 @@ function Journey({ eyebrow, title, steps, dark = false }) {
 
 const Landing = () => {
   const navigate = useNavigate();
+  const [listing, setListing] = useState({ events: [], loading: true, error: false });
+  useEffect(() => {
+    const controller = new AbortController();
+    fetchEvents({}, { signal: controller.signal }).then((events) => {
+      if (!controller.signal.aborted) setListing({ events: events.slice(0, 3), loading: false, error: false });
+    }).catch(() => {
+      if (!controller.signal.aborted) setListing({ events: [], loading: false, error: true });
+    });
+    return () => controller.abort();
+  }, []);
   usePageTitle(null);
 
   return (
@@ -108,7 +92,7 @@ const Landing = () => {
             <span className="block">this weekend</span>
           </h1>
           <p className="mt-12 max-w-xl text-lg leading-8 text-secondary sm:text-xl">
-            Book in seconds, or publish your own event with tools built for organizers.
+            Discover events or publish your own. Try simulated bookings while payment integration is being built.
           </p>
           <div className="mt-10 flex flex-wrap items-center gap-3">
             <Link to="/discover" className={`${buttonLg} ${onPaper.primary}`}>
@@ -126,12 +110,12 @@ const Landing = () => {
           />
           <article className="absolute bottom-6 left-6 right-6 rounded-card bg-surface text-ink shadow-2xl sm:right-auto sm:w-[380px] lg:-left-24 lg:bottom-16">
             <div className="p-6">
-              <p className="text-xs font-semibold text-accent">Featured</p>
-              <h2 className="mt-2 text-2xl font-extrabold tracking-[-0.03em]">Afterglow Festival</h2>
-              <p className="mt-1 text-sm font-medium text-muted">Brooklyn Mirage · New York</p>
+              <p className="text-xs font-semibold text-accent">Explore Eventify</p>
+              <h2 className="mt-2 text-2xl font-extrabold tracking-[-0.03em]">Your next experience starts here</h2>
+              <p className="mt-1 text-sm font-medium text-muted">Physical gatherings and online events</p>
             </div>
             <div className="mx-6 flex items-center justify-between border-t border-dashed border-ink/25 py-4">
-              <p className="text-sm font-semibold tabular-nums text-muted">Sat 17 Oct · 19:30</p>
+              <p className="text-sm font-semibold text-muted">Booking demo · No payments</p>
               <Link to="/discover" className="inline-flex items-center gap-1 text-sm font-semibold text-ink transition-colors hover:text-accent">
                 Get tickets <ArrowRight className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
               </Link>
@@ -146,16 +130,19 @@ const Landing = () => {
           <div className={`${pageContainer} py-24 lg:py-32`}>
             <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
               <div>
-                <p className="text-sm font-semibold text-white/60">Editors’ picks</p>
+                <p className="text-sm font-semibold text-white/60">Published events</p>
                 <h2 className={`mt-4 max-w-3xl ${sectionTitle}`}>Worth leaving the house for</h2>
               </div>
-              <p className="max-w-sm text-lg leading-8 text-white/70">Standout events selected by local tastemakers, updated every week.</p>
+              <p className="max-w-sm text-lg leading-8 text-white/70">Explore events published by organizers on Eventify.</p>
             </div>
             <div className="mt-16 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {events.map((event) => (
-                <EventCard key={event.title} {...event} href="/discover" onTicketsClick={() => navigate('/discover')} />
+              {listing.events.map((event) => (
+                <EventCard key={event.id} eventType={event.event_type === 'online' ? 'online' : 'physical'} title={event.title} category={event.event_type === 'online' ? 'Online' : 'Physical'} date={formatEventDate(event.start_at)} startAt={event.start_at} eventKey={event.id} imageUrl={event.cover_url ?? undefined} venue={event.event_type === 'online' ? 'Online event' : [event.venue_name, event.country].filter(Boolean).join(' · ')} price={formatMoney(event.ticket_price_minor, event.currency)} href={`/events/${event.id}`} onTicketsClick={() => navigate(`/events/${event.id}`)} />
               ))}
             </div>
+            {listing.loading && <p role="status" className="mt-6">Loading events…</p>}
+            {listing.error && <p role="alert" className="mt-6">Could not load events. Visit Discover events to try again.</p>}
+            {!listing.loading && !listing.error && listing.events.length === 0 && <p className="mt-6">No published events yet.</p>}
           </div>
         </section>
 
@@ -168,7 +155,7 @@ const Landing = () => {
             <p className="text-sm font-semibold text-accent">For organizers</p>
             <h2 className={`mt-4 max-w-xl text-balance ${sectionTitle}`}>Create the event. We’ll help fill the room</h2>
             <p className="mt-8 max-w-lg text-lg leading-8 text-secondary">
-              Everything you need to publish, promote, sell, scan, and understand your event, without stitching together five different tools.
+              Create an event page, manage availability, track simulated bookings, and check in guests from one place.
             </p>
             <ul className="mt-10 max-w-lg">
               {organizerPoints.map((point) => (

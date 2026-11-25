@@ -8,11 +8,12 @@ from django.http import HttpResponse, JsonResponse
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
-from mongoengine.errors import ValidationError
+from mongoengine.errors import SaveConditionError, ValidationError
+from mongoengine.queryset.visitor import Q
 
 from .auth_views import _read_json, _required_string
 from .decorators import require_role
-from .models import CURRENCIES, MAX_SAFE_AMOUNT, MAX_COVER_BYTES, Event, EventCover, OnlineEvent, PhysicalEvent, User
+from .models import AccountAccess, CURRENCIES, MAX_SAFE_AMOUNT, MAX_COVER_BYTES, Event, EventCover, OnlineEvent, PhysicalEvent, TicketPurchase, User
 
 
 EVENT_TYPES = {"event": Event, "physical": PhysicalEvent, "online": OnlineEvent}
@@ -48,10 +49,27 @@ def _cover_url(event):
     return f"/api/events/{event.id}/cover/?v={version}"
 
 
+def _public_events():
+    suspended = list(AccountAccess.objects(active=False).scalar("user_id"))
+    return Event.objects(
+        Q(status__in=[None, "", "published"]),
+        moderation_blocked__ne=True, organizer_id__nin=suspended,
+    )
+
+
+def _bookable(event):
+    return (
+        event.status in (None, "", "published") and not event.moderation_blocked
+        and (event.end_at is None or _as_utc(event.end_at) > datetime.now(timezone.utc))
+        and not AccountAccess.objects(user_id=event.organizer_id, active=False).first()
+    )
+
+
 def _serialize_event(event):
     return {
         "id": str(event.id),
         "organizer_id": event.organizer_id,
+        "moderation_blocked": event.moderation_blocked,
         "event_type": next(name for name, model in EVENT_TYPES.items() if type(event) is model),
         **{field: getattr(event, field) for field in COMMON_FIELDS + TYPE_FIELDS[type(event)] + OPTIONAL_FIELDS[type(event)]},
         **{field: _iso_date(getattr(event, field)) for field in DATE_FIELDS + ("created_at",)},
@@ -138,17 +156,32 @@ def _mutate_event(request, event_id):
     if event.organizer_id != request.jwt_payload["user_id"]:
         return JsonResponse({"error": "Forbidden."}, status=403)
     if request.method == "DELETE":
+        if event.status != "draft":
+            return JsonResponse({"error": "Move an event without bookings to Draft before deleting it."}, status=409)
+        if TicketPurchase.objects(event_snapshot__event_id=str(event.id)).first():
+            return JsonResponse({"error": "This event has bookings. Cancel it instead of deleting it."}, status=409)
+        if not Event.objects(id=event.id, status="draft").delete():
+            return JsonResponse({"error": "Event status changed. Reload before deleting."}, status=409)
         EventCover.objects(event_id=str(event.id)).delete()
-        event.delete()
         return HttpResponse(status=204)
     try:
         data = _read_json(request)
+        expected_inventory = data.pop("expected_available_tickets", event.available_tickets)
+        if type(expected_inventory) is not int or not 0 <= expected_inventory <= 2**63 - 1:
+            raise ValueError("Invalid expected inventory.")
+        old_status = event.status
         if "event_type" in data and data["event_type"] != _serialize_event(event)["event_type"]:
             raise ValueError("event_type cannot be changed.")
         for field, value in _event_fields(data, type(event)).items():
             setattr(event, field, value)
         _validate_schedule(event)
-        event.save()
+        if old_status == "cancelled" and event.status != "cancelled":
+            raise ValueError("A cancelled event cannot be reopened.")
+        # An inventory edit must not restore stock sold after the form was opened.
+        condition = {"available_tickets": expected_inventory} if "available_tickets" in data else None
+        event.save(save_condition=condition)
+    except SaveConditionError:
+        return JsonResponse({"error": "Ticket availability changed. Reload the event before editing stock."}, status=409)
     except ValueError:
         return JsonResponse({"error": "Invalid request payload."}, status=400)
     except ValidationError as exc:
@@ -172,7 +205,28 @@ def events(request):
         if request.GET.getlist("mine") != ["1"]:
             return JsonResponse({"error": "mine must be 1."}, status=400)
         return _organizer_events(request)
-    return JsonResponse([_serialize_event(event) for event in Event.objects], safe=False)
+    try:
+        allowed = {"continent", "country", "type", "limit", "offset"}
+        if set(request.GET) - allowed or any(len(request.GET.getlist(key)) != 1 for key in request.GET):
+            raise ValueError("Unknown or repeated filters.")
+        query = _public_events()
+        for field in ("continent", "country"):
+            value = request.GET.get(field, "").strip()
+            if len(value) > 100:
+                raise ValueError("Filter too long.")
+            if value:
+                query = query.filter(**{f"{field}__iexact": value})
+        event_type = request.GET.get("type", "").strip()
+        if event_type:
+            if event_type not in EVENT_TYPES:
+                raise ValueError("Unknown event type.")
+            query = query.filter(__raw__={"_cls": EVENT_TYPES[event_type]._class_name})
+        from .admin_views import _bounded_int
+        limit = _bounded_int(request.GET, "limit", "100", 1, 100)
+        offset = _bounded_int(request.GET, "offset", "0", 0, 100000)
+    except ValueError:
+        return JsonResponse({"error": "Invalid event filters."}, status=400)
+    return JsonResponse([_serialize_event(event) for event in query.order_by("start_at", "id").skip(offset).limit(limit)], safe=False)
 
 
 @csrf_exempt
@@ -182,6 +236,8 @@ def event_detail(request, event_id):
         return _mutate_event(request, event_id)
     event = _find_event(event_id)
     if event is None:
+        return JsonResponse({"error": "Event not found."}, status=404)
+    if event.moderation_blocked or event.status == "draft" or AccountAccess.objects(user_id=event.organizer_id, active=False).first():
         return JsonResponse({"error": "Event not found."}, status=404)
     return JsonResponse(_serialize_event(event))
 

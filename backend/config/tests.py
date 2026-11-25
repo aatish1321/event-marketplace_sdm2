@@ -16,7 +16,7 @@ import mongoengine
 from mongoengine.errors import NotUniqueError, ValidationError
 import mongomock
 
-from config.models import OrganizerProfile, SystemLog, User
+from config.models import AccountAccess, OrganizerProfile, SystemLog, User
 
 
 class BaseMongoTestCase(unittest.TestCase):
@@ -42,8 +42,10 @@ class BaseMongoTestCase(unittest.TestCase):
         super().setUp()
         User.drop_collection()
         SystemLog.drop_collection()
+        AccountAccess.drop_collection()
 
     def tearDown(self):
+        AccountAccess.drop_collection()
         User.drop_collection()
         SystemLog.drop_collection()
         super().tearDown()

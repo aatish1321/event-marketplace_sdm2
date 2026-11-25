@@ -127,6 +127,7 @@ export default function Register() {
     if (!form.full_name.trim()) errs.full_name = 'Full name is required.'
     if (!EMAIL_RE.test(form.email.trim())) errs.email = 'Enter a valid email.'
     if (form.password.length < 8) errs.password = 'Password must be at least 8 characters.'
+    else if (form.password.length > 128) errs.password = 'Password must be no more than 128 characters.'
     if (form.password !== form.confirm_password) errs.confirm_password = 'Passwords do not match.'
     if (isOrganizer) {
       if (!form.organization_name.trim()) errs.organization_name = 'Organization name is required.'
@@ -260,8 +261,8 @@ export default function Register() {
             <div className="space-y-5">
               <Field label="Full name" name="full_name" value={form.full_name} onChange={handleChange} error={errors.full_name} autoComplete="name" />
               <Field label="Email" name="email" type="email" value={form.email} onChange={handleChange} error={errors.email} autoComplete="email" />
-              <Field label="Password" name="password" type="password" value={form.password} onChange={handleChange} error={errors.password} autoComplete="new-password" />
-              <Field label="Confirm password" name="confirm_password" type="password" value={form.confirm_password} onChange={handleChange} error={errors.confirm_password} autoComplete="new-password" />
+              <Field label="Password" name="password" type="password" value={form.password} onChange={handleChange} error={errors.password} autoComplete="new-password" maxLength={128} />
+              <Field label="Confirm password" name="confirm_password" type="password" value={form.confirm_password} onChange={handleChange} error={errors.confirm_password} autoComplete="new-password" maxLength={128} />
             </div>
 
             {/* Right Column */}

@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { CalendarPlus, Globe, MapPin } from 'lucide-react'
 import { ApiError } from '../api/auth'
-import { listEvents } from '../api/events'
+import { deleteEvent, listEvents } from '../api/events'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import CreateEventModal from '../components/CreateEventModal'
 import AnalyticsWidget from '../components/AnalyticsWidget'
@@ -47,7 +48,11 @@ function DashboardSession({ token, logout }) {
   const [error, setError] = useState('')
   const [attempt, setAttempt] = useState(0)
   const [creating, setCreating] = useState(false)
+  const [editing, setEditing] = useState(null)
+  const [removing, setRemoving] = useState(false)
   const [notice, setNotice] = useState('')
+  const deletion = useRef(null)
+  useEffect(() => () => deletion.current?.abort(), [])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -65,9 +70,28 @@ function DashboardSession({ token, logout }) {
 
   const retry = () => { setError(''); setLoading(true); setAttempt((previous) => previous + 1) }
   const created = (event, warning = '') => {
+    const wasEditing = Boolean(editing)
     setEvents((previous) => sortEvents([event, ...previous.filter((item) => item.id !== event.id)]))
     setCreating(false)
-    setNotice(`“${event.title}” was created successfully.${warning ? ` ${warning}` : ''}`)
+    setEditing(null)
+    setNotice(`“${event.title}” was ${wasEditing ? 'updated' : 'created'} successfully.${warning ? ` ${warning}` : ''}`)
+  }
+
+  const remove = async (event) => {
+    if (deletion.current || !window.confirm(`Delete “${event.title}”? Only drafts without bookings can be deleted. Cancel booked events instead.`)) return
+    const controller = new AbortController()
+    deletion.current = controller
+    setRemoving(true)
+    try {
+      await deleteEvent(token, event.id, controller.signal)
+      if (controller.signal.aborted) return
+      setEvents((previous) => previous.filter((item) => item.id !== event.id))
+      setNotice('Event deleted.')
+    } catch (failure) {
+      if (controller.signal.aborted) return
+      if (failure instanceof ApiError && [401, 403].includes(failure.status)) logout()
+      else setNotice(failure instanceof ApiError ? failure.message : 'Could not delete this event. Try again.')
+    } finally { if (!controller.signal.aborted) { deletion.current = null; setRemoving(false) } }
   }
 
   return (
@@ -86,6 +110,7 @@ function DashboardSession({ token, logout }) {
         </div>
       </header>
       <main className={`${pageContainer} flex-1 py-12`}>
+        <nav aria-label="Organizer tools" className="mb-8 flex gap-6 font-semibold text-accent"><Link to="/check-in" className="underline">Check in guests</Link><Link to="/account" className="underline">Account settings</Link></nav>
         <AnalyticsWidget />
         {notice && <p role="status" className="mb-8 rounded-card bg-success/10 px-4 py-3 text-sm font-medium text-success">{notice}</p>}
         <section aria-labelledby="your-events-heading">
@@ -112,6 +137,7 @@ function DashboardSession({ token, logout }) {
                       </div>
                       <div className="flex flex-1 flex-col p-6">
                         <h3 className="break-words text-xl font-bold leading-snug">{event.title}</h3>
+                        <p className="mt-2 text-sm font-semibold">{event.moderation_blocked ? 'Hidden by admin' : event.status || 'Published'}</p>
                         {event.description && <p className="mt-2 whitespace-pre-line break-words text-sm leading-6 text-muted">{event.description}</p>}
                         <dl className="mt-5 space-y-3 border-t border-border pt-5 text-sm">
                           <div><dt className="text-xs font-semibold text-muted">Starts</dt><dd className="mt-1"><time dateTime={event.start_at}>{formatDate(event.start_at)}</time></dd></div>
@@ -119,6 +145,7 @@ function DashboardSession({ token, logout }) {
                           {online ? <div><dt className="text-xs font-semibold text-muted">Event link</dt><dd className="mt-1 break-words">{url ? <a href={url} target="_blank" rel="noopener noreferrer" className="text-accent underline-offset-4 hover:underline">Open event website ↗</a> : 'Link unavailable'}</dd></div>
                             : physical ? <div><dt className="text-xs font-semibold text-muted">Venue</dt><dd className="mt-1 break-words">{event.venue_name || 'Venue unavailable'}<span className="mt-1 block text-muted">{event.address}</span></dd></div> : null}
                         </dl>
+                        <div className="mt-5 flex gap-4"><button type="button" onClick={() => setEditing(event)} className="rounded-control border border-border px-4 py-2 text-sm font-semibold">Edit event</button><button type="button" disabled={removing} onClick={() => remove(event)} className="rounded-control px-4 py-2 text-sm font-semibold text-danger disabled:opacity-50">Delete event</button></div>
                       </div>
                     </article>
                   })}
@@ -126,7 +153,7 @@ function DashboardSession({ token, logout }) {
         </section>
       </main>
       <SiteFooter compact />
-      {creating && <CreateEventModal token={token} onClose={() => setCreating(false)} onCreated={created} onUnauthorized={logout} />}
+      {(creating || editing) && <CreateEventModal token={token} event={editing} onClose={() => { setCreating(false); setEditing(null) }} onCreated={created} onUnauthorized={logout} />}
     </div>
   )
 }

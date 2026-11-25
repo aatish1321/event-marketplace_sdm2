@@ -46,6 +46,35 @@ async function fillCommon(user) {
 }
 
 describe('Organizer dashboard and creation', () => {
+  it('edits an event, sends geography and protects inventory against stale forms', async () => {
+    const record = { ...physical, available_tickets: 5, ticket_price_minor: 1250, currency: 'EUR', country: 'Hungary', continent: 'Europe', status: 'published' }
+    const fetch = vi.fn().mockResolvedValueOnce(response([record])).mockResolvedValueOnce(response({ ...record, title: 'Updated gathering', available_tickets: 8 }))
+    renderDashboard(fetch)
+    await userEvent.click(await screen.findByRole('button', { name: 'Edit event' }))
+    expect(screen.getByLabelText('Country')).toHaveValue('Hungary')
+    const title = screen.getByLabelText('Title')
+    await userEvent.clear(title)
+    await userEvent.type(title, 'Updated gathering')
+    await userEvent.clear(screen.getByLabelText('Tickets available'))
+    await userEvent.type(screen.getByLabelText('Tickets available'), '8')
+    await userEvent.click(screen.getByRole('button', { name: 'Save changes' }))
+    await screen.findByText('Updated gathering')
+    expect(fetch.mock.calls[1][0]).toBe('/api/events/event-1/')
+    expect(fetch.mock.calls[1][1].method).toBe('PUT')
+    expect(JSON.parse(fetch.mock.calls[1][1].body)).toMatchObject({ title: 'Updated gathering', country: 'Hungary', continent: 'Europe', available_tickets: 8, expected_available_tickets: 5 })
+  })
+
+  it('can cancel an existing event without deleting its bookings', async () => {
+    const record = { ...physical, available_tickets: 5, ticket_price_minor: 0, currency: 'EUR', status: 'published' }
+    const fetch = vi.fn().mockResolvedValueOnce(response([record])).mockResolvedValueOnce(response({ ...record, status: 'cancelled' }))
+    renderDashboard(fetch)
+    await userEvent.click(await screen.findByRole('button', { name: 'Edit event' }))
+    await userEvent.selectOptions(screen.getByLabelText('Status'), 'cancelled')
+    await userEvent.click(screen.getByRole('button', { name: 'Save changes' }))
+    expect(await screen.findByText('cancelled')).toBeInTheDocument()
+    expect(JSON.parse(fetch.mock.calls[1][1].body).status).toBe('cancelled')
+    expect(JSON.parse(fetch.mock.calls[1][1].body)).not.toHaveProperty('available_tickets')
+  })
   it('shows loading then an empty organizer list with a bearer request', async () => {
     let resolve
     const fetch = vi.fn().mockReturnValue(new Promise((done) => { resolve = done }))
@@ -235,7 +264,7 @@ describe('Organizer dashboard and creation', () => {
     await user.click(screen.getByRole('radio', { name: 'Online' }))
     await user.type(screen.getByLabelText('Event URL'), 'https://events.example.com/room')
     await user.click(screen.getByRole('button', { name: 'Create event', exact: true }))
-    const button = screen.getByRole('button', { name: 'Creating…' })
+    const button = screen.getByRole('button', { name: 'Saving…' })
     expect(button).toBeDisabled()
     await user.click(button)
     expect(fetch).toHaveBeenCalledTimes(2)

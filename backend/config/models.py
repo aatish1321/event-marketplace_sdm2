@@ -9,6 +9,7 @@ from django.contrib.auth.hashers import (
 )
 from mongoengine import (
     BinaryField,
+    BooleanField,
     DateTimeField,
     Decimal128Field,
     Document,
@@ -16,6 +17,7 @@ from mongoengine import (
     EmbeddedDocument,
     EmbeddedDocumentField,
     IntField,
+    ListField,
     ObjectIdField,
     PointField,
     StringField,
@@ -26,6 +28,7 @@ from mongoengine import (
 __all__ = [
     "OrganizerProfile",
     "User",
+    "AccountAccess",
     "Event",
     "PhysicalEvent",
     "OnlineEvent",
@@ -117,6 +120,14 @@ class User(Document):
         return self.email or super().__str__()
 
 
+class AccountAccess(Document):
+    """Session revocation and suspension, including tokens issued before this record existed."""
+
+    user_id = StringField(primary_key=True)
+    active = BooleanField(default=True)
+    version = IntField(default=0, min_value=0)
+
+
 def _mongo_utc_now():
     """Use MongoDB's naive UTC millisecond representation consistently."""
     now = datetime.datetime.now(datetime.timezone.utc)
@@ -142,7 +153,8 @@ class Event(Document):
 
     title = StringField(required=True)
     organizer_id = StringField(required=True)
-    status = StringField()
+    status = StringField(choices=("draft", "published", "cancelled"), default="published")
+    moderation_blocked = BooleanField(default=False)
     continent = StringField()
     country = StringField()
     available_tickets = IntField(default=0, validation=_validate_available_tickets)
@@ -282,6 +294,8 @@ class TicketPurchase(Document):
     buyer_snapshot = EmbeddedDocumentField(BuyerSnapshot, required=True)
     event_snapshot = EmbeddedDocumentField(EventSnapshot, required=True)
     quantity = IntField(required=True, min_value=1, max_value=2**63 - 1)
+    checked_in = IntField(default=0, min_value=0)
+    check_in_requests = ListField(StringField(), default=list)
     created_at = DateTimeField(default=_mongo_utc_now)
     unit_price_minor = IntField(null=True, validation=_validate_amount)
     total_amount_minor = IntField(null=True, validation=_validate_amount)

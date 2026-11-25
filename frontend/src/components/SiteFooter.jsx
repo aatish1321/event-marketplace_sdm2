@@ -13,7 +13,7 @@ export default function SiteFooter({ compact = false }) {
           <div className="flex flex-col gap-12 pb-12 md:flex-row md:justify-between">
             <div className="max-w-sm">
               <Link to="/" className="text-xl font-extrabold uppercase tracking-[0.2em]">Eventify</Link>
-              <p className="mt-4 text-sm leading-6 text-white/60">Tickets for concerts, comedy, sports, talks and online events, and the tools to sell your own.</p>
+              <p className="mt-4 text-sm leading-6 text-white/60">Discover physical and online events, try simulated bookings, and manage your own events.</p>
             </div>
             <nav aria-label="Footer" className="grid grid-cols-2 gap-x-16 text-sm">
               <div>

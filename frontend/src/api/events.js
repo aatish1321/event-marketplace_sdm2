@@ -12,19 +12,23 @@ export const FILTER_KEYS = ['continent', 'country', 'type']
 
 export function buildEventsUrl(filters = {}) {
   const params = new URLSearchParams()
-  for (const key of FILTER_KEYS) {
+  const keys = filters.nearby ? ['continent', 'country', 'latitude', 'longitude', 'radius_km'] : FILTER_KEYS
+  for (const key of keys) {
     const value = filters[key]?.trim()
     if (value) params.set(key, value)
   }
+  if (!filters.nearby && filters.offset) params.set('offset', String(filters.offset))
   const query = params.toString()
-  return query ? `/api/events/?${query}` : '/api/events/'
+  const path = filters.nearby ? '/api/events/nearby/' : '/api/events/'
+  return query ? `${path}?${query}` : path
 }
 
 export async function fetchEvents(filters, { signal } = {}) {
   const res = await fetch(buildEventsUrl(filters), { signal })
   const data = await res.json().catch(() => null)
   if (!res.ok) throw new ApiError(res.status, data)
-  return Array.isArray(data) ? data : []
+  if (!Array.isArray(data)) throw new Error('Invalid events response')
+  return data
 }
 
 // Organizer requests share the canonical event schema with discovery, but
@@ -34,7 +38,7 @@ async function requestOrganizerEvents(url, token, options) {
     ...options,
     headers: {
       Authorization: `Bearer ${token}`,
-      ...(options.method === 'POST' ? { 'Content-Type': 'application/json' } : {}),
+      ...(['POST', 'PUT'].includes(options.method) ? { 'Content-Type': 'application/json' } : {}),
     },
   })
   const data = await response.json().catch(() => null)
@@ -52,6 +56,15 @@ export async function createEvent(token, payload, signal) {
   const data = await requestOrganizerEvents('/api/events/', token, { method: 'POST', body: JSON.stringify(payload), signal })
   if (!data?.id || typeof data.title !== 'string') throw new Error('Invalid event response')
   return data
+}
+
+export function updateEvent(token, eventId, payload, signal) {
+  return requestOrganizerEvents(`/api/events/${encodeURIComponent(eventId)}/`, token,
+    { method: 'PUT', body: JSON.stringify(payload), signal })
+}
+
+export function deleteEvent(token, eventId, signal) {
+  return requestOrganizerEvents(`/api/events/${encodeURIComponent(eventId)}/`, token, { method: 'DELETE', signal })
 }
 
 // PUT /api/events/:id/cover/ with the raw image bytes (JPEG, PNG or WebP, up to 2 MB)

@@ -1,4 +1,4 @@
-"""Stateless JSON registration and login for MongoEngine users."""
+"""JSON registration and bearer-token login for MongoEngine users."""
 
 import json
 from datetime import datetime, timedelta, timezone
@@ -11,7 +11,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from mongoengine.errors import NotUniqueError, ValidationError
 
-from .models import OrganizerProfile, User
+from .models import AccountAccess, OrganizerProfile, User
 
 
 TOKEN_LIFETIME_SECONDS = 3600
@@ -43,6 +43,8 @@ def register(request):
         data = _read_json(request)
         email = _required_string(data, "email").strip()
         password = _required_string(data, "password")
+        if not 8 <= len(password) <= 128:
+            raise ValueError("Password must have between 8 and 128 characters.")
         full_name = _required_string(data, "full_name").strip()
         role = _required_string(data, "role")
         if role not in (User.ROLE_ATTENDEE, User.ROLE_ORGANIZER):
@@ -100,7 +102,13 @@ def login(request):
         # Match the password-hashing work of an unsuccessful existing-user login.
         make_password(password)
         return JsonResponse({"error": "Invalid email or password."}, status=401)
+    access = AccountAccess.objects(user_id=str(user.id)).first()
+    if access is not None and not access.active:
+        return JsonResponse({"error": "This account is suspended."}, status=403)
     if not user.check_password(password):
+        return JsonResponse({"error": "Invalid email or password."}, status=401)
+    # A password change between the initial lookup and signing must not mint a fresh session.
+    if not User.objects(id=user.id, password_hash=user.password_hash).first():
         return JsonResponse({"error": "Invalid email or password."}, status=401)
 
     now = datetime.now(timezone.utc)
@@ -108,6 +116,7 @@ def login(request):
         {
             "user_id": str(user.id),
             "role": user.role,
+            "version": access.version if access else 0,
             "iat": now,
             "exp": now + timedelta(seconds=TOKEN_LIFETIME_SECONDS),
         },

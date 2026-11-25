@@ -49,7 +49,7 @@ export default function EventCard({
           <span className={`rounded-md px-2 py-1 text-xs font-semibold ${imageUrl ? 'bg-surface text-ink' : 'bg-white/20 text-white'}`}>
             {category}
           </span>
-          <button
+          {onSave && <button
             type="button"
             onClick={(e) => {
               e.preventDefault();
@@ -60,7 +60,7 @@ export default function EventCard({
             aria-label="Save event"
           >
             <Heart className="h-4 w-4" strokeWidth={1.5} />
-          </button>
+          </button>}
         </div>
       </div>
 

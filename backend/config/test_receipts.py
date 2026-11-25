@@ -37,7 +37,7 @@ class ReceiptFixtures:
                          "status": "paid", **changes}).save()
 
     def revenue(self, user_id="organizer"):
-        response = self.client.get("/api/organizer/analytics/", **self.auth(user_id, "organizer"))
+        response = self.client.get("/api/legacy/organizer/analytics/", **self.auth(user_id, "organizer"))
         self.assertEqual(response.status_code, 200, response.content)
         return response.json()["revenue"]
 
@@ -115,11 +115,11 @@ class ReceiptApiTests(ReceiptFixtures, BaseMongoTestCase):
             with self.subTest(query=query):
                 self.assertEqual(self.client.get("/api/user/tickets/", query, **self.auth()).status_code, 400)
         for query in ({"organizer_id": "victim"}, {"user_id": "victim"}, {"currency": "EUR"}):
-            self.assertEqual(self.client.get("/api/organizer/analytics/", query,
+            self.assertEqual(self.client.get("/api/legacy/organizer/analytics/", query,
                              **self.auth("organizer", "organizer")).status_code, 400)
 
     def test_authentication_roles_and_read_only_methods(self):
-        for path in ("/api/user/tickets/", "/api/organizer/analytics/"):
+        for path in ("/api/user/tickets/", "/api/legacy/organizer/analytics/"):
             for headers in ({}, {"HTTP_AUTHORIZATION": "Bearer invalid"},
                             self.auth(exp=datetime.now(timezone.utc) - timedelta(seconds=1))):
                 with self.subTest(path=path, headers=headers):
@@ -129,7 +129,7 @@ class ReceiptApiTests(ReceiptFixtures, BaseMongoTestCase):
                     self.assertEqual(getattr(self.client, method)(path,
                         **self.auth("organizer", "organizer")).status_code, 405)
         for role in ("attendee", "admin"):
-            self.assertEqual(self.client.get("/api/organizer/analytics/", **self.auth(role=role)).status_code, 403)
+            self.assertEqual(self.client.get("/api/legacy/organizer/analytics/", **self.auth(role=role)).status_code, 403)
 
     def test_revenue_uses_paid_totals_once_and_separates_currencies_and_owners(self):
         physical = self.event(model=PhysicalEvent)
@@ -140,7 +140,7 @@ class ReceiptApiTests(ReceiptFixtures, BaseMongoTestCase):
         for status in ("pending", "refunded", "cancelled"):
             self.ticket(physical, total_paid=Decimal("999"), status=status)
         self.ticket(self.event(owner="other"), total_paid=Decimal("888"))
-        response = self.client.get("/api/organizer/analytics/", **self.auth("organizer", "organizer"))
+        response = self.client.get("/api/legacy/organizer/analytics/", **self.auth("organizer", "organizer"))
         self.assertEqual(response.json(), {"revenue": [
             {"currency": "EUR", "total_revenue": "0.30", "tickets_sold": 5, "receipt_count": 2},
             {"currency": "USD", "total_revenue": "7.00", "tickets_sold": 1, "receipt_count": 1},

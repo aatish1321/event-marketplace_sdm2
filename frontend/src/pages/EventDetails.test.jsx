@@ -41,12 +41,28 @@ function renderDetails(path = '/events/e1') {
 const checkoutCalls = (fetch) => fetch.mock.calls.filter(([url]) => url === '/api/checkout/')
 
 describe('EventDetails', () => {
+  it.each([
+    { ...EVENT, status: 'cancelled' },
+    { ...EVENT, end_at: '2020-01-01T00:00:00Z' },
+  ])('closes booking for unavailable events', async (event) => {
+    const fetch = mockApi({ events: [event] })
+    renderDetails()
+    expect(await screen.findByRole('button', { name: 'Booking closed' })).toBeDisabled()
+    expect(checkoutCalls(fetch)).toHaveLength(0)
+  })
+
+  it('clearly labels checkout as a simulation', async () => {
+    mockApi()
+    renderDetails()
+    await screen.findByRole('button', { name: 'Book 1 ticket' })
+    expect(screen.getByText('Simulated booking. No payment will be collected.')).toBeInTheDocument()
+  })
   it('submits the displayed price and refreshes it after a price conflict', async () => {
     const fetch = mockApi({ events: [{ ...EVENT, ticket_price_minor: 1250, currency: 'EUR' },
       { ...EVENT, ticket_price_minor: 1300, currency: 'EUR' }],
       checkoutResponse: json(409, { code: 'price_changed' }) })
     renderDetails()
-    await userEvent.click(await screen.findByRole('button', { name: 'Buy 1 ticket' }))
+    await userEvent.click(await screen.findByRole('button', { name: 'Book 1 ticket' }))
     expect(await screen.findByRole('alert')).toHaveTextContent('ticket price changed')
     expect(JSON.parse(checkoutCalls(fetch)[0][1].body)).toMatchObject({ expected_unit_price_minor: 1250, expected_currency: 'EUR' })
     expect(await screen.findByText(/Unit price:.*13\.00/)).toBeInTheDocument()
@@ -57,13 +73,13 @@ describe('EventDetails', () => {
     const pending = new Promise((resolve) => { resolvePurchase = resolve })
     const fetch = mockApi({ checkoutResponse: pending })
     renderDetails()
-    await userEvent.click(await screen.findByRole('button', { name: 'Buy 1 ticket' }))
+    await userEvent.click(await screen.findByRole('button', { name: 'Book 1 ticket' }))
     act(() => {
       const token = makeToken({ role: 'attendee', user_id: 'new-user' })
       localStorage.setItem('access_token', token)
       window.dispatchEvent(new StorageEvent('storage', { key: 'access_token', newValue: token }))
     })
-    await screen.findByRole('button', { name: 'Buy 1 ticket' })
+    await screen.findByRole('button', { name: 'Book 1 ticket' })
     expect(checkoutCalls(fetch)[0][1].signal.aborted).toBe(true)
     await act(async () => resolvePurchase(json(201, { id: 'old-private-purchase', quantity: 1, event_snapshot: { title: 'Private old event' } })))
     expect(screen.queryByText(/Private old event/)).not.toBeInTheDocument()
@@ -81,9 +97,9 @@ describe('EventDetails', () => {
 
     const user = userEvent.setup()
     await user.click(screen.getByRole('button', { name: 'More tickets' }))
-    await user.click(screen.getByRole('button', { name: 'Buy 2 tickets' }))
+    await user.click(screen.getByRole('button', { name: 'Book 2 tickets' }))
 
-    expect(await screen.findByRole('status')).toHaveTextContent('You bought 2 tickets for Danube After Dark')
+    expect(await screen.findByRole('status')).toHaveTextContent('You booked 2 tickets for Danube After Dark')
     const [[, request]] = checkoutCalls(fetch)
     expect(JSON.parse(request.body)).toEqual({ event_id: 'e1', quantity: 2, expected_unit_price_minor: null, expected_currency: null })
     expect(request.headers.Authorization).toMatch(/^Bearer /)
@@ -98,7 +114,7 @@ describe('EventDetails', () => {
     const more = await screen.findByRole('button', { name: 'More tickets' })
     await user.click(more)
     expect(more).toBeDisabled()
-    expect(screen.getByRole('button', { name: 'Buy 2 tickets' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Book 2 tickets' })).toBeInTheDocument()
   })
 
   it('shows a sold-out state that cannot be bought', async () => {
@@ -117,7 +133,7 @@ describe('EventDetails', () => {
     })
     renderDetails()
     const user = userEvent.setup()
-    await user.click(await screen.findByRole('button', { name: 'Buy 1 ticket' }))
+    await user.click(await screen.findByRole('button', { name: 'Book 1 ticket' }))
     expect(await screen.findByRole('alert')).toHaveTextContent('Not enough tickets left')
     await waitFor(() => expect(screen.getByRole('button', { name: 'Sold out' })).toBeDisabled())
   })
@@ -126,7 +142,7 @@ describe('EventDetails', () => {
     mockApi({ checkoutResponse: json(403, { error: 'Forbidden.' }) })
     renderDetails()
     const user = userEvent.setup()
-    await user.click(await screen.findByRole('button', { name: 'Buy 1 ticket' }))
+    await user.click(await screen.findByRole('button', { name: 'Book 1 ticket' }))
     expect(await screen.findByRole('alert')).toHaveTextContent('Only attendee accounts can buy tickets')
   })
 

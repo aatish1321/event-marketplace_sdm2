@@ -9,7 +9,7 @@ services:
     build:
       context: ./backend
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     volumes:
       - ./backend/config:/app/config
       - ./backend/src:/app/src
@@ -23,7 +23,7 @@ services:
     build:
       context: ./frontend
     ports:
-      - "5173:5173"
+      - "127.0.0.1:5173:5173"
     volumes:
       - ./frontend/src:/app/src
       - ./frontend/public:/app/public
