@@ -2,6 +2,12 @@
 
 React, React Router, Vite, and Tailwind CSS.
 
+Ticket receipts display admission QR codes locally using pinned
+`qrcode-generator@2.0.4`, with the signed text code retained as a fallback.
+There are no QR service requests or camera scanning permissions. When updating
+an existing Docker development image, rebuild the frontend after this dependency
+change so the image includes the new package.
+
 ## Development
 
 ```sh

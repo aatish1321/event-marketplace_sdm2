@@ -96,13 +96,50 @@ checks in the GitHub rules for `main` after the workflow's first run.
   emailed password recovery, payments, and refunds are deferred.
 
 Admission uses a signed code for each booking and an atomic used-admission count.
-Group bookings can arrive in parts; the organizer chooses how many guests to admit.
-This is manual code entry, with no camera or QR scanner dependency.
+My tickets displays that code as a QR image generated locally in the browser, with
+the original text available under “Show text code instead”. No admission data is
+sent to a QR service. Group bookings can arrive in parts; the organizer chooses
+how many guests to admit. Check-in still uses manual code entry; camera scanning
+is not included.
 
 The canonical reporting endpoint is `/api/organizer/analytics/`, backed by
 `TicketPurchase`, the same records checkout writes. The older `Ticket` ledger is
 retained at `/api/user/tickets/` and `/api/legacy/organizer/analytics/` for compatibility;
 it does not represent bookings made through the demo checkout.
+
+## Accessing administration
+
+Open `/admin` on the **frontend**, normally `http://localhost:5173/admin`.
+Logs are at `/admin-logs`; admin login currently lands on that page, where
+“Manage users and events” links to administration. These routes require an
+account whose stored role is `admin`. Public registration cannot create admins,
+and Django's built-in admin is disabled for this MongoEngine application.
+
+To provision your first admin, register a normal account you control, then use
+a trusted backend shell. For local development:
+
+```sh
+cd backend
+uv run --no-sync python manage.py shell
+```
+
+With the backend running in Compose, use this from the project root instead:
+
+```sh
+docker compose exec backend uv run --no-sync python manage.py shell
+```
+
+In that shell, replace the placeholder with your account's exact registered email:
+
+```python
+from config.models import AccountAccess, User
+user = User.objects.get(email="your-email@example.com")
+user.update(set__role=User.ROLE_ADMIN)
+AccountAccess.objects(user_id=str(user.id)).update_one(inc__version=1, upsert=True)
+```
+
+Log out and log back in to get a token with the admin role, then open `/admin`.
+No default admin credentials are shipped, and no account is promoted automatically.
 
 ## Deployment configuration
 

@@ -46,7 +46,7 @@ function CheckInSession({ token, logout }) {
   return <main className={`${pageContainer} min-h-screen py-12`}>
     <Link to="/dashboard" className="font-semibold text-accent underline">Back to organizer dashboard</Link>
     <h1 className="mt-8 text-4xl font-extrabold">Check in guests</h1>
-    <p className="mt-4 text-muted">Paste the admission code from the attendee’s receipt. For group bookings, admit only the guests arriving now.</p>
+    <p className="mt-4 text-muted">Open “Show text code instead” on the attendee’s receipt and paste the admission code here. For group bookings, admit only the guests arriving now.</p>
     <form onSubmit={submit} className="mt-8 max-w-xl space-y-5 rounded-card border border-border bg-surface p-6">
       <label className="block font-semibold">Admission code<textarea name="admission_code" required maxLength={200} rows={3} disabled={busy || Boolean(result)} className="mt-2 block w-full rounded-control border border-border p-3 font-mono text-sm" /></label>
       <label className="block font-semibold">Guests arriving<input name="quantity" type="number" min={1} max={Number.MAX_SAFE_INTEGER} step={1} defaultValue={1} required disabled={busy || Boolean(result)} className="mt-2 block w-full rounded-control border border-border p-3" /></label>

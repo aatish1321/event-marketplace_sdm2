@@ -6,6 +6,7 @@ import AccountPagination from '../components/AccountPagination'
 import useAccountData from '../lib/useAccountData'
 import usePageTitle from '../lib/usePageTitle'
 import { formatMoney } from '../lib/money'
+import { admissionQrDataUrl } from '../lib/admissionQr'
 
 function date(value) {
   if (!value || Number.isNaN(new Date(value).getTime())) return 'Date unavailable'
@@ -49,7 +50,7 @@ function TicketsSession({ token, logout }) {
                   <div><dt className="font-semibold text-muted">Unit price</dt><dd className="mt-1">{formatMoney(ticket.unit_price_minor, ticket.currency)}</dd></div>
                   <div><dt className="font-semibold text-muted">Order total</dt><dd className="mt-1 font-bold">{formatMoney(ticket.total_amount_minor, ticket.currency)}</dd></div>
                   <div className="border-t border-dashed border-border pt-4 sm:col-span-2"><dt className="font-semibold text-muted">Receipt ID</dt><dd className="mt-1 break-all font-mono text-xs">{ticket.id}</dd></div>
-                  {ticket.admission_code && <div className="sm:col-span-2"><dt className="font-semibold text-muted">Admission code</dt><dd className="mt-1"><p className="break-all rounded-control bg-canvas p-3 font-mono text-xs select-all">{ticket.admission_code}</p><p className="mt-2 text-muted">Show this code to the organizer. Keep it private. {ticket.checked_in ?? 0} of {ticket.quantity} admissions used.</p></dd></div>}
+                  {ticket.admission_code && <div className="sm:col-span-2"><dt className="font-semibold text-muted">Admission QR code</dt><dd className="mt-3"><img src={admissionQrDataUrl(ticket.admission_code)} alt={`Admission QR code for ${event.title || 'your event'}`} className="max-w-full rounded-control border border-border bg-white" style={{ imageRendering: 'pixelated' }} /><p className="mt-2 text-muted">Show this QR code to the organizer. Keep it private. {ticket.checked_in ?? 0} of {ticket.quantity} admissions used.</p><details className="mt-3"><summary className="cursor-pointer font-semibold">Show text code instead</summary><p className="mt-2 break-all rounded-control bg-canvas p-3 font-mono text-xs select-all">{ticket.admission_code}</p></details></dd></div>}
                 </dl>
               </article>
             })}</div>}

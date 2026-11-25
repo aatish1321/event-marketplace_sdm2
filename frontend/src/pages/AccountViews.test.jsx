@@ -87,6 +87,17 @@ describe.each([
 })
 
 describe('receipt and log content', () => {
+  it('shows a local admission QR with the original code available as a fallback', async () => {
+    const code = `0123456789abcdef01234567:${'A'.repeat(43)}`
+    const fetch = vi.fn().mockResolvedValue(json(page([{ ...ticket(), admission_code: code, checked_in: 1 }])))
+    mount(MyTickets, 'attendee', fetch)
+    const qr = await screen.findByRole('img', { name: 'Admission QR code for Original event' })
+    expect(qr.getAttribute('src')).toMatch(/^data:image\/gif;base64,/)
+    expect(screen.getByText(/1 of 2 admissions used/)).toBeInTheDocument()
+    await userEvent.click(screen.getByText('Show text code instead'))
+    expect(screen.getByText(code)).toBeVisible()
+    expect(fetch).toHaveBeenCalledTimes(1)
+  })
   it('renders stored receipt snapshots and a safe external website link', async () => {
     mount(MyTickets, 'attendee', vi.fn().mockResolvedValue(json(page([ticket()]))))
     await screen.findByText('Original event')
