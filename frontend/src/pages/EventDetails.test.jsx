@@ -175,7 +175,7 @@ describe('EventDetails', () => {
   it('explains a lost race (409) and refreshes the count', async () => {
     mockApi({
       events: [EVENT, { ...EVENT, available_tickets: 0 }],
-      checkoutResponse: json(409, { error: 'Not enough tickets available.' }),
+      checkoutResponse: json(409, { error: 'Not enough tickets available.', code: 'insufficient_stock' }),
     })
     renderDetails()
     const user = userEvent.setup()
@@ -190,6 +190,14 @@ describe('EventDetails', () => {
     const user = userEvent.setup()
     await user.click(await screen.findByRole('button', { name: 'Book 1 ticket' }))
     expect(await screen.findByRole('alert')).toHaveTextContent('Only attendee accounts can buy tickets')
+  })
+
+  it('does not label other booking conflicts as a ticket shortage', async () => {
+    mockApi({ checkoutResponse: json(409, { error: 'Event details changed. Review the event and try again.', code: 'event_changed' }) })
+    renderDetails()
+    await userEvent.click(await screen.findByRole('button', { name: 'Book 1 ticket' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent('Event details changed')
+    expect(screen.getByRole('alert')).not.toHaveTextContent('Not enough tickets')
   })
 
   it('shows not found for an unknown event', async () => {

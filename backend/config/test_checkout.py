@@ -96,6 +96,45 @@ class CheckoutTests(BaseMongoTestCase):
                 for field, value in fields.items():
                     self.assertEqual(getattr(snapshot, field), value)
 
+    def test_legacy_events_with_missing_or_null_status_can_be_booked(self):
+        collection = Event._get_collection()
+        for update in ({"$unset": {"status": ""}}, {"$set": {"status": None}}):
+            with self.subTest(update=update):
+                collection.update_one({"_id": self.event.id}, {**update, "$set": {**update.get("$set", {}), "available_tickets": 5}})
+                response = self.checkout()
+                self.assertEqual(response.status_code, 201, response.content)
+                self.assertEqual(self.event.reload().available_tickets, 3)
+
+    def test_cancellation_during_reservation_is_not_reported_as_a_stock_shortage(self):
+        from config.checkout_views import _find_event
+
+        def cancel_after_read(event_id):
+            event = _find_event(event_id)
+            Event.objects(id=event.id).update_one(set__status="cancelled")
+            return event
+
+        with patch("config.checkout_views._find_event", side_effect=cancel_after_read):
+            response = self.checkout()
+        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.json()["code"], "event_unavailable")
+        self.assertEqual(self.event.reload().available_tickets, 5)
+        self.assertEqual(TicketPurchase.objects.count(), 0)
+
+    def test_schedule_change_during_reservation_is_not_reported_as_a_stock_shortage(self):
+        from config.checkout_views import _find_event
+
+        def reschedule_after_read(event_id):
+            event = _find_event(event_id)
+            Event.objects(id=event.id).update_one(set__end_at=datetime.now(timezone.utc) + timedelta(days=1))
+            return event
+
+        with patch("config.checkout_views._find_event", side_effect=reschedule_after_read):
+            response = self.checkout()
+        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.json()["code"], "event_changed")
+        self.assertEqual(self.event.reload().available_tickets, 5)
+        self.assertEqual(TicketPurchase.objects.count(), 0)
+
     def test_invalid_payloads_never_change_inventory(self):
         valid = {"event_id": str(self.event.id), "quantity": 1}
         invalid = [{}, {"event_id": str(self.event.id)}, {"quantity": 1}]

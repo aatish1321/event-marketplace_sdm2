@@ -17,7 +17,7 @@ const CHECKOUT_ERRORS = {
   400: 'Something went wrong with your order. Please try again.',
   403: 'Only attendee accounts can buy tickets. Please log in again.',
   404: 'This event no longer exists.',
-  409: 'Not enough tickets left. We updated the count, so please choose again.',
+  409: 'Could not complete this booking. Review the event and try again.',
 }
 
 const stepButton = `flex h-11 w-11 items-center justify-center rounded-control border border-border bg-surface text-ink transition-colors hover:border-ink/25 disabled:opacity-40 ${focusRing}`
@@ -120,6 +120,10 @@ function EventSession({ eventId, token }) {
         ? 'This event is no longer available for booking.'
         : error instanceof ApiError && error.data?.code === 'price_changed'
         ? 'The ticket price changed. Review the updated price and try again.'
+        : error instanceof ApiError && error.data?.code === 'insufficient_stock'
+        ? 'Not enough tickets left. We updated the count, so please choose again.'
+        : error instanceof ApiError && error.status === 409 && typeof error.data?.error === 'string'
+        ? error.data.error
         : error instanceof ApiError
         ? CHECKOUT_ERRORS[error.status] ?? CHECKOUT_ERRORS[400]
         : 'Could not reach the server. Check your connection and try again.'

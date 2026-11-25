@@ -81,15 +81,22 @@ def checkout(request):
         currency=event.currency,
     )
     purchase.validate()
+    # Legacy documents can omit status even though MongoEngine loads the published default.
     if not Event.objects(
         id=event.id, available_tickets__gte=safe_qty,
         ticket_price_minor=event.ticket_price_minor, currency=event.currency,
-        status=event.status, moderation_blocked__ne=True, end_at=event.end_at,
+        status__in=[None, "", "published"], moderation_blocked__ne=True, end_at=event.end_at,
     ).update_one(dec__available_tickets=safe_qty):
         current = _find_event(event_id)
-        if current is not None and (current.ticket_price_minor != event.ticket_price_minor or current.currency != event.currency):
+        if current is None:
+            return JsonResponse({"error": "Event not found."}, status=404)
+        if not _bookable(current):
+            return JsonResponse({"error": "This event is no longer available for booking.", "code": "event_unavailable"}, status=409)
+        if current.ticket_price_minor != event.ticket_price_minor or current.currency != event.currency:
             return _price_changed()
-        return JsonResponse({"error": "Not enough tickets available."}, status=409)
+        if current.available_tickets < safe_qty:
+            return JsonResponse({"error": "Not enough tickets available.", "code": "insufficient_stock"}, status=409)
+        return JsonResponse({"error": "Event details changed. Review the event and try again.", "code": "event_changed"}, status=409)
     # shortcut: failed saves or crashes can strand stock; add transactions or reconciliation for recovery.
     # A failed acknowledgement may follow a successful insert, so refunding here could oversell.
     purchase.save()
