@@ -19,7 +19,6 @@ services:
   - type: web
     name: event-marketplace
     runtime: static
-    plan: free
     rootDir: frontend
     buildCommand: npm ci && npm run build
     staticPublishPath: dist
