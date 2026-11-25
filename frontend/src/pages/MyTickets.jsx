@@ -1,4 +1,5 @@
-import { Link } from 'react-router-dom'
+import { useCallback } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 import { fetchTickets } from '../api/account'
 import { useAuth } from '../context/AuthContext'
 import AttendeeLayout, { focusRing } from '../components/AttendeeLayout'
@@ -19,12 +20,15 @@ function safeUrl(value) {
 
 export default function MyTickets() {
   const { token, logout } = useAuth()
+  const [params] = useSearchParams()
+  const eventId = params.get('event_id') ?? ''
   usePageTitle('My tickets')
-  return <TicketsSession key={token} token={token} logout={logout} />
+  return <TicketsSession key={`${token}:${eventId}`} token={token} logout={logout} eventId={eventId} />
 }
 
-function TicketsSession({ token, logout }) {
-  const { data, loading, error, refresh, setOffset } = useAccountData(fetchTickets, token, logout)
+function TicketsSession({ token, logout, eventId }) {
+  const loadTickets = useCallback((token, options) => fetchTickets(token, { ...options, eventId }), [eventId])
+  const { data, loading, error, refresh, setOffset } = useAccountData(loadTickets, token, logout)
   return <AttendeeLayout>
     <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
       <div><h1 className="text-5xl font-extrabold tracking-[-0.04em]">My tickets</h1><p className="mt-4 text-muted">Your booking receipts, saved as they were when you booked.</p></div>

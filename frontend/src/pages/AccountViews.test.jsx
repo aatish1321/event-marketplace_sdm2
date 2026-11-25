@@ -21,11 +21,11 @@ const log = (message = 'Server failed') => ({ id: 'log-123', level: 'ERROR', end
   method: 'POST', status_code: 500, message, traceback: 'Traceback: exception', timestamp: '2030-01-01T12:00:00Z' })
 const totals = { purchase_count: 3, tickets_sold: 9, events_with_sales: 2, unpriced_purchase_count: 3, revenue_by_currency: [] }
 
-function mount(Component, role, fetch) {
+function mount(Component, role, fetch, path = '/view') {
   const token = makeToken({ role })
   localStorage.setItem('access_token', token)
   vi.stubGlobal('fetch', fetch)
-  render(<AuthProvider><MemoryRouter initialEntries={['/view']}><Routes>
+  render(<AuthProvider><MemoryRouter initialEntries={[path]}><Routes>
     <Route path="/view" element={<ProtectedRoute allowedRoles={[role]}><Component /></ProtectedRoute>} />
     <Route path="/login" element={<h1>Login destination</h1>} />
   </Routes></MemoryRouter></AuthProvider>)
@@ -87,6 +87,13 @@ describe.each([
 })
 
 describe('receipt and log content', () => {
+  it('opens the selected event’s receipt using the event filter from Show ticket', async () => {
+    const eventId = '0123456789abcdef01234567'
+    const fetch = vi.fn().mockResolvedValue(json(page([ticket()])))
+    mount(MyTickets, 'attendee', fetch, `/view?event_id=${eventId}`)
+    await screen.findByText('Original event')
+    expect(fetch.mock.calls[0][0]).toBe(`/api/tickets/?limit=20&offset=0&event_id=${eventId}`)
+  })
   it('shows a local admission QR with the original code available as a fallback', async () => {
     const code = `0123456789abcdef01234567:${'A'.repeat(43)}`
     const fetch = vi.fn().mockResolvedValue(json(page([{ ...ticket(), admission_code: code, checked_in: 1 }])))

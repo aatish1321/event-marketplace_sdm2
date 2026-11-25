@@ -34,6 +34,10 @@ legacy `Ticket` analytics contract described later has moved to
 `GET /api/legacy/organizer/analytics/`. Existing legacy receipt reads remain available.
 New booking history includes `admission_code`, `checked_in`, `event_status`, and
 `booking_mode: "simulation"`; never publish admission codes or place them in URLs.
+`GET /api/tickets/` also accepts an optional `event_id` to filter the signed-in
+attendee's receipts before pagination. The event ID must be one valid MongoDB ID;
+invalid or repeated values return 400. Event details uses this filter to display
+“Show ticket” instead of booking controls when the attendee already has a receipt.
 
 Production settings: `DJANGO_SETTINGS_MODULE=config.production`; see the root
 README for runtime, HTTPS proxy, storage, and deployment requirements.

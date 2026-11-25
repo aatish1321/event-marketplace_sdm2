@@ -16,10 +16,11 @@ const json = (status, body) => ({ ok: status < 400, status, json: async () => bo
 
 // Serves GET /api/events/e1/ from a list of successive event states, and
 // answers POST /api/checkout/ with the given response.
-function mockApi({ events = [EVENT], checkoutResponse = json(201, {}) } = {}) {
+function mockApi({ events = [EVENT], checkoutResponse = json(201, {}), tickets = [], ticketsResponse } = {}) {
   let reads = 0
   const fetch = vi.fn(async (url) => {
     if (url === '/api/checkout/') return checkoutResponse
+    if (url.startsWith('/api/tickets/')) return ticketsResponse ?? json(200, { count: tickets.length, limit: 1, offset: 0, results: tickets })
     if (url === '/api/events/e1/') return json(200, events[Math.min(reads++, events.length - 1)])
     return json(404, { error: 'Event not found.' })
   })
@@ -41,6 +42,48 @@ function renderDetails(path = '/events/e1') {
 const checkoutCalls = (fetch) => fetch.mock.calls.filter(([url]) => url === '/api/checkout/')
 
 describe('EventDetails', () => {
+  it.each([0, 3])('shows the saved ticket instead of booking controls, even with %s tickets left', async (available_tickets) => {
+    const fetch = mockApi({ events: [{ ...EVENT, available_tickets }], tickets: [{ id: 'saved-purchase' }] })
+    renderDetails()
+    expect(await screen.findByRole('link', { name: 'Show ticket' })).toHaveAttribute('href', '/my-tickets?event_id=e1')
+    expect(screen.queryByRole('button', { name: /^Book / })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'More tickets' })).not.toBeInTheDocument()
+    expect(fetch.mock.calls.some(([url]) => url === '/api/tickets/?limit=1&offset=0&event_id=e1')).toBe(true)
+    expect(checkoutCalls(fetch)).toHaveLength(0)
+  })
+
+  it('does not enable booking until the saved-ticket check completes', async () => {
+    let resolve
+    mockApi({ ticketsResponse: new Promise((done) => { resolve = done }) })
+    renderDetails()
+    expect(await screen.findByRole('button', { name: 'Checking tickets…' })).toBeDisabled()
+    await act(async () => resolve(json(200, { count: 0, limit: 1, offset: 0, results: [] })))
+    expect(await screen.findByRole('button', { name: 'Book 1 ticket' })).toBeEnabled()
+  })
+
+  it('keeps booking disabled when checking existing tickets fails and lets the user retry', async () => {
+    const fetch = mockApi({ ticketsResponse: json(503, { error: 'Unavailable' }) })
+    renderDetails()
+    expect(await screen.findByRole('button', { name: 'Booking unavailable' })).toBeDisabled()
+    expect(screen.getByRole('alert')).toHaveTextContent('Could not check your existing tickets')
+    fetch.mockImplementation(async (url) => url.startsWith('/api/tickets/')
+      ? json(200, { count: 1, limit: 1, offset: 0, results: [{ id: 'saved-purchase' }] }) : json(200, EVENT))
+    await userEvent.click(screen.getByRole('button', { name: 'Try again' }))
+    expect(await screen.findByRole('link', { name: 'Show ticket' })).toBeInTheDocument()
+    expect(checkoutCalls(fetch)).toHaveLength(0)
+  })
+
+  it('shows the saved ticket when checkout saved it but the response was lost', async () => {
+    const fetch = mockApi()
+    renderDetails()
+    const button = await screen.findByRole('button', { name: 'Book 1 ticket' })
+    fetch.mockImplementation(async (url) => url === '/api/checkout/' ? json(503, { error: 'Response lost' })
+      : url.startsWith('/api/tickets/') ? json(200, { count: 1, limit: 1, offset: 0, results: [{ id: 'saved-purchase' }] }) : json(200, EVENT))
+    await userEvent.click(button)
+    expect(await screen.findByRole('link', { name: 'Show ticket' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /^Book / })).not.toBeInTheDocument()
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
   it.each([
     { ...EVENT, status: 'cancelled' },
     { ...EVENT, end_at: '2020-01-01T00:00:00Z' },
@@ -96,10 +139,13 @@ describe('EventDetails', () => {
     expect(screen.getByText('3 tickets left')).toBeInTheDocument()
 
     const user = userEvent.setup()
-    await user.click(screen.getByRole('button', { name: 'More tickets' }))
+    await user.click(await screen.findByRole('button', { name: 'More tickets' }))
     await user.click(screen.getByRole('button', { name: 'Book 2 tickets' }))
 
     expect(await screen.findByRole('status')).toHaveTextContent('You booked 2 tickets for Danube After Dark')
+    expect(screen.getByRole('link', { name: 'Show ticket' })).toHaveAttribute('href', '/my-tickets?event_id=e1')
+    expect(screen.queryByRole('button', { name: /^Book / })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'More tickets' })).not.toBeInTheDocument()
     const [[, request]] = checkoutCalls(fetch)
     expect(JSON.parse(request.body)).toEqual({ event_id: 'e1', quantity: 2, expected_unit_price_minor: null, expected_currency: null })
     expect(request.headers.Authorization).toMatch(/^Bearer /)

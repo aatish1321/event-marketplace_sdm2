@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft, CheckCircle2, Globe, MapPin, Minus, Plus } from 'lucide-react'
 import { ApiError } from '../api/auth'
 import { checkout, fetchEvent } from '../api/events'
+import { fetchTickets } from '../api/account'
 import { useAuth } from '../context/AuthContext'
 import { formatEventDate } from '../lib/dates'
 import { dateParts, tileColor } from '../lib/tiles'
@@ -39,6 +40,7 @@ function EventSession({ eventId, token }) {
   const [loaded, setLoaded] = useState({ key: null, event: null, error: null })
   const [quantity, setQuantity] = useState(1)
   const [order, setOrder] = useState({ status: 'idle', purchase: null, message: '' })
+  const [booking, setBooking] = useState('loading')
 
   const key = `${eventId}:${version}`
   const refresh = () => setVersion((v) => v + 1)
@@ -55,6 +57,14 @@ function EventSession({ eventId, token }) {
       })
     return () => controller.abort()
   }, [eventId, version])
+
+  useEffect(() => {
+    const controller = new AbortController()
+    fetchTickets(token, { eventId, limit: 1, signal: controller.signal })
+      .then((data) => { if (!controller.signal.aborted) setBooking(data.count > 0 ? 'owned' : 'available') })
+      .catch(() => { if (!controller.signal.aborted) setBooking('error') })
+    return () => controller.abort()
+  }, [token, eventId, version])
 
   usePageTitle(loaded.event?.id === eventId ? loaded.event.title : 'Event')
 
@@ -84,6 +94,7 @@ function EventSession({ eventId, token }) {
   const soldOut = available === 0
   const unavailable = event.moderation_blocked || ['draft', 'cancelled'].includes(event.status) || event.end_at && new Date(event.end_at).getTime() <= Date.now()
   const buying = order.status === 'buying'
+  const hasTicket = booking === 'owned' || order.status === 'done'
   // Clamp so a refreshed, lower count can never leave an impossible quantity selected.
   const qty = Math.min(Math.max(quantity, 1), Math.max(available, 1))
   const priced = Number.isSafeInteger(event.ticket_price_minor) && event.ticket_price_minor >= 0 && CURRENCIES.includes(event.currency)
@@ -91,7 +102,7 @@ function EventSession({ eventId, token }) {
   const date = formatEventDate(event.start_at)
 
   const buy = async () => {
-    if (buying || soldOut || unavailable || purchaseRequest.current) return
+    if (booking !== 'available' || hasTicket || buying || soldOut || unavailable || purchaseRequest.current) return
     const controller = new AbortController()
     purchaseRequest.current = controller
     setOrder({ status: 'buying', purchase: null, message: '' })
@@ -178,7 +189,7 @@ function EventSession({ eventId, token }) {
 
           {unavailable && <p role="status" className="mt-4 font-semibold text-danger">{event.status === 'cancelled' ? 'Event cancelled' : 'Booking closed'}</p>}
           <p className="mt-3 text-sm text-muted">Simulated booking. No payment will be collected.</p>
-          {!soldOut && !unavailable && (
+          {!hasTicket && booking === 'available' && !soldOut && !unavailable && (
             <>
               <div className="mt-6 flex items-center justify-between">
                 <span id="quantity-label" className="text-sm font-semibold">Quantity</span>
@@ -199,14 +210,18 @@ function EventSession({ eventId, token }) {
             </>
           )}
 
-          <button
+          {hasTicket ? <>
+            <p className="mt-6 font-semibold">You already have a ticket for this event.</p>
+            <Link to={`/my-tickets?event_id=${encodeURIComponent(eventId)}`} className={`mt-4 flex h-11 w-full items-center justify-center rounded-control bg-accent px-6 text-sm font-semibold text-white transition-colors hover:bg-accent/90 ${focusRing}`}>Show ticket</Link>
+          </> : <button
             type="button"
             onClick={buy}
-            disabled={soldOut || buying || Boolean(unavailable)}
+            disabled={booking !== 'available' || soldOut || buying || Boolean(unavailable)}
             className={`mt-6 flex h-11 w-full items-center justify-center rounded-control bg-accent px-6 text-sm font-semibold text-white transition-colors hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-50 ${focusRing}`}
           >
-            {unavailable ? 'Booking closed' : soldOut ? 'Sold out' : buying ? 'Booking…' : `Book ${ticketsLabel(qty)}`}
-          </button>
+            {unavailable ? 'Booking closed' : soldOut ? 'Sold out' : booking === 'loading' ? 'Checking tickets…' : booking === 'error' ? 'Booking unavailable' : buying ? 'Booking…' : `Book ${ticketsLabel(qty)}`}
+          </button>}
+          {!hasTicket && booking === 'error' && <p role="alert" className="mt-4 text-sm text-danger">Could not check your existing tickets. <button type="button" onClick={() => { setBooking('loading'); refresh() }} className="font-semibold underline">Try again</button></p>}
 
           {order.status === 'done' && (
             <p role="status" className="mt-4 flex gap-2 rounded-card bg-success/10 px-4 py-3 text-sm font-medium text-success">
@@ -214,10 +229,10 @@ function EventSession({ eventId, token }) {
               You booked {ticketsLabel(order.purchase.quantity)} for {order.purchase.event_snapshot?.title ?? event.title}. No payment was collected.
             </p>
           )}
-          {order.status === 'error' && (
+          {order.status === 'error' && !hasTicket && (
             <p role="alert" className="mt-4 rounded-card bg-danger/10 px-4 py-3 text-sm font-medium text-danger">{order.message}</p>
           )}
-          {order.status === 'done' && <><p className="mt-3 text-sm">Order total: {formatMoney(order.purchase.total_amount_minor, order.purchase.currency)}</p><Link to="/my-tickets" className={`mt-4 inline-block text-sm font-semibold text-accent underline ${focusRing}`}>View my tickets</Link></>}
+          {order.status === 'done' && <p className="mt-3 text-sm">Order total: {formatMoney(order.purchase.total_amount_minor, order.purchase.currency)}</p>}
         </aside>
       </div>
     </AttendeeLayout>

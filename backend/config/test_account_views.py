@@ -57,6 +57,23 @@ class AccountViewsTests(BaseMongoTestCase):
         for query in ('limit=0', 'limit=101', 'offset=-1', 'limit=abc', 'limit=1&limit=2', 'offset=2147483648'):
             self.assertEqual(self.client.get(f'/api/tickets/?{query}', **self.auth('attendee')).status_code, 400)
 
+    def test_event_filter_finds_old_receipts_without_exposing_other_buyers(self):
+        event_id = '0123456789abcdef01234567'
+        own = self.purchase(event=event_id)
+        self.purchase(buyer='other', event=event_id, minute=2)
+        for minute in range(1, 22):
+            self.purchase(event='another-event', minute=minute)
+        response = self.client.get(f'/api/tickets/?event_id={event_id.upper()}&limit=1', **self.auth('attendee'))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['count'], 1)
+        self.assertEqual([record['id'] for record in response.json()['results']], [str(own.id)])
+        self.assertIn('no-store', response['Cache-Control'])
+        self.assertEqual(self.client.get('/api/tickets/?event_id=ffffffffffffffffffffffff', **self.auth('attendee')).json()['count'], 0)
+
+    def test_event_filter_rejects_invalid_and_repeated_ids(self):
+        for query in ('event_id=', 'event_id=invalid', 'event_id=0123456789abcdef01234567&event_id=ffffffffffffffffffffffff'):
+            self.assertEqual(self.client.get(f'/api/tickets/?{query}', **self.auth('attendee')).status_code, 400)
+
     def test_roles_missing_and_expired_tokens_cannot_read_private_data(self):
         for path, permitted in (('/api/tickets/', 'attendee'), ('/api/organizer/analytics/', 'organizer')):
             for headers in ({}, {'HTTP_AUTHORIZATION': 'Bearer bad'}, self.auth(permitted, exp=1)):

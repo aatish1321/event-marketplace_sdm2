@@ -26,11 +26,18 @@ def my_tickets(request):
     try:
         limit = _bounded_int(request.GET, "limit", "20", 1, 100)
         offset = _bounded_int(request.GET, "offset", "0", 0, 2**31 - 1)
+        event_id = request.GET.get("event_id")
+        if event_id is not None:
+            if len(request.GET.getlist("event_id")) != 1 or not ObjectId.is_valid(event_id):
+                raise ValueError("Invalid event ID.")
+            event_id = str(ObjectId(event_id))
     except ValueError:
         return JsonResponse({"error": "Invalid request parameters."}, status=400)
     purchases = TicketPurchase.objects(
         buyer_snapshot__user_id=request.jwt_payload["user_id"],
     ).order_by("-created_at", "-id")
+    if event_id is not None:
+        purchases = purchases.filter(event_snapshot__event_id=event_id)
     page = list(purchases.skip(offset).limit(limit))
     event_ids = [ObjectId(p.event_snapshot.event_id) for p in page if ObjectId.is_valid(p.event_snapshot.event_id)]
     suspended = set(AccountAccess.objects(active=False).scalar("user_id"))

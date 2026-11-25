@@ -22,8 +22,8 @@ export async function fetchProfile(token, { signal } = {}) {
 export function fetchAdminUsers(token, options) { return readPage('/api/admin/users/', token, options) }
 export function fetchAdminEvents(token, options) { return readPage('/api/admin/events/', token, options) }
 
-async function readPage(path, token, { limit = 20, offset = 0, signal } = {}) {
-  const data = await readAccount(`${path}?${new URLSearchParams({ limit, offset })}`, token, signal)
+async function readPage(path, token, { limit = 20, offset = 0, signal, eventId } = {}) {
+  const data = await readAccount(`${path}?${new URLSearchParams({ limit, offset, ...(eventId ? { event_id: eventId } : {}) })}`, token, signal)
   if (!data || !Number.isInteger(data.count) || data.count < 0 || !Number.isInteger(data.limit)
     || data.limit < 1 || !Number.isInteger(data.offset) || data.offset < 0 || !Array.isArray(data.results)
     || data.results.some((record) => !record || typeof record !== 'object' || typeof record.id !== 'string')) {
