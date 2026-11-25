@@ -104,9 +104,19 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 # Email
+TICKET_EMAIL_ENABLED = env.bool('TICKET_EMAIL_ENABLED', default=False)
+DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='tickets@example.com')
 MAILERS = {
     'default': {
-        'BACKEND': 'django.core.mail.backends.console.EmailBackend',
+        'BACKEND': 'django.core.mail.backends.smtp.EmailBackend',
+        'OPTIONS': {
+            'host': env('EMAIL_HOST', default='smtp.sendgrid.net'),
+            'port': env.int('EMAIL_PORT', default=587),
+            'username': env('EMAIL_HOST_USER', default='apikey'),
+            'password': env('EMAIL_HOST_PASSWORD', default=''),
+            'use_tls': True,
+            'timeout': 10,
+        },
     },
 }
 

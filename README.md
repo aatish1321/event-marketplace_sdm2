@@ -107,6 +107,49 @@ The canonical reporting endpoint is `/api/organizer/analytics/`, backed by
 retained at `/api/user/tickets/` and `/api/legacy/organizer/analytics/` for compatibility;
 it does not represent bookings made through the demo checkout.
 
+## Ticket confirmation emails (SendGrid demo)
+
+After a successful booking, the backend can email the saved buyer's registered
+address with the event details, booking quantity, total, admission QR image, and
+text-code fallback. Recipients need only an Eventify account; they do not need
+SendGrid accounts. This does not send registration or email-verification messages.
+
+1. Create a [SendGrid account](https://sendgrid.com/), then verify your sender
+   address under **Settings → Sender Authentication → Single Sender Verification**.
+   See [sender verification](https://www.twilio.com/docs/sendgrid/ui/sending-email/sender-verification).
+2. Create an API key with **Mail Send** permission. Keep it private and outside
+   this repository; never paste it into chat or commit it in an environment file.
+3. From the project root, run these commands one at a time in your terminal.
+   Replace the example sender with the exact address you verified:
+
+   ```sh
+   export TICKET_EMAIL_ENABLED=True
+   export DEFAULT_FROM_EMAIL="your-verified-sender@example.com"
+   read -rs EMAIL_HOST_PASSWORD
+   export EMAIL_HOST_PASSWORD
+   docker compose up -d --build --no-deps backend
+   unset EMAIL_HOST_PASSWORD
+   ```
+
+   At `read -rs EMAIL_HOST_PASSWORD`, paste your API key and press Enter. Input
+   stays hidden and the key is not included in your command history. Compose
+   passes it to the backend runtime only. Rebuilding includes the pinned PNG QR
+   dependency. Repeat the exports when recreating the backend in a new terminal.
+
+4. Make a new booking with a buyer account you control and check its inbox and
+   spam folder. Existing bookings are not emailed retroactively.
+
+SMTP defaults are `smtp.sendgrid.net`, port `587`, username `apikey`, with STARTTLS
+enabled. The API key is the SMTP password; see the
+[SendGrid SMTP instructions](https://www.twilio.com/docs/sendgrid/for-developers/sending-email/integrating-with-the-smtp-api).
+Sending is disabled by default until `TICKET_EMAIL_ENABLED=True` is supplied.
+
+A mail failure leaves the booking saved and shows a warning with **Show ticket**.
+Sending happens during checkout with a 10-second SMTP timeout; there is no
+automatic retry. SMTP acceptance does not guarantee inbox delivery. Single Sender
+Verification is for this demo; a verified sending domain is preferable for a
+public service. Booking remains simulated and collects no payment.
+
 ## Accessing administration
 
 Open `/admin` on the **frontend**, normally `http://localhost:5173/admin`.

@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <body style="margin:0;background:#f5f1e9;font-family:Arial,sans-serif;color:#202a32;">
+    <main style="max-width:560px;margin:24px auto;padding:28px;background:#ffffff;border-radius:12px;">
+      <p style="font-weight:bold;letter-spacing:2px;">EVENTIFY</p>
+      <h1 style="font-size:26px;">Your booking is confirmed</h1>
+      <p>Hi {{ buyer }}, here is your ticket.</p>
+      <h2>{{ title }}</h2>
+      <dl>
+        <dt><strong>Booking ID</strong></dt><dd>{{ receipt_id }}</dd>
+        <dt><strong>Tickets</strong></dt><dd>{{ quantity }}</dd>
+        <dt><strong>Starts</strong></dt><dd>{{ starts }}</dd>
+        <dt><strong>Ends</strong></dt><dd>{{ ends }}</dd>
+        <dt><strong>Where</strong></dt><dd>{{ location }}</dd>
+        <dt><strong>Recorded total</strong></dt><dd>{{ total }}</dd>
+      </dl>
+      {% if stream_url %}<p><a href="{{ stream_url }}">Open online event</a></p>{% endif %}
+      <h2>Admission QR</h2>
+      <img src="cid:{{ qr_cid }}" alt="Your admission QR code" width="270" height="270" style="display:block;max-width:100%;height:auto;">
+      <p>Show this QR to the organizer. It covers all {{ quantity }} admissions in this booking.</p>
+      <p><strong>Text code fallback</strong></p>
+      <p style="word-break:break-all;font-family:monospace;">{{ admission_code }}</p>
+      <p>Keep your QR and admission code private.</p>
+      <p style="font-size:13px;color:#52606b;">This is a simulated booking. No payment was collected.</p>
+    </main>
+  </body>
+</html>

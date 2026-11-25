@@ -10,6 +10,7 @@ from .auth_views import _read_json, _required_string
 from .decorators import require_role
 from .event_views import EVENT_TYPES, _bookable, _find_event, _iso_date
 from .models import CURRENCIES, MAX_SAFE_AMOUNT, BuyerSnapshot, Event, EventSnapshot, TicketPurchase, User
+from .ticket_emails import send_ticket_confirmation
 
 
 def _price_changed():
@@ -101,7 +102,10 @@ def checkout(request):
     # A failed acknowledgement may follow a successful insert, so refunding here could oversell.
     purchase.save()
 
-    return JsonResponse(serialize_purchase(purchase), status=201)
+    data = serialize_purchase(purchase)
+    # shortcut: send inline for the demo; add an outbox worker when automatic retries are needed.
+    data["confirmation_email_status"] = send_ticket_confirmation(purchase, data["admission_code"])
+    return JsonResponse(data, status=201)
 
 
 def serialize_purchase(purchase, event_status=None):

@@ -39,6 +39,20 @@ attendee's receipts before pagination. The event ID must be one valid MongoDB ID
 invalid or repeated values return 400. Event details uses this filter to display
 “Show ticket” instead of booking controls when the attendee already has a receipt.
 
+After saving a booking, checkout optionally sends the buyer a confirmation email
+with their ticket details, signed admission QR PNG, and text-code fallback. The
+recipient comes from the saved buyer snapshot, never from a checkout parameter.
+The `POST /api/checkout/` response includes `confirmation_email_status`: `sent`
+(SMTP accepted), `failed`, or `not_configured`. This field is specific to the
+checkout response; booking history is unchanged. Delivery failure does not undo
+the booking or restore stock. No automatic email retry is implemented.
+
+Sending is disabled by default. See the root README's
+[SendGrid setup](../README.md#ticket-confirmation-emails-sendgrid-demo) for verified
+sender and private API-key configuration. Django's `MAILERS` SMTP backend uses
+STARTTLS and a 10-second timeout. Tests use the in-memory mail backend and dummy
+addresses; they do not send real email.
+
 Production settings: `DJANGO_SETTINGS_MODULE=config.production`; see the root
 README for runtime, HTTPS proxy, storage, and deployment requirements.
 

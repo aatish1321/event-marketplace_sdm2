@@ -1,0 +1,21 @@
+{% autoescape off %}Hi {{ buyer }},
+
+Your Eventify booking is confirmed.
+
+Event: {{ title }}
+Booking ID: {{ receipt_id }}
+Tickets: {{ quantity }}
+Starts: {{ starts }}
+Ends: {{ ends }}
+Where: {{ location }}
+{% if stream_url %}Online event link: {{ stream_url }}
+{% endif %}Recorded total: {{ total }}
+
+Your admission QR is attached as a PNG image. Show it to the organizer when you arrive.
+If the image cannot be opened, use this admission code:
+{{ admission_code }}
+
+Keep your QR and admission code private. One code covers all {{ quantity }} admissions in this booking.
+
+This is a simulated booking. No payment was collected.
+{% endautoescape %}

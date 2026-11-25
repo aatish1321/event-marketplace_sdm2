@@ -42,6 +42,19 @@ function renderDetails(path = '/events/e1') {
 const checkoutCalls = (fetch) => fetch.mock.calls.filter(([url]) => url === '/api/checkout/')
 
 describe('EventDetails', () => {
+  it.each([
+    ['sent', 'Your ticket and QR code have been emailed to your registered address.'],
+    ['failed', 'Your ticket is saved, but the confirmation email could not be sent. Use Show ticket to open it here.'],
+    ['not_configured', 'Email confirmations are not configured yet. Use Show ticket to open your ticket.'],
+  ])('keeps the saved ticket accessible when email status is %s', async (confirmation_email_status, message) => {
+    const fetch = mockApi({ checkoutResponse: json(201, { id: 'p1', quantity: 1, confirmation_email_status }) })
+    renderDetails()
+    await userEvent.click(await screen.findByRole('button', { name: 'Book 1 ticket' }))
+    expect(await screen.findByRole('link', { name: 'Show ticket' })).toBeInTheDocument()
+    expect(screen.getByText(message)).toBeInTheDocument()
+    expect(checkoutCalls(fetch)).toHaveLength(1)
+    expect(screen.queryByRole('button', { name: /^Book / })).not.toBeInTheDocument()
+  })
   it.each([0, 3])('shows the saved ticket instead of booking controls, even with %s tickets left', async (available_tickets) => {
     const fetch = mockApi({ events: [{ ...EVENT, available_tickets }], tickets: [{ id: 'saved-purchase' }] })
     renderDetails()

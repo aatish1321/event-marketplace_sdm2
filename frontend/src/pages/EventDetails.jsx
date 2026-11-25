@@ -237,6 +237,9 @@ function EventSession({ eventId, token }) {
             <p role="alert" className="mt-4 rounded-card bg-danger/10 px-4 py-3 text-sm font-medium text-danger">{order.message}</p>
           )}
           {order.status === 'done' && <p className="mt-3 text-sm">Order total: {formatMoney(order.purchase.total_amount_minor, order.purchase.currency)}</p>}
+          {order.status === 'done' && order.purchase.confirmation_email_status === 'sent' && <p className="mt-3 text-sm text-success">Your ticket and QR code have been emailed to your registered address.</p>}
+          {order.status === 'done' && order.purchase.confirmation_email_status === 'failed' && <p role="status" className="mt-3 text-sm text-danger">Your ticket is saved, but the confirmation email could not be sent. Use Show ticket to open it here.</p>}
+          {order.status === 'done' && order.purchase.confirmation_email_status === 'not_configured' && <p className="mt-3 text-sm text-muted">Email confirmations are not configured yet. Use Show ticket to open your ticket.</p>}
         </aside>
       </div>
     </AttendeeLayout>
