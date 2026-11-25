@@ -204,6 +204,14 @@ class MarketplaceFlowTests(BaseMongoTestCase):
         self.assertEqual(self.request("put", f"/api/events/{self.event.id}/", {"moderation_blocked": False}).status_code, 400)
         self.assertEqual(self.request("put", f"/api/admin/users/{self.admin.id}/", {"active": False}, self.admin).status_code, 409)
 
+    def test_admin_mutations_reject_methods_other_than_put(self):
+        headers = self.auth(self.admin)
+        for path in (f"/api/admin/users/{self.buyer.id}/", f"/api/admin/events/{self.event.id}/"):
+            for method in ("get", "post", "patch", "delete"):
+                response = self.request(method, path, {}, headers=headers)
+                self.assertEqual(response.status_code, 405)
+                self.assertEqual(response["Allow"], "PUT")
+
     def test_password_length_is_enforced_on_the_server(self):
         for password in ("short", "x" * 129):
             response = self.client.post("/api/auth/register/", {"email": "new@example.com", "password": password, "full_name": "New", "role": "attendee"}, content_type="application/json")

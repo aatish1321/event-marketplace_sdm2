@@ -3,7 +3,7 @@
 from django.http import JsonResponse
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_GET, require_PUT
+from django.views.decorators.http import require_GET, require_http_methods
 
 from .decorators import require_role
 from .auth_views import _read_json
@@ -71,7 +71,7 @@ def users(request):
 
 @csrf_exempt
 @never_cache
-@require_PUT
+@require_http_methods(["PUT"])
 @require_role(User.ROLE_ADMIN)
 def user_access(request, user_id):
     user = User.objects(id=ObjectId(user_id)).first() if ObjectId.is_valid(user_id) else None
@@ -104,7 +104,7 @@ def events(request):
 
 @csrf_exempt
 @never_cache
-@require_PUT
+@require_http_methods(["PUT"])
 @require_role(User.ROLE_ADMIN)
 def moderate_event(request, event_id):
     event = _find_event(event_id)
