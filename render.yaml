@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: event-marketplace-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.production
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DJANGO_ALLOWED_HOSTS
+        value: event-marketplace-api.onrender.com
+      - key: DJANGO_TRUST_PROXY
+        value: "True"
+      - key: MONGO_URI
+        sync: false
+  - type: web
+    name: event-marketplace
+    runtime: static
+    plan: free
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    routes:
+      - type: rewrite
+        source: /api/*
+        destination: https://event-marketplace-api.onrender.com/api/*
+      - type: rewrite
+        source: /*
+        destination: /index.html

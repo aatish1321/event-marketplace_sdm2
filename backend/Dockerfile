@@ -10,10 +10,10 @@ RUN pip install uv
 COPY . .
 
 # Install dependencies
-RUN uv sync
+RUN uv sync --locked
 
 # Expose port 8000
 EXPOSE 8000
 
-# Run Django development server
-CMD ["uv", "run", "manage.py", "runserver", "0.0.0.0:8000"]
+# Run Django behind Render's HTTPS proxy.
+CMD ["sh", "-c", "uv run --no-sync gunicorn config.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 1"]
